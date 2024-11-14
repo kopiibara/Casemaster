@@ -1,0 +1,17 @@
+{
+    "columns": [
+      { "header": "Case No.", "key": "case-no" },
+      { "header": "Title", "key": "title" },
+      { "header": "Date Added", "key": "date-added" },
+      { "header": "Status", "key": "status" }
+    ],
+    "datas": [
+      {
+        "case-no": "13-73060",
+        "title": "IDA v. QUE BOK KUN",
+        "date-added": "November 14, 2024",
+        "status": "New"
+      }
+    ]
+  }
+  

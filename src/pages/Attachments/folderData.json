@@ -1,0 +1,27 @@
+[
+    {
+      "title": "Criminal Cases",
+      "size": "213kb",
+      "location": "In My Attachments",
+      "iconColor": "rgba(15, 32, 67, 0.6)"
+    },
+    {
+      "title": "Civil Cases",
+      "size": "315kb",
+      "location": "In Shared Folders",
+      "iconColor": "rgba(15, 32, 67, 0.6)"
+    },
+    {
+      "title": "Evidence",
+      "size": "158kb",
+      "location": "In Starred Folders",
+      "iconColor": "rgba(15, 32, 67, 0.6)"
+    },
+    {
+      "title": "Documents",
+      "size": "400kb",
+      "location": "In My Attachments",
+      "iconColor": "rgba(15, 32, 67, 0.6)"
+    }
+  ]
+  
