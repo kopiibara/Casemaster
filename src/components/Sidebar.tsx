@@ -15,6 +15,9 @@ import MailIcon from "@mui/icons-material/EmailOutlined";
 import AttachmentIcon from "@mui/icons-material/AttachmentOutlined";
 import CaseTrackerIcon from "@mui/icons-material/TableChartOutlined";
 import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
+import Avatar from "@mui/material/Avatar";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import IconButton from "@mui/material/IconButton";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = React.useState("Dashboard");
@@ -32,13 +35,22 @@ export default function Sidebar() {
   ) => {
     setOpenSections((prev) => {
       const isOpening = !prev[section];
-      if (isOpening && defaultItem) {
-        setActiveItem(defaultItem); // Set the default item when expanding
-      }
-      return {
+      const updatedSections = {
         ...prev,
         [section]: isOpening,
       };
+
+      // Close all other sections when one is opened
+      if (isOpening) {
+        Object.keys(updatedSections).forEach((key) => {
+          if (key !== section) updatedSections[key] = false;
+        });
+      }
+
+      if (isOpening && defaultItem) {
+        setActiveItem(defaultItem); // Set the default item when expanding
+      }
+      return updatedSections;
     });
   };
 
@@ -46,7 +58,11 @@ export default function Sidebar() {
     setActiveItem(item);
   };
 
-  const listItemStyles = (items) => ({
+  interface ListItemStylesProps {
+    items: string;
+  }
+
+  const listItemStyles = (items: ListItemStylesProps["items"]) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -68,24 +84,29 @@ export default function Sidebar() {
   });
 
   return (
-    <Stack className="w-65 bg-[#0F2043] h-screen p-8" spacing={4}>
-      <Stack direction="row" spacing={2}>
-        <Box>
+    <Stack className="w-72 bg-[#0F2043] h-screen p-8" spacing={2}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-start", // Aligns to the left (instead of center)
+          alignItems: "center", // Vertically center-aligns the content
+          textAlign: "left", // Ensures the text is aligned to the left
+          paddingTop: "1rem", // Adds top margin to create space above the header
+        }}
+      >
+        <Box sx={{ marginRight: 2 }}>
+          {" "}
+          {/* Increased marginRight to create more space */}
           <img
             src="/logo-white.ico"
             alt="Casemaster Logo"
-            style={{ width: 50, height: 50 }}
+            style={{ width: 40, height: 40 }}
           />
         </Box>
-        <Box>
-          <Typography
-            sx={{ color: "#f6f9ff", fontWeight: "bold" }}
-            variant="h4"
-          >
-            Casemaster
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography sx={{ color: "#f6f9ff", fontWeight: "600" }} variant="h6">
+          CASEMASTER
+        </Typography>
+      </Box>
 
       <List
         sx={{
@@ -658,6 +679,26 @@ export default function Sidebar() {
           />
         </ListItemButton>
       </List>
+
+      {/* Spacer to push footer to the bottom */}
+      <Box sx={{ flexGrow: 1 }} />
+
+      <div className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
+        <Avatar src="/broken-image.jpg" variant="rounded" />
+        {true && (
+          <div className="">
+            <p className="text-s text-white">Kopibara</p>
+            <p className="text-xs text-white">BRANCH CLERK</p>
+          </div>
+        )}
+        {true && (
+          <span className="ml-auto">
+            <IconButton>
+              <SettingsOutlinedIcon className="text-white" />
+            </IconButton>
+          </span>
+        )}
+      </div>
     </Stack>
   );
 }
