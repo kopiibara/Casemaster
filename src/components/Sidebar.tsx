@@ -1,58 +1,68 @@
 import * as React from "react";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import DraftsIcon from "@mui/icons-material/Drafts";
-import SendIcon from "@mui/icons-material/Send";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import StarBorder from "@mui/icons-material/StarBorder";
-import ArchiveIcon from "@mui/icons-material/Archive";
+import DashboardIcon from "@mui/icons-material/SpaceDashboardOutlined";
+import CaseLogsIcon from "@mui/icons-material/AutoStoriesOutlined";
+import MailIcon from "@mui/icons-material/EmailOutlined";
+import AttachmentIcon from "@mui/icons-material/AttachmentOutlined";
+import CaseTrackerIcon from "@mui/icons-material/TableChartOutlined";
+import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = React.useState("Dashboard");
-  const [openSections, setOpenSections] = React.useState({
+  const [openSections, setOpenSections] = React.useState<
+    Record<string, boolean>
+  >({
     logbook: false,
     mails: false,
     attachments: false,
   });
 
-  const toggleSection = (section) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+  const toggleSection = (
+    section: string,
+    defaultItem: string | null = null
+  ) => {
+    setOpenSections((prev) => {
+      const isOpening = !prev[section];
+      if (isOpening && defaultItem) {
+        setActiveItem(defaultItem); // Set the default item when expanding
+      }
+      return {
+        ...prev,
+        [section]: isOpening,
+      };
+    });
   };
 
-  const handleItemClick = (item) => {
+  const handleItemClick = (item: string) => {
     setActiveItem(item);
   };
 
-  const listItemStyles = (item) => ({
+  const listItemStyles = (items) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    py: 1, // Reduce vertical padding
-    px: 2, // Slightly reduce horizontal padding
     borderRadius: 3,
     cursor: "pointer",
     color: "white",
-    fontSize: "0.75rem", // Slightly smaller font size
+    fontSize: "0.75rem",
     "&:hover": {
-      bgcolor: "#0B1730", // Default hover behavior
+      bgcolor: "#0B1730",
     },
     "&.Mui-selected": {
-      bgcolor: "white", // Active background
-      color: "#0f2043", // Active text color
+      bgcolor: "white",
+      color: "#0f2043",
       fontWeight: "bold",
       "&:hover": {
-        bgcolor: "white", // Override hover when active
+        bgcolor: "white",
       },
     },
   });
@@ -84,125 +94,539 @@ export default function Sidebar() {
           color: "#f6f9ff",
         }}
         component="nav"
-        aria-labelledby="nested-list-subheader"
+        aria-labelledby="casemaster"
       >
+        {/* Dashboard */}
         <ListItemButton
-          sx={listItemStyles("Dashboard")}
+          sx={{
+            ...listItemStyles("Dashboard"),
+            paddingY: "0.5rem",
+            paddingX: "1rem",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
           selected={activeItem === "Dashboard"}
           onClick={() => handleItemClick("Dashboard")}
         >
-          <ListItemText primary="Dashboard" />
+          <ListItemIcon
+            sx={{
+              minWidth: "unset",
+              marginRight: "0.25rem",
+            }}
+          >
+            <DashboardIcon
+              className={
+                activeItem === "Dashboard" ? "text-[#0F2043]" : "text-[#f6f9ff]"
+              }
+            />
+          </ListItemIcon>
+          <ListItemText
+            primary="Dashboard"
+            sx={{
+              margin: "0.3rem",
+            }}
+          />
         </ListItemButton>
 
+        {/* Caselogs */}
         <ListItemButton
-          sx={listItemStyles("Logbook")}
-          onClick={() => toggleSection("logbook")}
+          sx={{
+            ...listItemStyles("Caselogs"),
+            paddingY: "0.5rem",
+            paddingX: "1rem",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+          onClick={() => toggleSection("caselogs", "From Email")}
         >
-          <ListItemText primary="Logbook" />
-          {openSections.logbook ? <ExpandLess /> : <ExpandMore />}
+          <ListItemIcon
+            sx={{
+              minWidth: "unset",
+              marginRight: "0.25rem",
+            }}
+          >
+            <CaseLogsIcon
+              className={
+                activeItem === "Caselogs" ? "text-[#0F2043]" : "text-[#f6f9ff]"
+              }
+            />
+          </ListItemIcon>
+          <ListItemText
+            primary="Case Logs"
+            sx={{
+              marginLeft: "0.3rem",
+            }}
+          />
+          {openSections.caselogs ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
-        <Collapse in={openSections.logbook} timeout="auto" unmountOnExit>
+        <Collapse in={openSections.caselogs} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton
-              sx={listItemStyles("From Email")}
+              sx={{
+                ...listItemStyles("From Email"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "From Email"}
               onClick={() => handleItemClick("From Email")}
             >
-              <ListItemText primary="From Email" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "From Email"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="From Email"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Manual Input")}
+              sx={{
+                ...listItemStyles("Manual Input"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Manual Input"}
               onClick={() => handleItemClick("Manual Input")}
             >
-              <ListItemText primary="Manual Input" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Manual Input"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Manual Input"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
           </List>
         </Collapse>
 
+        {/* Mails */}
         <ListItemButton
-          sx={listItemStyles("Mails")}
-          onClick={() => toggleSection("mails")}
+          sx={{
+            ...listItemStyles("Mails"),
+            paddingY: "0.5rem",
+            paddingX: "1rem",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+          onClick={() => toggleSection("mails", "Inbox")}
         >
-          <ListItemText primary="Mails" />
+          <ListItemIcon
+            sx={{
+              minWidth: "unset",
+              marginRight: "0.5rem",
+            }}
+          >
+            <MailIcon
+              className={
+                activeItem === "Caselogs" ? "text-[#0F2043]" : "text-[#f6f9ff]"
+              }
+            />
+          </ListItemIcon>
+
+          <ListItemText
+            primary="Mails"
+            sx={{
+              marginLeft: "0.3rem",
+            }}
+          />
           {openSections.mails ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={openSections.mails} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton
-              sx={listItemStyles("Inbox")}
+              sx={{
+                ...listItemStyles("Inbox"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Inbox"}
               onClick={() => handleItemClick("Inbox")}
             >
-              <ListItemText primary="Inbox" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Inbox" ? "text-[#0F2043]" : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Inbox"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Sent")}
+              sx={{
+                ...listItemStyles("Sent"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Sent"}
               onClick={() => handleItemClick("Sent")}
             >
-              <ListItemText primary="Sent" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Sent" ? "text-[#0F2043]" : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Sent"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Starred")}
+              sx={{
+                ...listItemStyles("Starred"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Starred"}
               onClick={() => handleItemClick("Starred")}
             >
-              <ListItemText primary="Starred" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Starred"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Starred"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Archive")}
+              sx={{
+                ...listItemStyles("Archive"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Archive"}
               onClick={() => handleItemClick("Archive")}
             >
-              <ListItemText primary="Archive" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Archive"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Archive"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
           </List>
         </Collapse>
 
+        {/* Attachments */}
         <ListItemButton
-          sx={listItemStyles("Attachments")}
-          onClick={() => toggleSection("attachments")}
+          sx={{
+            ...listItemStyles("Attachments"),
+            paddingY: "0.5rem",
+            paddingX: "1rem",
+            justifyContent: "flex-start",
+            alignItems: "center",
+          }}
+          onClick={() => toggleSection("attachments", "All Attachments")}
         >
-          <ListItemText primary="Attachments" />
+          <ListItemIcon
+            sx={{
+              minWidth: "unset",
+              marginRight: "0.5rem",
+            }}
+          >
+            <AttachmentIcon
+              className={
+                activeItem === "Attachments"
+                  ? "text-[#0F2043]"
+                  : "text-[#f6f9ff]"
+              }
+            />
+          </ListItemIcon>
+          <ListItemText
+            primary="Attachments"
+            sx={{
+              paddingLeft: "0.3rem",
+            }}
+          />
           {openSections.attachments ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
         <Collapse in={openSections.attachments} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
             <ListItemButton
-              sx={listItemStyles("All Attachments")}
+              sx={{
+                ...listItemStyles("All Attachments"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "All Attachments"}
               onClick={() => handleItemClick("All Attachments")}
             >
-              <ListItemText primary="All Attachments" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "All Attachments"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="All Attachments"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("My Attachments")}
+              sx={{
+                ...listItemStyles("My Attachments"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "My Attachments"}
               onClick={() => handleItemClick("My Attachments")}
             >
-              <ListItemText primary="My Attachments" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "My Attachments"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="My Attachments"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Shared with Me")}
+              sx={{
+                ...listItemStyles("Shared with Me"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Shared with Me"}
               onClick={() => handleItemClick("Shared with Me")}
             >
-              <ListItemText primary="Shared with Me" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Shared with Me"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Shared with Me"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Starred Attachments")}
+              sx={{
+                ...listItemStyles("Starred Attachments"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Starred Attachments"}
               onClick={() => handleItemClick("Starred Attachments")}
             >
-              <ListItemText primary="Starred Attachments" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Starred Attachments "
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Starred Attachments"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
             <ListItemButton
-              sx={listItemStyles("Archive Attachments")}
+              sx={{
+                ...listItemStyles("Archive Attachments"),
+                paddingY: "0.5rem",
+                paddingX: "1rem",
+                justifyContent: "flex-start",
+                alignItems: "center",
+              }}
               selected={activeItem === "Archive Attachments"}
               onClick={() => handleItemClick("Archive Attachments")}
             >
-              <ListItemText primary="Archive Attachments" />
+              <ListItemIcon
+                sx={{
+                  minWidth: "unset",
+                }}
+              >
+                <SubMenuIcon
+                  sx={{
+                    width: "0.7rem",
+                    height: "0.7rem",
+                    marginLeft: "0.25rem",
+                  }}
+                  className={
+                    activeItem === "Archive Attachments"
+                      ? "text-[#0F2043]"
+                      : "text-[#f6f9ff]"
+                  }
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary="Archive Attachments"
+                sx={{
+                  paddingLeft: "1rem",
+                }}
+              />
             </ListItemButton>
           </List>
         </Collapse>
@@ -212,15 +636,26 @@ export default function Sidebar() {
           selected={activeItem === "Case Tracker"}
           onClick={() => handleItemClick("Case Tracker")}
         >
-          <ListItemText primary="Case Tracker" />
-        </ListItemButton>
-
-        <ListItemButton
-          sx={listItemStyles("Archive")}
-          selected={activeItem === "Archive"}
-          onClick={() => handleItemClick("Archive")}
-        >
-          <ListItemText primary="Archive" />
+          <ListItemIcon
+            sx={{
+              minWidth: "unset",
+              marginRight: "0.5rem",
+            }}
+          >
+            <CaseTrackerIcon
+              className={
+                activeItem === "Case Tracker"
+                  ? "text-[#0F2043]"
+                  : "text-[#f6f9ff]"
+              }
+            />
+          </ListItemIcon>
+          <ListItemText
+            primary="Case Tracker"
+            sx={{
+              paddingLeft: "0.3rem",
+            }}
+          />
         </ListItemButton>
       </List>
     </Stack>
