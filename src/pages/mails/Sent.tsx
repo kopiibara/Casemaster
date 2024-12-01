@@ -2,13 +2,13 @@ import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import { Box } from "@mui/system";
 
-const MyAttachments = () => {
+const Sent = () => {
   return (
     <Box className="flex">
       <Sidebar />
-      <Header title="My Attachments" />
+      <Header title="Sent" />
     </Box>
   );
 };
 
-export default MyAttachments;
+export default Sent;

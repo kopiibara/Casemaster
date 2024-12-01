@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -15,6 +16,9 @@ import MailIcon from "@mui/icons-material/EmailOutlined";
 import AttachmentIcon from "@mui/icons-material/AttachmentOutlined";
 import CaseTrackerIcon from "@mui/icons-material/TableChartOutlined";
 import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
+import Avatar from "@mui/material/Avatar";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import IconButton from "@mui/material/IconButton";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = React.useState("Dashboard");
@@ -26,27 +30,79 @@ export default function Sidebar() {
     attachments: false,
   });
 
+  const navigate = useNavigate(); // useNavigate hook for routing
+
   const toggleSection = (
     section: string,
     defaultItem: string | null = null
   ) => {
     setOpenSections((prev) => {
       const isOpening = !prev[section];
-      if (isOpening && defaultItem) {
-        setActiveItem(defaultItem); // Set the default item when expanding
-      }
-      return {
+      const updatedSections = {
         ...prev,
         [section]: isOpening,
       };
+
+      // Close all other sections when one is opened
+      if (isOpening) {
+        Object.keys(updatedSections).forEach((key) => {
+          if (key !== section) updatedSections[key] = false;
+        });
+      }
+
+      if (isOpening && defaultItem) {
+        setActiveItem(defaultItem); // Set the default item when expanding
+      }
+      return updatedSections;
     });
   };
 
-  const handleItemClick = (item: string) => {
+  const handleItemClick = (item: string, route?: string) => {
     setActiveItem(item);
+    switch (item) {
+      case "From Email":
+        navigate("/caselogs/FromEmail");
+        break;
+      case "Manual Input":
+        navigate("/caselogs/ManualInput");
+        break;
+      case "All Attachments":
+        navigate("/attachments/AllAttachments");
+        break;
+      case "My Attachments":
+        navigate("/attachments/MyAttachments");
+        break;
+      case "Shared with Me":
+        navigate("/attachments/SharedWithMe");
+        break;
+      case "Starred Attachments":
+        navigate("/attachments/Starred");
+        break;
+      case "Archive Attachments":
+        navigate("/attachments/Achive");
+        break;
+      case "Inbox":
+        navigate("/mails/Inbox");
+        break;
+      case "Sent":
+        navigate("/mails/Sent");
+        break;
+      case "Starred":
+        navigate("/mails/Starred");
+        break;
+      case "Archive":
+        navigate("/mails/Archive");
+        break;
+      case "Case Tracker":
+        navigate("/casetracker/CaseTracker");
+        break;
+
+      default:
+        break;
+    }
   };
 
-  const listItemStyles = (items) => ({
+  const listItemStyles = (item: string) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -65,27 +121,79 @@ export default function Sidebar() {
         bgcolor: "white",
       },
     },
+    paddingY: "0.5rem",
+    paddingX: "1rem",
   });
 
+  const iconStyles = (item: string) => ({
+    minWidth: "unset",
+    marginRight: "0.25rem",
+    color: activeItem === item ? "#0f2043" : "#f6f9ff",
+    "&:hover": {
+      color: "#0f2043",
+    },
+  });
+
+  const renderListItem = (
+    item: string,
+    icon: React.ReactNode,
+    section?: string,
+    defaultItem?: string,
+    route?: string
+  ) => (
+    <ListItemButton
+      sx={listItemStyles(item)}
+      selected={activeItem === item}
+      onClick={() =>
+        section
+          ? toggleSection(section, defaultItem)
+          : handleItemClick(item, route)
+      }
+    >
+      <ListItemIcon sx={iconStyles(item)}>{icon}</ListItemIcon>
+      <ListItemText primary={item} sx={{ marginLeft: "0.3rem" }} />
+      {section && (openSections[section] ? <ExpandLess /> : <ExpandMore />)}
+    </ListItemButton>
+  );
+
+  const renderSubListItem = (item: string, route: string) => (
+    <ListItemButton
+      sx={listItemStyles(item)}
+      selected={activeItem === item}
+      onClick={() => handleItemClick(item, route)}
+    >
+      <ListItemIcon sx={iconStyles(item)}>
+        <SubMenuIcon
+          sx={{ width: "0.7rem", height: "0.7rem", marginLeft: "0.25rem" }}
+          className={activeItem === item ? "text-[#0F2043]" : "text-[#f6f9ff]"}
+        />
+      </ListItemIcon>
+      <ListItemText primary={item} sx={{ paddingLeft: "1rem" }} />
+    </ListItemButton>
+  );
+
   return (
-    <Stack className="w-65 bg-[#0F2043] h-full p-8" spacing={4}>
-      <Stack direction="row" spacing={2}>
-        <Box>
+    <Stack className="w-72 bg-[#0F2043] h-screen p-8" spacing={2}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          textAlign: "left",
+          paddingTop: "1rem",
+        }}
+      >
+        <Box sx={{ marginRight: 2 }}>
           <img
             src="/logo-white.ico"
             alt="Casemaster Logo"
-            style={{ width: 50, height: 50 }}
+            style={{ width: 40, height: 40 }}
           />
         </Box>
-        <Box>
-          <Typography
-            sx={{ color: "#f6f9ff", fontWeight: "bold" }}
-            variant="h4"
-          >
-            Casemaster
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography sx={{ color: "#f6f9ff", fontWeight: "600" }} variant="h6">
+          CASEMASTER
+        </Typography>
+      </Box>
 
       <List
         sx={{
@@ -96,568 +204,81 @@ export default function Sidebar() {
         component="nav"
         aria-labelledby="casemaster"
       >
-        {/* Dashboard */}
-        <ListItemButton
-          sx={{
-            ...listItemStyles("Dashboard"),
-            paddingY: "0.5rem",
-            paddingX: "1rem",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-          selected={activeItem === "Dashboard"}
-          onClick={() => handleItemClick("Dashboard")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: "unset",
-              marginRight: "0.25rem",
-            }}
-          >
-            <DashboardIcon
-              className={
-                activeItem === "Dashboard" ? "text-[#0F2043]" : "text-[#f6f9ff]"
-              }
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary="Dashboard"
-            sx={{
-              margin: "0.3rem",
-            }}
-          />
-        </ListItemButton>
-
-        {/* Caselogs */}
-        <ListItemButton
-          sx={{
-            ...listItemStyles("Caselogs"),
-            paddingY: "0.5rem",
-            paddingX: "1rem",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-          onClick={() => toggleSection("caselogs", "From Email")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: "unset",
-              marginRight: "0.25rem",
-            }}
-          >
-            <CaseLogsIcon
-              className={
-                activeItem === "Caselogs" ? "text-[#0F2043]" : "text-[#f6f9ff]"
-              }
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary="Case Logs"
-            sx={{
-              marginLeft: "0.3rem",
-            }}
-          />
-          {openSections.caselogs ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
+        {renderListItem("Dashboard", <DashboardIcon />)}
+        {renderListItem(
+          "Case Logs",
+          <CaseLogsIcon />,
+          "caselogs",
+          "From Email",
+          "/caselogs/FromEmail" // Adding the route for Case Logs
+        )}
         <Collapse in={openSections.caselogs} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("From Email"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "From Email"}
-              onClick={() => handleItemClick("From Email")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "From Email"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="From Email"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Manual Input"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Manual Input"}
-              onClick={() => handleItemClick("Manual Input")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Manual Input"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Manual Input"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
+            {renderSubListItem("From Email", "/caselogs/FromEmail")}
+            {renderSubListItem("Manual Input", "/caselogs/ManualInput")}
           </List>
         </Collapse>
-
-        {/* Mails */}
-        <ListItemButton
-          sx={{
-            ...listItemStyles("Mails"),
-            paddingY: "0.5rem",
-            paddingX: "1rem",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-          onClick={() => toggleSection("mails", "Inbox")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: "unset",
-              marginRight: "0.5rem",
-            }}
-          >
-            <MailIcon
-              className={
-                activeItem === "Caselogs" ? "text-[#0F2043]" : "text-[#f6f9ff]"
-              }
-            />
-          </ListItemIcon>
-
-          <ListItemText
-            primary="Mails"
-            sx={{
-              marginLeft: "0.3rem",
-            }}
-          />
-          {openSections.mails ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
+        {renderListItem(
+          "Mails",
+          <MailIcon />,
+          "mails",
+          "Inbox",
+          "/mails/inbox"
+        )}
         <Collapse in={openSections.mails} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Inbox"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Inbox"}
-              onClick={() => handleItemClick("Inbox")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Inbox" ? "text-[#0F2043]" : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Inbox"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Sent"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Sent"}
-              onClick={() => handleItemClick("Sent")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Sent" ? "text-[#0F2043]" : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Sent"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Starred"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Starred"}
-              onClick={() => handleItemClick("Starred")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Starred"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Starred"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Archive"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Archive"}
-              onClick={() => handleItemClick("Archive")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Archive"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Archive"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
+            {renderSubListItem("Inbox", "/mails/Inbox")}
+            {renderSubListItem("Sent", "/mails/Sent")}
+            {renderSubListItem("Starred", "/mails/Starred")}
+            {renderSubListItem("Archive", "/mails/Archive")}
           </List>
         </Collapse>
-
-        {/* Attachments */}
-        <ListItemButton
-          sx={{
-            ...listItemStyles("Attachments"),
-            paddingY: "0.5rem",
-            paddingX: "1rem",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-          onClick={() => toggleSection("attachments", "All Attachments")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: "unset",
-              marginRight: "0.5rem",
-            }}
-          >
-            <AttachmentIcon
-              className={
-                activeItem === "Attachments"
-                  ? "text-[#0F2043]"
-                  : "text-[#f6f9ff]"
-              }
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary="Attachments"
-            sx={{
-              paddingLeft: "0.3rem",
-            }}
-          />
-          {openSections.attachments ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
+        {renderListItem(
+          "Attachments",
+          <AttachmentIcon />,
+          "attachments",
+          "All Attachments",
+          "/attachments/AllAttachments"
+        )}
         <Collapse in={openSections.attachments} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("All Attachments"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "All Attachments"}
-              onClick={() => handleItemClick("All Attachments")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "All Attachments"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="All Attachments"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("My Attachments"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "My Attachments"}
-              onClick={() => handleItemClick("My Attachments")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "My Attachments"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="My Attachments"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Shared with Me"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Shared with Me"}
-              onClick={() => handleItemClick("Shared with Me")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Shared with Me"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Shared with Me"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Starred Attachments"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Starred Attachments"}
-              onClick={() => handleItemClick("Starred Attachments")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Starred Attachments "
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Starred Attachments"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
-            <ListItemButton
-              sx={{
-                ...listItemStyles("Archive Attachments"),
-                paddingY: "0.5rem",
-                paddingX: "1rem",
-                justifyContent: "flex-start",
-                alignItems: "center",
-              }}
-              selected={activeItem === "Archive Attachments"}
-              onClick={() => handleItemClick("Archive Attachments")}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: "unset",
-                }}
-              >
-                <SubMenuIcon
-                  sx={{
-                    width: "0.7rem",
-                    height: "0.7rem",
-                    marginLeft: "0.25rem",
-                  }}
-                  className={
-                    activeItem === "Archive Attachments"
-                      ? "text-[#0F2043]"
-                      : "text-[#f6f9ff]"
-                  }
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary="Archive Attachments"
-                sx={{
-                  paddingLeft: "1rem",
-                }}
-              />
-            </ListItemButton>
+            {renderSubListItem(
+              "All Attachments",
+              "/attachments/AllAttachments"
+            )}
+            {renderSubListItem("My Attachments", "/attachments/MyAttachments")}
+            {renderSubListItem("Shared with Me", "/attachments/SharedWithMe")}
+            {renderSubListItem("Starred Attachments", "/attachments/Starred")}
+            {renderSubListItem("Archive Attachments", "/attachments/Archive")}
           </List>
         </Collapse>
-
-        <ListItemButton
-          sx={listItemStyles("Case Tracker")}
-          selected={activeItem === "Case Tracker"}
-          onClick={() => handleItemClick("Case Tracker")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: "unset",
-              marginRight: "0.5rem",
-            }}
-          >
-            <CaseTrackerIcon
-              className={
-                activeItem === "Case Tracker"
-                  ? "text-[#0F2043]"
-                  : "text-[#f6f9ff]"
-              }
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary="Case Tracker"
-            sx={{
-              paddingLeft: "0.3rem",
-            }}
-          />
-        </ListItemButton>
+        {renderListItem(
+          "Case Tracker",
+          <CaseTrackerIcon />,
+          undefined,
+          undefined,
+          "/casetracker/CaseTracker"
+        )}
       </List>
+
+      <Box sx={{ flexGrow: 1 }} />
+
+      <div className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
+        <Avatar src="/broken-image.jpg" variant="rounded" />
+        {true && (
+          <div className="">
+            <p className="text-s text-white">Kopibara</p>
+            <p className="text-xs text-white">BRANCH CLERK</p>
+          </div>
+        )}
+        {true && (
+          <span className="ml-auto">
+            <IconButton>
+              <SettingsOutlinedIcon className="text-white" />
+            </IconButton>
+          </span>
+        )}
+      </div>
     </Stack>
   );
 }

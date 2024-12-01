@@ -1,7 +1,14 @@
-import React from "react";
+import Sidebar from "../../components/Sidebar";
+import Header from "../../components/Header";
+import { Box } from "@mui/system";
 
-const FromEmail = () => {
-  return <div>FromEmail</div>;
+const SharedWithMe = () => {
+  return (
+    <Box className="flex">
+      <Sidebar />
+      <Header title="Shared with Me" />
+    </Box>
+  );
 };
 
-export default FromEmail;
+export default SharedWithMe;
