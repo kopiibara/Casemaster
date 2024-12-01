@@ -1,14 +1,7 @@
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
 import { Box } from "@mui/system";
 
 const Sent = () => {
-  return (
-    <Box className="flex">
-      <Sidebar />
-      <Header title="Sent" />
-    </Box>
-  );
+  return <Box className="flex"></Box>;
 };
 
 export default Sent;

@@ -4,7 +4,7 @@ const SignIn = () => {
   const navigate = useNavigate();
 
   const handleSignIn = () => {
-    navigate("/dashboard/dashboard");
+    navigate("/dashboard");
   };
 
   return (

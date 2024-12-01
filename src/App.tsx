@@ -13,37 +13,37 @@ import SharedWithMe from "./pages/attachments/SharedWithMe";
 import StarredAttachments from "./pages/attachments/Starred";
 import ArchiveAttachments from "./pages/attachments/Archive";
 import CaseTracker from "./pages/casetracker/CaseTracker";
-import Sidebar from "./components/Sidebar";
-import "./index.css";
+import MainLayout from "./MainLayout";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Include Login */}
+        {/* Public Routes */}
         <Route path="/" element={<SignIn />} />
-        {/* Include Dashboard */}
 
-        <Route path="/dashboard/*" element={<DashboardPage />} />
-        {/* Include Caselogs */}
-        <Route path="/caselogs/FromEmail" element={<FromEmail />} />
-        <Route path="/caselogs/ManualInput" element={<ManualInput />} />
-        {/* Include Mails */}
-        <Route path="/mails/Inbox" element={<InboxMails />} />
-        <Route path="/mails/Sent" element={<SentMails />} />
-        <Route path="/mails/Starred" element={<StarredMails />} />
-        <Route path="/mails/Archive" element={<ArchiveMails />} />
-        {/* Include Attachments */}
-        <Route
-          path="/attachments/AllAttachments"
-          element={<AllAttachments />}
-        />
-        <Route path="/attachments/MyAttachments" element={<MyAttachments />} />
-        <Route path="/attachments/SharedWithMe" element={<SharedWithMe />} />
-        <Route path="/attachments/Starred" element={<StarredAttachments />} />
-        <Route path="/attachments/Achive" element={<ArchiveAttachments />} />
-        {/* Include Case Tracker */}
-        <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
+        {/* Protected Routes (with Sidebar and Header) */}
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/caselogs/FromEmail" element={<FromEmail />} />
+          <Route path="/caselogs/ManualInput" element={<ManualInput />} />
+          <Route path="/mails/Inbox" element={<InboxMails />} />
+          <Route path="/mails/Sent" element={<SentMails />} />
+          <Route path="/mails/Starred" element={<StarredMails />} />
+          <Route path="/mails/Archive" element={<ArchiveMails />} />
+          <Route
+            path="/attachments/AllAttachments"
+            element={<AllAttachments />}
+          />
+          <Route
+            path="/attachments/MyAttachments"
+            element={<MyAttachments />}
+          />
+          <Route path="/attachments/SharedWithMe" element={<SharedWithMe />} />
+          <Route path="/attachments/Starred" element={<StarredAttachments />} />
+          <Route path="/attachments/Archive" element={<ArchiveAttachments />} />
+          <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
+        </Route>
       </Routes>
     </Router>
   );

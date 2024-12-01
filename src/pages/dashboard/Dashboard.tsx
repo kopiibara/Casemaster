@@ -1,12 +1,10 @@
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
 import { Box } from "@mui/system";
 
 const Dashboard = () => {
   return (
-    <Box className="flex">
-      <Sidebar />
-      <Header title="Dashboard" />
+    <Box>
+      <h1>Welcome to the Dashboard</h1>
+      <p>Here is some content for the Dashboard page.</p>
     </Box>
   );
 };

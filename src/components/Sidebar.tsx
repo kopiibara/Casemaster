@@ -50,9 +50,12 @@ export default function Sidebar() {
         });
       }
 
+      // Automatically select the default item when opening the section
       if (isOpening && defaultItem) {
-        setActiveItem(defaultItem); // Set the default item when expanding
+        setActiveItem(defaultItem);
+        handleItemClick(defaultItem); // Trigger navigation if needed
       }
+
       return updatedSections;
     });
   };
@@ -60,6 +63,9 @@ export default function Sidebar() {
   const handleItemClick = (item: string, route?: string) => {
     setActiveItem(item);
     switch (item) {
+      case "Dashboard":
+        navigate("/dashboard");
+        break;
       case "From Email":
         navigate("/caselogs/FromEmail");
         break;
@@ -79,7 +85,7 @@ export default function Sidebar() {
         navigate("/attachments/Starred");
         break;
       case "Archive Attachments":
-        navigate("/attachments/Achive");
+        navigate("/attachments/Archive");
         break;
       case "Inbox":
         navigate("/mails/Inbox");

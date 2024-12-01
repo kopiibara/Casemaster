@@ -3,12 +3,7 @@ import Header from "../../components/Header";
 import { Box } from "@mui/system";
 
 const MyAttachments = () => {
-  return (
-    <Box className="flex">
-      <Sidebar />
-      <Header title="My Attachments" />
-    </Box>
-  );
+  return <Box className="flex"></Box>;
 };
 
 export default MyAttachments;
