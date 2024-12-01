@@ -68,7 +68,7 @@ export default function Sidebar() {
   });
 
   return (
-    <Stack className="w-65 bg-[#0F2043] h-screen p-8" spacing={4}>
+    <Stack className="w-65 bg-[#0F2043] h-full p-8" spacing={4}>
       <Stack direction="row" spacing={2}>
         <Box>
           <img
