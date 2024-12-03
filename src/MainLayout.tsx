@@ -1,6 +1,7 @@
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { Box } from "@mui/system";
+import { Divider } from "@mui/material";
 import { Outlet, useLocation } from "react-router-dom";
 
 const MainLayout = () => {
@@ -35,15 +36,17 @@ const MainLayout = () => {
       {/* Main content area */}
       <Box className="flex-grow flex flex-col">
         {/* Header */}
-        <Header title={getTitle()} />
+        <Box sx={{ flexShrink: 0 }}>
+          <Header title={getTitle()} />
+        </Box>
 
         {/* Main Content */}
         <Box
           sx={{
             flexGrow: 1,
             overflow: "auto", // Allow scrolling for long pages
-            padding: 3, // Add spacing
-            bgcolor: "#f0f4f8", // Light background for contrast
+            paddingY: 2,
+            paddingX: 3, // Add spacing
           }}
         >
           <Outlet />

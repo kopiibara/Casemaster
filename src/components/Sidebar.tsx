@@ -179,14 +179,14 @@ export default function Sidebar() {
   );
 
   return (
-    <Stack className="w-72 bg-[#0F2043] h-screen p-8" spacing={2}>
+    <Stack className="w-72 bg-[#0F2043] h-screen p-8 min-w-72" spacing={3}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "flex-start",
           alignItems: "center",
           textAlign: "left",
-          paddingTop: "1rem",
+          paddingTop: "1.25rem",
         }}
       >
         <Box sx={{ marginRight: 2 }}>
@@ -269,13 +269,13 @@ export default function Sidebar() {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      <div className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
+      <Box className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
         <Avatar src="/broken-image.jpg" variant="rounded" />
         {true && (
-          <div className="">
+          <Box className="">
             <p className="text-s text-white">Kopibara</p>
             <p className="text-xs text-white">BRANCH CLERK</p>
-          </div>
+          </Box>
         )}
         {true && (
           <span className="ml-auto">
@@ -284,7 +284,7 @@ export default function Sidebar() {
             </IconButton>
           </span>
         )}
-      </div>
+      </Box>
     </Stack>
   );
 }

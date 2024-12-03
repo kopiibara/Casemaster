@@ -49,7 +49,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.mjs"),
     },
 
-    minWidth: 1000,
+    minWidth: 1400,
     minHeight: 800,
     maxWidth: screenWidth,
   });

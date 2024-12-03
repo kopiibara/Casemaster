@@ -10,6 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import NotificationIcon from "@mui/icons-material/Notifications";
 import SearchIcon from "@mui/icons-material/Search";
 import Zoom from "@mui/material/Zoom";
+import Divider from "@mui/material/Divider";
 
 export default function Header({ title }: { title: string }) {
   const today = new Date();
@@ -21,15 +22,15 @@ export default function Header({ title }: { title: string }) {
   const formattedDate = today.toLocaleDateString("en-US", options);
 
   return (
-    <Box sx={{ flexGrow: 1, marginTop: 5, border: "1px", marginX: 4 }}>
+    <Box sx={{ flexGrow: 1, marginTop: 5, border: "1px", marginX: 3 }}>
       <AppBar
         position="static"
         elevation={0}
-        sx={{ bgcolor: "#f6f9ff", gap: 4 }}
+        sx={{ bgcolor: "#f6f9ff", gap: 1.5 }}
       >
         <Toolbar>
-          <Stack direction="column" sx={{ flexGrow: 1 }}>
-            <Typography variant="body1" sx={{ color: "#0f2043" }}>
+          <Stack direction="column" spacing={1}>
+            <Typography variant="body1" sx={{ color: "#828CA0" }}>
               {formattedDate}
             </Typography>
             <Typography
@@ -41,34 +42,56 @@ export default function Header({ title }: { title: string }) {
             </Typography>
           </Stack>
           <Box sx={{ flexGrow: 1 }} />
-          <Input
-            startAdornment={
-              <InputAdornment position="start">
-                <SearchIcon style={{ color: "#424242", marginLeft: "15px" }} />
-              </InputAdornment>
-            }
-            placeholder="Search"
-            disableUnderline
-            style={{
-              backgroundColor: "#d3cfcf4d",
-              color: "#424242",
-              height: "2.5rem",
-              borderRadius: "20px",
-            }}
-          />
-          <Tooltip
-            title="Notifications"
-            TransitionComponent={Zoom}
-            placement="bottom"
-            arrow
-          >
-            <IconButton aria-label="Import to Case Tracker" size="small">
-              <NotificationIcon
-                style={{ color: "#0F2043", cursor: "pointer" }}
+          <Stack spacing={2} direction="row">
+            {/* Conditionally render the search bar */}
+            {title !== "Dashboard" && (
+              <Input
+                startAdornment={
+                  <InputAdornment position="start">
+                    <SearchIcon
+                      style={{ color: "#424242", marginLeft: "15px" }}
+                    />
+                  </InputAdornment>
+                }
+                placeholder="Search"
+                disableUnderline
+                style={{
+                  backgroundColor: "#d3cfcf4d",
+                  color: "#424242",
+                  height: "2.5rem",
+                  borderRadius: "20px",
+                }}
               />
-            </IconButton>
-          </Tooltip>
+            )}
+            <Tooltip
+              title="Notifications"
+              TransitionComponent={Zoom}
+              placement="bottom"
+              arrow
+              slotProps={{
+                popper: {
+                  modifiers: [
+                    {
+                      name: "offset",
+                      options: {
+                        offset: [0, -5],
+                      },
+                    },
+                  ],
+                },
+              }}
+            >
+              <IconButton aria-label="Notification">
+                <NotificationIcon
+                  style={{ color: "#0F2043", cursor: "pointer" }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Toolbar>
+        <Box sx={{ marginLeft: 3 }}>
+          <Divider sx={{ width: "calc(100% - 2.5rem)" }} />
+        </Box>
       </AppBar>
     </Box>
   );

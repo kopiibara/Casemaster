@@ -1,10 +1,10 @@
 import { Box } from "@mui/system";
+import FilterButtons from "../../components/FilterButtons";
 
 const Dashboard = () => {
   return (
-    <Box>
-      <h1>Welcome to the Dashboard</h1>
-      <p>Here is some content for the Dashboard page.</p>
+    <Box sx={{ marginX: 3 }}>
+      <h1>Dashboard</h1>
     </Box>
   );
 };
