@@ -12,6 +12,13 @@ import ImportOutlinedIcon from "@mui/icons-material/PublishOutlined";
 import ImportFilledIcon from "@mui/icons-material/Publish";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EmailFilledIcon from "@mui/icons-material/Email";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
+import LabelOutlinedIcon from "@mui/icons-material/LabelOutlined";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import EditFilledIcon from "@mui/icons-material/Edit";
 
@@ -29,6 +36,50 @@ export default function DetailsComponent() {
     email: "outlined",
     edit: "outlined",
   });
+
+  // Mock data for the details table
+  const detailsData = [
+    {
+      icon: <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Case No.",
+      value: "RCT-001",
+    },
+    {
+      icon: <TitleOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Title",
+      value: "BPI SAVINGS v. LABINDO",
+    },
+    {
+      icon: <PersonOutlineIcon sx={{ fontSize: 20 }} />,
+      label: "Party Filer",
+      value: "Yvez Lawrence",
+    },
+    {
+      icon: <CalendarTodayOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Date Added",
+      value: "October 12, 2024 5:30 PM",
+    },
+    {
+      icon: <LabelOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Document Type",
+      value: "Motion",
+    },
+    {
+      icon: <AttachFileOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Attachment",
+      value: "101424_motion_recon.pdf",
+    },
+    {
+      icon: <LabelOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Tag",
+      value: "None",
+    },
+    {
+      icon: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 20 }} />,
+      label: "Status",
+      value: "New",
+    },
+  ];
 
   // Generic handler for mouse enter/leave and click
   const handleIconChange = (action: string, iconName: string) => {
@@ -49,6 +100,9 @@ export default function DetailsComponent() {
     <Card
       sx={{
         minWidth: 400,
+        maxWidth: 400,
+        minHeight: 590,
+        maxHeight: 590,
         boxShadow: "none",
         border: "1px solid",
         borderColor: "#DBDEE3",
@@ -182,6 +236,62 @@ export default function DetailsComponent() {
               </Stack>
             </Stack>
             <Divider sx={{ width: "calc(100% - 0.75rem)" }} />
+
+            {/* Details Table */}
+            <Box
+              sx={{
+                maxHeight: 480,
+                overflow: "auto",
+                "&::-webkit-scrollbar": {
+                  width: 4, // Width of the scrollbar
+                },
+                "&::-webkit-scrollbar-track": {
+                  backgroundColor: "#f0f0f0", // Scrollbar track color
+                  borderRadius: 4,
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#D9D9D9", // Scrollbar thumb color
+                  borderRadius: 4,
+                  "&:hover": {
+                    backgroundColor: "#909090", // Thumb color on hover
+                  },
+                },
+              }}
+            >
+              <Stack spacing={2} mt={2}>
+                {detailsData.map((detail, index) => (
+                  <Stack
+                    key={index}
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    sx={{ minHeight: 40 }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "40%",
+                      }}
+                    >
+                      {detail.icon}
+                      <Typography
+                        variant="body2"
+                        sx={{ ml: 1, fontWeight: "bold" }}
+                      >
+                        {detail.label}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      sx={{ width: "60%", wordBreak: "break-word" }}
+                    >
+                      {detail.value}
+                    </Typography>
+                  </Stack>
+                ))}
+              </Stack>
+            </Box>
           </Stack>
         </Box>
       </CardContent>

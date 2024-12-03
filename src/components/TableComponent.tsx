@@ -75,8 +75,32 @@ const TableComponent: React.FC<TableComponentProps> = ({
   const sortedData = stableSort(tableBodyData, getComparator(order, orderBy));
 
   return (
-    <TableContainer sx={{ backgroundColor: "white", borderRadius: 2 }}>
-      <Table sx={{ minWidth: 600 }} aria-label="dynamic table">
+    <TableContainer
+      sx={{
+        backgroundColor: "white",
+        borderRadius: 2,
+        maxHeight: 590,
+        "&::-webkit-scrollbar": {
+          width: 4, // Width of the scrollbar
+        },
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "#f0f0f0", // Scrollbar track color
+          borderRadius: 4,
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#D9D9D9", // Scrollbar thumb color
+          borderRadius: 4,
+          "&:hover": {
+            backgroundColor: "#909090", // Thumb color on hover
+          },
+        },
+      }}
+    >
+      <Table
+        sx={{ minWidth: 300, minHeight: "100%" }}
+        stickyHeader
+        aria-label="dynamic table"
+      >
         <TableHead
           sx={{
             backgroundColor: "#DCE5F6",
