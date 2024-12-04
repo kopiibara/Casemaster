@@ -60,6 +60,30 @@ const FromEmail: React.FC = () => {
       "Date Added": "2024-11-27",
       Status: "Archived",
     },
+    {
+      "Case No.": 10101,
+      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
+      "Date Added": "2024-11-27",
+      Status: "Archived",
+    },
+    {
+      "Case No.": 10101,
+      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
+      "Date Added": "2024-11-27",
+      Status: "Archived",
+    },
+    {
+      "Case No.": 10101,
+      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
+      "Date Added": "2024-11-27",
+      Status: "Archived",
+    },
+    {
+      "Case No.": 10101,
+      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
+      "Date Added": "2024-11-27",
+      Status: "Archived",
+    },
   ];
 
   const popoverContent = (
@@ -233,12 +257,25 @@ const FromEmail: React.FC = () => {
         </Stack>
 
         {/* Box container to adjust only the table and card layout */}
-        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-          <TableComponent
-            tableHeadData={tableHeadData}
-            tableBodyData={tableBodyData}
-            popoverContent={popoverContent}
-          />
+        <Box
+          sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}
+        >
+          {/* Box containing the table */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              flexGrow: 1,
+              height: "100%",
+              overflow: "hidden",
+            }}
+          >
+            <TableComponent
+              tableHeadData={tableHeadData}
+              tableBodyData={tableBodyData}
+              popoverContent={popoverContent}
+            />
+          </Box>
 
           {/* Conditionally render the Card beside the Table */}
           {showCard && <DetailsComponent />}

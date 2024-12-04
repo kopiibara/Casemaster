@@ -29,12 +29,12 @@ const MainLayout = () => {
   };
 
   return (
-    <Box className="flex h-screen">
+    <Box className="flex h-screen w-screen max-h-screen max-w-screen">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main content area */}
-      <Box className="flex-grow flex flex-col">
+      <Box className="flex-grow flex flex-col max-h-screen max-w-screen">
         {/* Header */}
         <Box sx={{ flexShrink: 0 }}>
           <Header title={getTitle()} />
@@ -47,6 +47,8 @@ const MainLayout = () => {
             overflow: "auto", // Allow scrolling for long pages
             paddingY: 2,
             paddingX: 3, // Add spacing
+            maxHeight: "100%", // Set maximum height
+            maxWidth: "100%", // Set maximum width
           }}
         >
           <Outlet />
