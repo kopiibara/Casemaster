@@ -1,10 +1,13 @@
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/system";
 import React, { useState } from "react";
 import FilterButtons from "../../components/FilterButtons";
 import TableComponent from "../../components/TableComponent";
+import { Button } from "@mui/material";
 
 const CaseTracker: React.FC = () => {
-  const [caseType, setCaseType] = useState("Civil Case");
+  const CaseType = ["Case Type", "Civil Case", "Special Case", "Criminal Case"];
+  const Deadline = ["Deadline", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
+  const Dates = ["Date", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
 
   const tableHeadData = ["Case No.", "Title", "Deadline", "Status"];
   const tableBodyData = [
@@ -51,40 +54,30 @@ const CaseTracker: React.FC = () => {
     // Add your logic here
   };
 
-  const handleCaseTypeChange = (index: number) => {
-    const caseTypes = ["Civil Case", "Special Case", "Criminal Case"];
-    setCaseType(caseTypes[index]);
-  };
-
   return (
-    <Box sx={{ marginX: 1, marginTop: 1 }}>
-      {/* Button and FilterButtons for Case Type */}
-      <Box sx={{ display: "flex", justifyContent: "flex-start", marginBottom: 2, gap: 2 }}>
+    <Box sx={{ marginX: 3, marginTop: 1 }}>
+      {/* Top Section: Add Case Button and Filters */}
+      <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 2, marginBottom: 2 }}>
         <Button
           variant="contained"
           onClick={handleAddCase}
           sx={{
             backgroundColor: "#0F2043",
             color: "#FFFFFF",
-            borderRadius: "12px", 
-            textTransform: "none", 
-            paddingX: 3, 
-            paddingY: 1, 
+            borderRadius: "12px",
+            textTransform: "none",
+            paddingX: 3,
+            paddingY: 1,
             "&:hover": {
-              backgroundColor: "#0E1B39", 
+              backgroundColor: "#0E1B39",
             },
           }}
         >
           + Add New Case
         </Button>
-
-        {/* Using FilterButtons component */}
-        <FilterButtons
-          options={["Case Type", "Civil Case", "Special Case", "Criminal Case"]}
-          defaultIndex={0}
-          // No need to modify FilterButtons itself
-          onChange={handleCaseTypeChange} // This will be called when a selection is made
-        />
+        <FilterButtons options={CaseType} defaultIndex={0} />
+        <FilterButtons options={Deadline} defaultIndex={0} />
+        <FilterButtons options={Dates} defaultIndex={0} />
       </Box>
 
       {/* Table */}
