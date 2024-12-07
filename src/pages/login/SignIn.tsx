@@ -1,22 +1,24 @@
 import { useNavigate } from "react-router-dom";
+import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
 
 const SignIn = () => {
   const navigate = useNavigate();
 
   const handleSignIn = () => {
-    navigate("/dashboard");
+    navigate("/profile-setup");
   };
 
   return (
-    <div className="text-[#0F2043] flex justify-center items-center flex-col min-h-screen gap-2">
-      <h1 className="text-3xl font-bold">Sign In</h1>
-      <p>Sign in to your account to continue</p>
-      <button
-        className="bg-white text-[#0F2043] border border-[#0F2043] rounded-md px-3 py-1 shadow-sm hover:bg-[#0F2043] hover:text-white cursor-pointer"
-        onClick={handleSignIn}
-      >
-        Sign In
-      </button>
+    <div className='flex items-center justify-center min-h-screen'>
+    <div className="flex items-center justify-center flex-col text-center">
+         <BusinessCenterOutlinedIcon style={{fontSize:'60px', color:'#0f2043'}}/>
+      <p className='text-[6rem] font-bold text-[#0f2043]'>CaseMaster</p>
+      <p className='text-4xl text-[#0f2043]'>Your go-to Legal Workflow Manager </p>
+      <p className='text-xl text-[rgba(15,32,67,0.3)] my-7'>Putting ease in all your legal workflow—all at one</p>
+      <button onClick={handleSignIn} className='bg-[#0f2043] w-64 h-10 rounded-xl text-white'>
+        Sign In With <strong>Microsoft</strong>   
+    </button>
+    </div>
     </div>
   );
 };

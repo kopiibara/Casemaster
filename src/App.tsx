@@ -14,6 +14,15 @@ import StarredAttachments from "./pages/attachments/Starred";
 import ArchiveAttachments from "./pages/attachments/Archive";
 import CaseTracker from "./pages/casetracker/CaseTracker";
 import MainLayout from "./MainLayout";
+import ProfileSetup from "./pages/login/ProfileSetup";
+import PINSetup from "./pages/login/PINSetup";
+import Profiles from "./pages/login/Profiles";
+import LoginExistingProfile from "./pages/login/ExistingProfile/LoginExistingProfile";
+import ExistingProfilePin from "./pages/login/ExistingProfile/ExistingProfilePin";
+import AddExistingProfile from "./pages/login/ExistingProfile/AddExistingProfile";
+import ConfirmExistingProfile from "./pages/login/ExistingProfile/ConfirmExistingProfile";
+
+
 
 function App() {
   return (
@@ -21,6 +30,13 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<SignIn />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/pin-setup" element={<PINSetup />} />
+        <Route path="/profiles" element={<Profiles />} />
+        <Route path="/login-existing-profile" element={<LoginExistingProfile/>}/>
+        <Route path="/add-existing-profile" element={<AddExistingProfile/>}/>
+        <Route path="/existing-profile-pin" element={<ExistingProfilePin/>}/>
+        <Route path="/confirm-existing-profile" element={<ConfirmExistingProfile/>}/>
 
         {/* Protected Routes (with Sidebar and Header) */}
         <Route element={<MainLayout />}>
