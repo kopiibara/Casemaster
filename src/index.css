@@ -6,12 +6,12 @@
 
 /* Apply Inter to the entire body, or use a specific selector */
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "Inter";
   background-color: #f6f9ff;
 }
 
 /* Or apply it directly to your menu list */
 .root {
-  font-family: "Inter", sans-serif;
+  font-family: "Inter";
   font-weight: 500; /* Adjust font weight if desired */
 }

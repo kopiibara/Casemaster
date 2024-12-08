@@ -8,7 +8,8 @@ import TableRow from "@mui/material/TableRow";
 import ChipComponent from "./ChipComponent";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
-import { Popover, TableSortLabel } from "@mui/material";
+import { Popover, TableSortLabel, Button } from "@mui/material";
+import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 
 // Helper function to sort data
 const descendingComparator = (a: any, b: any, orderBy: string) => {
@@ -68,6 +69,11 @@ const TableComponent: React.FC<TableComponentProps> = ({
     setOrderBy(property);
   };
 
+  const handleResetSort = () => {
+    setOrder("asc");
+    setOrderBy("");
+  };
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
@@ -77,9 +83,6 @@ const TableComponent: React.FC<TableComponentProps> = ({
   return (
     <TableContainer
       sx={{
-        backgroundColor: "white",
-        borderRadius: 2,
-        maxHeight: 590,
         "&::-webkit-scrollbar": {
           width: 4, // Width of the scrollbar
         },
@@ -95,22 +98,14 @@ const TableComponent: React.FC<TableComponentProps> = ({
           },
         },
       }}
+      className="bg-white rounded-lg max-h-[78vh] h-[78vh] min-h-[30vh] "
     >
       <Table
-        sx={{ minWidth: 300, minHeight: "100%" }}
+        className="min-w-[300px], min-h-full"
         stickyHeader
         aria-label="dynamic table"
       >
-        <TableHead
-          sx={{
-            backgroundColor: "#DCE5F6",
-            "& .MuiTableCell-head": {
-              fontWeight: "bold",
-              color: "#0F2043",
-              fontSize: "0.875rem",
-            },
-          }}
-        >
+        <TableHead className="bg-[#DCE5F6] [&_.MuiTableCell-head]:font-bold [&_.MuiTableCell-head]:text-[#0F2043] [&_.MuiTableCell-head]:text-sm">
           <TableRow>
             {tableHeadData.map((header, index) => (
               <TableCell
@@ -142,7 +137,13 @@ const TableComponent: React.FC<TableComponentProps> = ({
                 fontSize: "0.875rem",
                 backgroundColor: "#DCE5F6",
               }}
-            ></TableCell>
+            >
+              {orderBy && (
+                <IconButton onClick={handleResetSort} size="small">
+                  <RestartAltOutlinedIcon />
+                </IconButton>
+              )}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody
@@ -194,8 +195,8 @@ const TableComponent: React.FC<TableComponentProps> = ({
                     vertical: "top",
                     horizontal: "right",
                   }}
-                  PaperProps={{
-                    disableInteractive: true,
+                  slotProps={{
+                    paper: {},
                   }}
                   sx={{
                     ".MuiPaper-root": {

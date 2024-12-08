@@ -44,7 +44,7 @@ const MainLayout = () => {
         <Box
           sx={{
             flexGrow: 1,
-            overflow: "auto", // Allow scrolling for long pages
+            overflow: "hidden", // Allow scrolling for long pages
             paddingY: 2,
             paddingX: 3, // Add spacing
             maxHeight: "100%", // Set maximum height

@@ -22,26 +22,27 @@ export default function Header({ title }: { title: string }) {
   const formattedDate = today.toLocaleDateString("en-US", options);
 
   return (
-    <Box sx={{ flexGrow: 1, marginTop: 5, border: "1px", marginX: 3 }}>
+    <Box className="flex-grow pt-6 px-6">
       <AppBar
         position="static"
         elevation={0}
-        sx={{ bgcolor: "#f6f9ff", gap: 1.5 }}
+        className="gap-1.5"
+        sx={{ backgroundColor: "#f6f9ff" }}
       >
         <Toolbar>
           <Stack direction="column" spacing={1}>
-            <Typography variant="body1" sx={{ color: "#828CA0" }}>
+            <Typography variant="body1" className="text-[#828CA0]">
               {formattedDate}
             </Typography>
             <Typography
               variant="h4"
               component="div"
-              sx={{ color: "#0F2043", fontWeight: "bold" }}
+              className="text-[#0F2043] "
             >
               {title}
             </Typography>
           </Stack>
-          <Box sx={{ flexGrow: 1 }} />
+          <Box className="flex-grow" />
           <Stack spacing={2} direction="row">
             {/* Conditionally render the search bar */}
             {title !== "Dashboard" && (
@@ -55,12 +56,7 @@ export default function Header({ title }: { title: string }) {
                 }
                 placeholder="Search"
                 disableUnderline
-                style={{
-                  backgroundColor: "#d3cfcf4d",
-                  color: "#424242",
-                  height: "2.5rem",
-                  borderRadius: "20px",
-                }}
+                className="bg-[#d3cfcf4d] text-[#424242] h-10 rounded-full"
               />
             )}
             <Tooltip
@@ -82,15 +78,13 @@ export default function Header({ title }: { title: string }) {
               }}
             >
               <IconButton aria-label="Notification">
-                <NotificationIcon
-                  style={{ color: "#0F2043", cursor: "pointer" }}
-                />
+                <NotificationIcon className="text-[#0F2043] cursor-pointer" />
               </IconButton>
             </Tooltip>
           </Stack>
         </Toolbar>
-        <Box sx={{ marginLeft: 3 }}>
-          <Divider sx={{ width: "calc(100% - 2.5rem)" }} />
+        <Box className="ml-6">
+          <Divider className="w-[calc(100%-2.5rem)]" />
         </Box>
       </AppBar>
     </Box>

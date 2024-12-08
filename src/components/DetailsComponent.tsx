@@ -1,13 +1,16 @@
 import { useState } from "react";
-import Box from "@mui/material/Box";
-import { Stack } from "@mui/material";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import IconButton from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
-import Zoom from "@mui/material/Zoom";
-import Divider from "@mui/material/Divider";
+
+import {
+  Stack,
+  Box,
+  Typography,
+  IconButton,
+  Divider,
+  Zoom,
+  Tooltip,
+  CardContent,
+  Card,
+} from "@mui/material";
 import ImportOutlinedIcon from "@mui/icons-material/PublishOutlined";
 import ImportFilledIcon from "@mui/icons-material/Publish";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -23,7 +26,6 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import EditFilledIcon from "@mui/icons-material/Edit";
 
 export default function DetailsComponent() {
-  // Separate states for each icon
   type IconState = {
     import: "outlined" | "filled";
     email: "outlined" | "filled";
@@ -37,51 +39,49 @@ export default function DetailsComponent() {
     edit: "outlined",
   });
 
-  // Mock data for the details table
   const detailsData = [
     {
-      icon: <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <DescriptionOutlinedIcon className="text-lg" />,
       label: "Case No.",
       value: "RCT-001",
     },
     {
-      icon: <TitleOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <TitleOutlinedIcon className="text-lg" />,
       label: "Title",
       value: "BPI SAVINGS v. LABINDO",
     },
     {
-      icon: <PersonOutlineIcon sx={{ fontSize: 20 }} />,
+      icon: <PersonOutlineIcon className="text-lg" />,
       label: "Party Filer",
       value: "Yvez Lawrence",
     },
     {
-      icon: <CalendarTodayOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <CalendarTodayOutlinedIcon className="text-lg" />,
       label: "Date Added",
       value: "October 12, 2024 5:30 PM",
     },
     {
-      icon: <LabelOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <LabelOutlinedIcon className="text-lg" />,
       label: "Document Type",
       value: "Motion",
     },
     {
-      icon: <AttachFileOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <AttachFileOutlinedIcon className="text-lg" />,
       label: "Attachment",
       value: "101424_motion_recon.pdf",
     },
     {
-      icon: <LabelOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <LabelOutlinedIcon className="text-lg" />,
       label: "Tag",
       value: "None",
     },
     {
-      icon: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 20 }} />,
+      icon: <CheckCircleOutlineOutlinedIcon className="text-lg" />,
       label: "Status",
       value: "New",
     },
   ];
 
-  // Generic handler for mouse enter/leave and click
   const handleIconChange = (action: string, iconName: string) => {
     setIcons((prev) => ({
       ...prev,
@@ -98,29 +98,19 @@ export default function DetailsComponent() {
 
   return (
     <Card
-      sx={{
-        minWidth: 400,
-        maxWidth: 400,
-        minHeight: 590,
-        maxHeight: 590,
-        boxShadow: "none",
-        border: "1px solid",
-        borderColor: "#DBDEE3",
-        borderRadius: 3,
-      }}
+      className="min-w-[400px] p-6 max-w-[400px] min-h-[590px] max-h-[590px] shadow-none border border-[#DBDEE3]"
+      sx={{ borderRadius: "0.5rem" }}
     >
-      <CardContent sx={{ padding: 4 }}>
-        <Box sx={{ color: "#0F2043" }}>
+      <CardContent className="p-4">
+        <Box className="text-[#0F2043]">
           <Stack spacing={1}>
-            {/* Header */}
             <Stack direction={"row"}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" className="font-bold">
                 Details
               </Typography>
-              <Box sx={{ flexGrow: 1 }} />
+              <Box className="flex-grow" />
 
               <Stack direction={"row"} alignItems="center">
-                {/* Import Button */}
                 <Tooltip
                   title="Import to Case Tracker"
                   slots={{ transition: Zoom }}
@@ -144,11 +134,7 @@ export default function DetailsComponent() {
                     onClick={() => handleIconChange("click", "import")}
                     onMouseEnter={() => handleIconChange("enter", "import")}
                     onMouseLeave={() => handleIconChange("leave", "import")}
-                    sx={{
-                      borderRadius: "50%",
-                      minWidth: "auto",
-                      minHeight: "auto",
-                    }}
+                    className="rounded-full min-w-auto min-h-auto"
                   >
                     {icons.import === "outlined" ? (
                       <ImportOutlinedIcon className="text-[#0F2043]" />
@@ -158,7 +144,6 @@ export default function DetailsComponent() {
                   </IconButton>
                 </Tooltip>
 
-                {/* Email Button */}
                 <Tooltip
                   title="Check Email"
                   slots={{ transition: Zoom }}
@@ -182,11 +167,7 @@ export default function DetailsComponent() {
                     onClick={() => handleIconChange("click", "email")}
                     onMouseEnter={() => handleIconChange("enter", "email")}
                     onMouseLeave={() => handleIconChange("leave", "email")}
-                    sx={{
-                      borderRadius: "50%",
-                      minWidth: "auto",
-                      minHeight: "auto",
-                    }}
+                    className="rounded-full min-w-auto min-h-auto"
                   >
                     {icons.email === "outlined" ? (
                       <EmailOutlinedIcon className="text-[#0F2043]" />
@@ -196,7 +177,6 @@ export default function DetailsComponent() {
                   </IconButton>
                 </Tooltip>
 
-                {/* Edit Button */}
                 <Tooltip
                   title="Edit Details"
                   slots={{ transition: Zoom }}
@@ -220,11 +200,7 @@ export default function DetailsComponent() {
                     onClick={() => handleIconChange("click", "edit")}
                     onMouseEnter={() => handleIconChange("enter", "edit")}
                     onMouseLeave={() => handleIconChange("leave", "edit")}
-                    sx={{
-                      borderRadius: "50%",
-                      minWidth: "auto",
-                      minHeight: "auto",
-                    }}
+                    className="rounded-full min-w-auto min-h-auto"
                   >
                     {icons.edit === "outlined" ? (
                       <EditOutlinedIcon className="text-[#0F2043]" />
@@ -235,29 +211,9 @@ export default function DetailsComponent() {
                 </Tooltip>
               </Stack>
             </Stack>
-            <Divider sx={{ width: "calc(100% - 0.75rem)" }} />
+            <Divider className="w-[calc(100%-0.75rem)]" />
 
-            {/* Details Table */}
-            <Box
-              sx={{
-                maxHeight: 480,
-                overflow: "auto",
-                "&::-webkit-scrollbar": {
-                  width: 4, // Width of the scrollbar
-                },
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor: "#f0f0f0", // Scrollbar track color
-                  borderRadius: 4,
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "#D9D9D9", // Scrollbar thumb color
-                  borderRadius: 4,
-                  "&:hover": {
-                    backgroundColor: "#909090", // Thumb color on hover
-                  },
-                },
-              }}
-            >
+            <Box className="max-h-[480px] overflow-auto scrollbar-thin scrollbar-thumb-[#D9D9D9] scrollbar-track-[#f0f0f0] scrollbar-thumb-rounded hover:scrollbar-thumb-[#909090]">
               <Stack spacing={2} mt={2}>
                 {detailsData.map((detail, index) => (
                   <Stack
@@ -265,26 +221,17 @@ export default function DetailsComponent() {
                     direction="row"
                     spacing={2}
                     alignItems="center"
-                    sx={{ minHeight: 40 }}
+                    className="min-h-[40px] text-[#8992A3]"
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        width: "40%",
-                      }}
-                    >
+                    <Box className="flex items-center w-[40%] gap-3   ">
                       {detail.icon}
-                      <Typography
-                        variant="body2"
-                        sx={{ ml: 1, fontWeight: "bold" }}
-                      >
+                      <Typography variant="body2" className=" text-[#8992A3]">
                         {detail.label}
                       </Typography>
                     </Box>
                     <Typography
                       variant="body2"
-                      sx={{ width: "60%", wordBreak: "break-word" }}
+                      className="w-[60%] break-words text-[#0F2043]"
                     >
                       {detail.value}
                     </Typography>

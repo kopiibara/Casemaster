@@ -60,12 +60,20 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             color: "#0F2043",
             borderColor: "#0F2043",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Change this to your desired hover color
+              backgroundColor: "#DCE5F6",
+              // Change this to your desired hover color
             },
           },
         }}
+        className="text-[#0F2043] [&_.MuiButton-root]:text-[#0F2043] [&_.MuiButton-root]:border-[#0F2043] [&_.MuiButton-root]:hover:bg-[#DCE5F6]"
       >
-        <Button onClick={handleClick}>{options[selectedIndex]}</Button>
+        <Button
+          onClick={handleClick}
+          sx={{ textTransform: "none" }}
+          className="normal-case"
+        >
+          {options[selectedIndex]}
+        </Button>
         <Button
           size="small"
           aria-controls={open ? "split-button-menu" : undefined}
@@ -78,12 +86,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </Button>
       </ButtonGroup>
       <Popper
-        sx={{ zIndex: 1 }}
+        sx={{ zIndex: 1300 }} // Ensure this value is higher than the table header
         open={open}
         anchorEl={anchorRef.current}
         role={undefined}
         transition
         disablePortal
+        className="z-[1300]"
       >
         {({ TransitionProps, placement }) => (
           <Grow
@@ -105,9 +114,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                       sx={{
                         color: "#0F2043",
                         "&:hover": {
-                          backgroundColor: "#DCE5F6", // Change this to your desired hover color
+                          backgroundColor: "#DCE5F6",
+                          textTransform: "none",
                         },
                       }}
+                      className="text-[#0F2043] hover:bg-[#DCE5F6] normal-case"
                     >
                       {option}
                     </MenuItem>

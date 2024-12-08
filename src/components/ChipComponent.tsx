@@ -25,11 +25,17 @@ const ChipComponent: React.FC<ChipComponentProps> = ({
     backgroundColors[label] ||
     (variant === "outlined" ? "transparent" : "#DCE5F6");
 
+  const chipClasses = `
+    ${variant === "outlined" ? "border" : ""}
+    ${backgroundColor !== "transparent" ? "text-white" : ""}
+  `;
+
   return (
     <Chip
       label={label}
       variant={variant === "outlined" ? "outlined" : "filled"}
       onClick={onClick}
+      className={chipClasses}
       sx={{
         backgroundColor: backgroundColor,
         color: "#FFFFFF", // Set text color to white

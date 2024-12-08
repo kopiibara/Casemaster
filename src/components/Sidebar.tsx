@@ -180,15 +180,7 @@ export default function Sidebar() {
 
   return (
     <Stack className="w-72 bg-[#0F2043] h-screen p-8 min-w-72" spacing={3}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-start",
-          alignItems: "center",
-          textAlign: "left",
-          paddingTop: "1.25rem",
-        }}
-      >
+      <Box className="flex flex-start items-center text-align-left pt-6">
         <Box sx={{ marginRight: 2 }}>
           <img
             src="/logo-white.ico"
@@ -202,11 +194,7 @@ export default function Sidebar() {
       </Box>
 
       <List
-        sx={{
-          width: "100%",
-          maxWidth: 360,
-          color: "#f6f9ff",
-        }}
+        className="width-100%, max-w-360, color-[#f6f9ff]"
         component="nav"
         aria-labelledby="casemaster"
       >
@@ -267,14 +255,18 @@ export default function Sidebar() {
         )}
       </List>
 
-      <Box sx={{ flexGrow: 1 }} />
+      <Box flexGrow={2} />
 
       <Box className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
         <Avatar src="/broken-image.jpg" variant="rounded" />
         {true && (
           <Box className="">
-            <p className="text-s text-white">Kopibara</p>
-            <p className="text-xs text-white">BRANCH CLERK</p>
+            <Typography sx={{ color: "#f6f9ff" }} variant="subtitle1">
+              Kopibara
+            </Typography>
+            <Typography sx={{ color: "#f6f9ff" }} variant="subtitle2">
+              Branch Clerk
+            </Typography>
           </Box>
         )}
         {true && (
