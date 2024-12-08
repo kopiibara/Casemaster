@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
+import { Box } from "@mui/material";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -22,12 +24,40 @@ const SignIn = () => {
         <p className="text-l text-[rgba(15,32,67,0.3)] my-7">
           Putting ease in all your legal workflow—all in one place.
         </p>
-        <button
+        <Button
           onClick={handleSignIn}
-          className="bg-[#0f2043] w-64 h-10 rounded-xl text-white"
+          variant="contained"
+          sx={{
+            backgroundColor: "#0f2043",
+            color: "white",
+            width: "16rem",
+            height: "2.5rem",
+            borderRadius: "10px",
+            textTransform: "none",
+            fontWeight: "medium",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#0c1833", // Darker shade for hover
+              boxShadow: "none",
+            },
+          }}
         >
-          Sign In With <strong>Microsoft</strong>
-        </button>
+          <Box
+            component="img"
+            src="/microsoft-logo.png" // Replace with the actual path to your Microsoft logo
+            alt="Microsoft Logo"
+            sx={{
+              width: "1rem",
+              height: "1rem",
+              objectFit: "contain",
+            }}
+          />
+          Sign In With Microsoft
+        </Button>
       </div>
     </div>
   );
