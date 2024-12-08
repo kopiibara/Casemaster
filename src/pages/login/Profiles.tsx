@@ -1,152 +1,174 @@
-import React, { useState, useRef } from 'react';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import ProfileIcon from './capy.jpg';
-import Button from '@mui/material/Button';
-import ModalView from './ModalComponent'; // Import your ModalView component
+import React, { useState } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
+import ProfileIcon from "./capy.jpg";
+import Button from "@mui/material/Button";
+import { Box } from "@mui/material";
 
 interface Profile {
   id: number;
   name: string;
   role: string;
   image: string;
-  email: string;
-  phone: string;
 }
 
 const Profile = () => {
   const navigate = useNavigate();
   const [profiles] = useState<Profile[]>([
-    { id: 1, name: 'Mon Rivamonte', role: 'Admin', image: ProfileIcon, email: 'Mon@gmail.com', phone: '+639159015884' },
-    { id: 2, name: 'Gwyneth Uy', role: 'CEO', image: ProfileIcon, email: 'gwy@gmail.com', phone: '+639090909090' },
+    {
+      id: 1,
+      name: "Mon Rivamonte",
+      role: "Admin",
+      image: ProfileIcon,
+    },
   ]);
 
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-  const [isSkipped, setIsSkipped] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pin, setPin] = useState<string>('');
-
-  const correctPin = "1234";
-  const inputRefs = Array.from({ length: 4 }, () => useRef<HTMLInputElement>(null));
-
   const handleBack = () => {
-    navigate('/');
+    navigate("/");
   };
 
-  const test = () => {
-    navigate('/dashboard');
-  };
-
-  const clickProfile = (profile: Profile) => {
-    setSelectedProfile(profile);
-    setIsModalOpen(true); // Open the modal when a profile is clicked
-  };
-
-  const goToAddExistingProfile = () => {
-    navigate('/add-existing-profile');
-  };
-
-  const handleSkipped = () => {
-    setIsSkipped(true);
-  };
-
-  const createAnotherProfile = () => {
-    navigate('/profile-setup');
-  };
-
-  const handleAddExistingProfile = () => {
-    navigate('/add-existing-profile');
+  const goToProfileSelection = () => {
+    navigate("/profile-selection");
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      {!isSkipped && (
-        <div style={{
-          position: 'absolute',
-          top: '-5rem',
-          left: '5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-          <button
-            onClick={handleBack}
-            className="w-8 h-8 border border-[#0f2043] rounded-full flex justify-center items-center"
-          >
-            <ArrowBackIcon />
-          </button>
-          <p>Back</p>
-        </div>
-      )}
-      <div className='mt-56'>
-        <div className='flex justify-center items-center flex-col'>
-          <div className='flex justify-center items-center flex-col'>
-            <h2 className="font-bold text-3xl text-[#0f2043]">{isSkipped ? 'Select your Profile' : 'You are all Set!'}</h2>
-            <p className="text-xl text-[#0f2043] text-opacity-40">{isSkipped ? 'Select a profile to use then enter your PIN' : 'Do you want to create another profile?'}</p>
-          </div>
-          <div className='flex justify-center items-center mt-8'>
-            {profiles.map(profile => (
-              <div
-                key={profile.id}
-                onClick={() => clickProfile(profile)}
-                className='w-40 h-44 border rounded-xl flex items-center justify-center text-center flex-col cursor-pointer mr-6 border-[#0f2043] border-opacity-20 '
-              >
-                <div
-                  style={{
-                    backgroundImage: `url(${profile.image})`,
-                    width: '60px',
-                    height: '60px',
-                    backgroundSize: 'cover',
-                    borderRadius: '50%',
-                  }}></div>
-                <div>
-                  <h4>{profile.name}</h4>
-                  <p className="text-[#0f2043] text-opacity-40">{profile.role}</p>
-                </div>
-              </div>
-            ))}
-            <div
-              className='w-40 h-44 border border-dashed rounded-xl flex items-center justify-center text-center flex-col cursor-pointer mr-3 border-[#0f2043] border-opacity-20 '
-            >
-              <div onClick={isSkipped ? goToAddExistingProfile : handleAddExistingProfile}>
-                <AddIcon />
-              </div>
-            </div>
-          </div>
-          {!isSkipped ? (
-            <div className='mt-10'>
-              <Button
-                onClick={handleSkipped}
-                variant='outlined'
-                sx={{ marginRight: '0.7rem', borderRadius: '5px', textTransform: 'none' }}
-              >
-                Skip
-              </Button>
-              <Button
-                onClick={createAnotherProfile}
-                variant="contained"
-                sx={{ marginRight: '0.7rem', borderRadius: '5px', backgroundColor: '#517FD3', textTransform: 'none' }}
-              >
-                Create Another
-              </Button>
-            </div>
-          ) : (
-            <p onClick={test} className='text-[#d52e2e] mt-12'>Sign out Microsoft Account</p>
-          )}
-        </div>
-      </div>
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "#f9fafb",
+        textAlign: "center",
+      }}
+    >
+      {/* Back Button */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "5rem",
+          left: "3rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          cursor: "pointer",
+        }}
+        onClick={handleBack}
+      >
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)" },
+          }}
+        >
+          <ArrowBackIcon sx={{ color: "#0f2043" }} />
+        </Box>
+        <Box sx={{ fontSize: "0.875rem", color: "#0f2043" }}>Back</Box>
+      </Box>
 
-      {/* Render ModalView if the modal is open */}
-      {isModalOpen && selectedProfile && (
-        <ModalView
-          isModalOpen={isModalOpen}
-          currentView="enter-pin"
-          handleCloseModal={() => setIsModalOpen(false)}
-          selectedProfile={selectedProfile}
-        />
-      )}
-    </div>
+      {/* Centered Content */}
+      <Box sx={{ mt: 6 }}>
+        <h2
+          style={{
+            fontWeight: "bold",
+            fontSize: "1.875rem",
+            color: "#0f2043",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Profile created successfully!
+        </h2>
+        <p
+          style={{
+            fontSize: "1.125rem",
+            color: "rgba(15, 32, 67, 0.6)",
+            marginBottom: "1.5rem",
+          }}
+        >
+          Go back to the profile selection page to login.
+        </p>
+      </Box>
+
+      {/* Profile Card */}
+      <Box
+        sx={{
+          width: "16rem",
+          height: "14rem",
+          border: "1px solid rgba(15, 32, 67, 0.2)",
+          borderRadius: "0.75rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+          p: 4,
+          bgcolor: "white",
+          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          mb: 4,
+        }}
+      >
+        <Box
+          sx={{
+            backgroundImage: `url(${profiles[0].image})`,
+            width: "70px",
+            height: "70px",
+            backgroundSize: "cover",
+            borderRadius: "50%",
+            mb: "1rem",
+          }}
+        ></Box>
+        <Box
+          component="h4"
+          sx={{
+            fontSize: "1.125rem",
+            fontWeight: "600",
+            color: "#0f2043",
+            mb: "0.5rem",
+          }}
+        >
+          {profiles[0].name}
+        </Box>
+        <Box
+          component="p"
+          sx={{
+            fontSize: "0.875rem",
+            color: "#0f2043",
+            opacity: 0.6,
+          }}
+        >
+          {profiles[0].role}
+        </Box>
+      </Box>
+
+      {/* Button */}
+      <Box>
+        <Button
+          variant="contained"
+          onClick={goToProfileSelection}
+          sx={{
+            textTransform: "none",
+            bgcolor: "#517FD3",
+            borderRadius: "0.625rem",
+            padding: "0.5rem 2rem",
+            fontSize: "1rem",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#3D6FBF",
+              boxShadow: "none",
+            },
+          }}
+        >
+          Go to Profile Selection
+        </Button>
+      </Box>
+    </Box>
   );
 };
 
