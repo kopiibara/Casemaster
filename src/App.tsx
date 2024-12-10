@@ -47,7 +47,8 @@ function App() {
         {/* Add this route */}
         {/* Protected Routes (with Sidebar and Header) */}
         <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/:profileId" element={<DashboardPage />} />
+
           <Route path="/caselogs/FromEmail" element={<FromEmail />} />
           <Route path="/caselogs/ManualInput" element={<ManualInput />} />
           <Route path="/mails/Inbox" element={<InboxMails />} />

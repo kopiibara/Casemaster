@@ -64,7 +64,7 @@ export default function Sidebar() {
     setActiveItem(item);
     switch (item) {
       case "Dashboard":
-        navigate("/dashboard");
+        navigate("/dashboard/Dashboard");
         break;
       case "From Email":
         navigate("/caselogs/FromEmail");

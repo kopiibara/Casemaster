@@ -320,7 +320,8 @@ const ManualInput: React.FC = () => {
             maxWidth="sm"
           >
             <DialogContent>
-              <AddNewCase />
+              {/* Pass handleDialogClose to AddNewCase */}
+              <AddNewCase onClose={handleDialogClose} />
             </DialogContent>
           </Dialog>
         </Box>

@@ -28,8 +28,7 @@ const ProfileSelection = () => {
   };
 
   const goToProfile = (profileId: number) => {
-    console.log(`Selected Profile ID: ${profileId}`);
-    // Navigate to PIN or another page with profileId
+    navigate(`/dashboard/${profileId}`); // Navigate to the dashboard with the profileId
   };
 
   const handleAddNewProfile = () => {
