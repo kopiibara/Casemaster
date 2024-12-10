@@ -19,6 +19,7 @@ import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
 import Avatar from "@mui/material/Avatar";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import IconButton from "@mui/material/IconButton";
+import { useParams } from "react-router-dom";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = React.useState("Dashboard");
@@ -31,6 +32,8 @@ export default function Sidebar() {
   });
 
   const navigate = useNavigate(); // useNavigate hook for routing
+
+  const { profileId } = useParams();
 
   const toggleSection = (
     section: string,

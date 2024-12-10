@@ -12,12 +12,14 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 
 let win;
 const { screen } = require2("electron");
 function createWindow() {
-  const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  const windowWidth = Math.round(screenWidth * 0.7);
+  const windowHeight = Math.round(screenHeight * 0.8);
   win = new BrowserWindow({
-    width: 1400,
-    // Set the width to 1600
-    height: 900,
-    // Set the height to 1000
+    width: windowWidth,
+    // Dynamic width
+    height: windowHeight,
+    // Dynamic height
     center: true,
     // Center the window on the screen
     titleBarStyle: "hidden",
@@ -31,9 +33,14 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs")
     },
-    minWidth: 1400,
-    minHeight: 800,
-    maxWidth: screenWidth
+    minWidth: Math.round(screenWidth * 0.6),
+    // Minimum width: 60% of screen width
+    minHeight: Math.round(screenHeight * 0.7),
+    // Minimum height: 60% of screen height
+    maxWidth: screenWidth,
+    // Maximum width: 100% of screen width
+    maxHeight: screenHeight
+    // Maximum height: 100% of screen height
   });
   win.removeMenu();
   win.webContents.on("did-finish-load", () => {

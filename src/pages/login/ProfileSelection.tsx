@@ -4,12 +4,15 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import ProfileIcon from "./capy.jpg";
 import { Box, Button, IconButton } from "@mui/material";
+import ModalView from "./ModalComponent";
 
 interface Profile {
   id: number;
   name: string;
   role: string;
   image: string;
+  email: string;
+  phone: string;
 }
 
 const ProfileSelection = () => {
@@ -20,19 +23,31 @@ const ProfileSelection = () => {
       name: "Mon Rivamonte",
       role: "Admin",
       image: ProfileIcon,
+      email: "mon.rivamontepalomares@gmail.com",
+      phone: "09123456789",
     },
   ]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
   const handleBack = () => {
     navigate("/");
   };
 
-  const goToProfile = (profileId: number) => {
-    navigate(`/dashboard/${profileId}`); // Navigate to the dashboard with the profileId
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProfile(null);
+  };
+
+  const goToProfile = (profile: Profile) => {
+    console.log(`Selected Profile ID: ${profile.id}`);
+    setSelectedProfile(profile); // Set the clicked profile as the selected profile
+    setIsModalOpen(true);
   };
 
   const handleAddNewProfile = () => {
-    navigate("/add-profile"); // Navigate to the "Add New Profile" page
+    navigate("/add-existing-profile"); // Navigate to the "Add New Profile" page
   };
 
   return (
@@ -114,7 +129,7 @@ const ProfileSelection = () => {
         {profiles.map((profile) => (
           <Box
             key={profile.id}
-            onClick={() => goToProfile(profile.id)}
+            onClick={() => goToProfile(profile)}
             sx={{
               width: "16rem",
               height: "14rem",
@@ -229,6 +244,16 @@ const ProfileSelection = () => {
           Sign out Microsoft Account
         </Button>
       </Box>
+
+      {/* Modal */}
+      {selectedProfile && (
+        <ModalView
+          isModalOpen={isModalOpen}
+          currentView="enter-pin"
+          handleCloseModal={handleCloseModal}
+          selectedProfile={selectedProfile} // Pass selected profile here
+        />
+      )}
     </Box>
   );
 };

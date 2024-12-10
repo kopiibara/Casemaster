@@ -318,6 +318,11 @@ const ManualInput: React.FC = () => {
             onClose={handleDialogClose}
             fullWidth
             maxWidth="sm"
+            PaperProps={{
+              sx: {
+                borderRadius: 3, // Set your desired border radius
+              },
+            }}
           >
             <DialogContent>
               {/* Pass handleDialogClose to AddNewCase */}

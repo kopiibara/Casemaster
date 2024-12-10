@@ -10,7 +10,7 @@ const MainLayout = () => {
   // Dynamic titles based on the route
   const getTitle = () => {
     const titles: Record<string, string> = {
-      "/dashboard": "Dashboard",
+      "/dashboard/Dashboard": "Dashboard",
       "/caselogs/FromEmail": "Case Logs - From Email",
       "/caselogs/ManualInput": "Case Logs - Manual Input",
       "/mails/Inbox": "Inbox Mails",

@@ -18,7 +18,7 @@ import StatusIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
 const AddNewCase = ({ onClose }: { onClose: () => void }) => {
   return (
-    <Box>
+    <Box sx={{ rounded: "0.5rem" }}>
       <Stack className="gap-4 p-6">
         {/* Header */}
         <Stack direction={"row"} className="flex items-center">

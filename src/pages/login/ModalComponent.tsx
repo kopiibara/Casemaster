@@ -6,45 +6,53 @@ import ForgotPIN from "./modals/ForgotPIN";
 import { useNavigate } from "react-router-dom";
 
 interface ModalViewProps {
-    isModalOpen: boolean;
-    currentView: string;
-    handleCloseModal: () => void;
-    selectedProfile: {
-        id: number;
-        name: string;
-        role: string;
-        image: string;
-        email: string;
-        phone: string;
-      };
-  }
+  isModalOpen: boolean;
+  currentView: string;
+  handleCloseModal: () => void;
+  selectedProfile: {
+    id: number;
+    name: string;
+    role: string;
+    image: string;
+    email: string;
+    phone: string;
+  };
+}
 
-const ModalView: React.FC<ModalViewProps> =({ isModalOpen, currentView, handleCloseModal, selectedProfile }) => {
+const ModalView: React.FC<ModalViewProps> = ({
+  isModalOpen,
+  currentView,
+  handleCloseModal,
+  selectedProfile,
+}) => {
   const [pinValues, setPinValues] = useState<string[]>(new Array(4).fill(""));
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
-  const inputRefs = Array.from({ length: 4 }, () => useRef<HTMLInputElement>(null));
+  const inputRefs = Array.from({ length: 4 }, () =>
+    useRef<HTMLInputElement>(null)
+  );
   const navigate = useNavigate();
   const [currentViewState, setCurrentViewState] = useState<string>(currentView);
-  const correctPin = "1234"; 
+  const correctPin = "1234";
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const { value } = e.target;
 
-    if (/^\d$/.test(value) || value === '') {
+    if (/^\d$/.test(value) || value === "") {
       const updatedPinValues = [...pinValues];
       updatedPinValues[index] = value;
       setPinValues(updatedPinValues);
 
-    
       if (value && index < inputRefs.length - 1) {
         inputRefs[index + 1].current?.focus();
       } else if (!value && index > 0) {
         inputRefs[index - 1].current?.focus();
       }
 
-
-      if (updatedPinValues.join('') === correctPin) {
-        navigate('/dashboard');
+      if (updatedPinValues.join("") === correctPin) {
+        navigate("/dashboard/Dashboard");
       } else if (updatedPinValues.every((v) => v)) {
         setErrorIndexes([0, 1, 2, 3]);
       } else {
@@ -62,24 +70,24 @@ const ModalView: React.FC<ModalViewProps> =({ isModalOpen, currentView, handleCl
       case "enter-pin":
         return (
           <EnterPin
-            selectedProfile = {selectedProfile}
+            selectedProfile={selectedProfile}
             pinValues={pinValues}
-            showPin={true} 
+            showPin={true}
             errorIndexes={errorIndexes}
             inputRefs={inputRefs}
             handleInputChange={handleInputChange}
-            handleCloseModal={handleCloseModal} 
-            setCurrentView={setCurrentView} 
+            handleCloseModal={handleCloseModal}
+            setCurrentView={setCurrentView}
           />
         );
-        case "forgot-pin":
-            return (
-                <ForgotPIN
-                selectedProfile = {selectedProfile}
-                handleCloseModal={handleCloseModal}
-                setCurrentView={setCurrentView}
-                />
-            );
+      case "forgot-pin":
+        return (
+          <ForgotPIN
+            selectedProfile={selectedProfile}
+            handleCloseModal={handleCloseModal}
+            setCurrentView={setCurrentView}
+          />
+        );
 
       default:
         return <div>View not found</div>;
@@ -105,7 +113,6 @@ const ModalView: React.FC<ModalViewProps> =({ isModalOpen, currentView, handleCl
           width: 550,
           height: 480,
           outline: "none",
-          
         }}
         onClick={(e) => e.stopPropagation()}
       >

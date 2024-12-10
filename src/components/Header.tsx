@@ -22,7 +22,7 @@ export default function Header({ title }: { title: string }) {
   const formattedDate = today.toLocaleDateString("en-US", options);
 
   return (
-    <Box className="flex-grow pt-6 px-6">
+    <Box className="flex-grow pt-10 px-6 po">
       <AppBar
         position="static"
         elevation={0}
@@ -34,11 +34,7 @@ export default function Header({ title }: { title: string }) {
             <Typography variant="body1" className="text-[#828CA0]">
               {formattedDate}
             </Typography>
-            <Typography
-              variant="h4"
-              component="div"
-              className="text-[#0F2043] "
-            >
+            <Typography variant="h4" component="div" className="text-[#0F2043]">
               {title}
             </Typography>
           </Stack>
@@ -84,7 +80,7 @@ export default function Header({ title }: { title: string }) {
           </Stack>
         </Toolbar>
         <Box className="ml-6">
-          <Divider className="w-[calc(100%-2.5rem)]" />
+          <Divider className="w-[calc(100%-1.5rem)] pt-1" />
         </Box>
       </AppBar>
     </Box>
