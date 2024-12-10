@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Modal, Box, TextField, Button } from "@mui/material";
+import React, { ChangeEvent } from "react";
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const ProfileSetup = () => {
   const [currentModalView, setCurrentModalView] = useState("email");
   const [inputValue, setInputValue] = useState("");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const handleCancel = () => {
     navigate(-1);
@@ -19,7 +21,23 @@ const ProfileSetup = () => {
     navigate("/pin-setup");
   };
 
-  const handleUploadImage = () => {};
+  const handleUploadImage = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUploadedImage(imageUrl);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUploadedImage(null);
+  };
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -101,6 +119,7 @@ const ProfileSetup = () => {
                 Upload Image
               </Button>
               <Button
+                onClick={handleRemoveImage}
                 variant="outlined"
                 sx={{
                   color: "#E13D3D",
@@ -128,6 +147,15 @@ const ProfileSetup = () => {
               </p>
             </Box>
           </Box>
+
+        {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+
         </Box>
 
         <Box className="mb-8">
