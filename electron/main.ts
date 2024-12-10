@@ -31,15 +31,10 @@ let win: BrowserWindow | null;
 
 const { screen } = require("electron");
 function createWindow() {
-  const { width: screenWidth, height: screenHeight } =
-    screen.getPrimaryDisplay().workAreaSize;
-
-  const windowWidth = Math.round(screenWidth * 0.7); // 80% of screen width
-  const windowHeight = Math.round(screenHeight * 0.8); // 80% of screen height
-
+  const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
   win = new BrowserWindow({
-    width: windowWidth, // Dynamic width
-    height: windowHeight, // Dynamic height
+    width: 1400, // Set the width to 1600
+    height: 900, // Set the height to 1000
     center: true, // Center the window on the screen
 
     titleBarStyle: "hidden", // Hide the title bar
@@ -54,10 +49,9 @@ function createWindow() {
       preload: path.join(__dirname, "preload.mjs"),
     },
 
-    minWidth: Math.round(screenWidth * 0.6), // Minimum width: 60% of screen width
-    minHeight: Math.round(screenHeight * 0.7), // Minimum height: 60% of screen height
-    maxWidth: screenWidth, // Maximum width: 100% of screen width
-    maxHeight: screenHeight, // Maximum height: 100% of screen height
+    minWidth: 1400,
+    minHeight: 800,
+    maxWidth: screenWidth,
   });
 
   win.removeMenu(); // Remove the menu
