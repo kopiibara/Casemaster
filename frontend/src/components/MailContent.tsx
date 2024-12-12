@@ -1,231 +1,180 @@
-import React, { useState } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Typography,
-  Tooltip,
-  IconButton,
-  TextField,
-} from "@mui/material";
-import { Reply, AttachFile, MailOutline, Cancel } from "@mui/icons-material";
+import { Box, Typography, Divider } from "@mui/material";
+import { EmailPreview } from "./EmailPreview";
+import EmailView from "./MailContent";
+import { useState } from "react";
 
-interface EmailViewProps {
+// Define the structure for emails
+interface Email {
+  id: number;
   sender: string;
   email: string;
-  timestamp: string;
   subject: string;
+  time: string;
+  preview: string;
   content: string;
+  date: string; // Add date for grouping
   attachment?: {
     name: string;
     size: string;
   };
-  onReply: (replyContent: string) => void; // Add onReply prop
+  replies?: Reply[]; // Add replies field
 }
 
-const EmailView: React.FC<EmailViewProps> = ({
-  sender,
-  email,
-  timestamp,
-  subject,
-  content,
-  attachment,
-  onReply,
-}) => {
-  const [isReplying, setIsReplying] = useState(false);
-  const [replyContent, setReplyContent] = useState<string>("");
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
+}
 
-  const handleSendReply = () => {
-    onReply(replyContent); // Call the parent handler
-    setIsReplying(false);
-    setReplyContent(""); // Reset reply editor
+const MailContainer = () => {
+  const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+
+  // Function to handle reply submission
+  const handleReply = (replyContent: string) => {
+    if (selectedEmail) {
+      const newReply: Reply = {
+        id: Date.now(),
+        content: replyContent,
+        time: new Date().toLocaleTimeString(),
+      };
+      const updatedEmail = {
+        ...selectedEmail,
+        replies: [...(selectedEmail.replies || []), newReply],
+      };
+      setSelectedEmail(updatedEmail);
+      // Update the emails array if needed
+    }
   };
 
+  // Mock Email Data
+  const emails: Email[] = [
+    {
+      id: 1,
+      sender: "Alice Cooper",
+      email: "alice.cooper@example.com",
+      subject: "Meeting Update",
+      time: "10:30 AM",
+      date: "Today",
+      preview: "Hi team, please find the updated meeting agenda...",
+      content: "Detailed meeting agenda goes here.",
+    },
+    {
+      id: 2,
+      sender: "Bob Marley",
+      email: "bob.marley@example.com",
+      subject: "Invoice Attached",
+      time: "9:00 AM",
+      date: "Today",
+      preview: "Dear Customer, please find the attached invoice...",
+      content: "Invoice details and summary.",
+      attachment: { name: "invoice.pdf", size: "300KB" },
+    },
+    {
+      id: 3,
+      sender: "Charlie Brown",
+      email: "charlie.brown@example.com",
+      subject: "Project Deadline",
+      time: "11:00 AM",
+      date: "Yesterday",
+      preview: "Reminder: The project deadline is approaching quickly.",
+      content: "Project deadline details and next steps.",
+    },
+  ];
+
+  // Group emails by date
+  const groupedEmails = emails.reduce((groups, email) => {
+    if (!groups[email.date]) groups[email.date] = [];
+    groups[email.date].push(email);
+    return groups;
+  }, {} as { [key: string]: Email[] });
 
   return (
-    <Card
-      sx={{
-        maxWidth: "100%",
-        p: 3,
-        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
-        borderRadius: 4,
-        backgroundColor: "#fefefe",
-      }}
-    >
-      {/* Email Header */}
-      <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: "primary.main" }}>
-            {sender
-              .split(" ")
-              .map((name) => name[0])
-              .join("")}
-          </Avatar>
-        }
-        title={
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {sender}
-          </Typography>
-        }
-        subheader={
-          <Tooltip title={`Email: ${email}`}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                cursor: "pointer",
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              <MailOutline fontSize="small" sx={{ mr: 0.5 }} />
-              {email}
+    <Box display="flex" height="77vh" overflow="hidden">
+      {/* Email List Section */}
+      <Box
+        sx={{
+          width: "35%",
+          overflowY: "auto",
+          borderRight: "1px solid #ddd",
+          bgcolor: "#f7f7f7",
+          "&::-webkit-scrollbar": {
+            width: 6,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#b0b0b0",
+            borderRadius: 8,
+            "&:hover": {
+              backgroundColor: "#909090",
+            },
+          },
+        }}
+      >
+        {Object.keys(groupedEmails).map((date) => (
+          <Box key={date} sx={{ padding: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+              {date}
             </Typography>
-          </Tooltip>
-        }
-        action={
-          <Typography variant="caption" color="text.secondary">
-            {timestamp}
-          </Typography>
-        }
-      />
+            <Divider />
+            {groupedEmails[date].map((email) => (
+              <EmailPreview
+                key={email.id}
+                sender={email.sender}
+                subject={email.subject}
+                time={email.time}
+                preview={email.preview}
+                onClick={() => setSelectedEmail(email)}
+                selected={selectedEmail?.id === email.id}
+              />
+            ))}
+          </Box>
+        ))}
+      </Box>
 
-      <Divider sx={{ my: 2 }} />
-
-      {/* Email Content */}
-      <CardContent>
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{
-            fontWeight: 600,
-            color: "primary.main",
-          }}
-        >
-          {subject || "No Subject"}
-        </Typography>
-
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          paragraph
-          sx={{ lineHeight: 1.8 }}
-        >
-          {content
-            ? content.split("\n\n").map((paragraph, index) => (
-                <Box key={index} mb={2}>
-                  {paragraph}
-                </Box>
-              ))
-            : "No content available for this email."}
-        </Typography>
-
-        {/* Attachment Section */}
-        {attachment && (
+      {/* Email View Section */}
+      <Box
+        sx={{
+          width: "65%",
+          overflowY: "auto",
+          padding: 3,
+          bgcolor: "#fff",
+          "&::-webkit-scrollbar": {
+            width: 6,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#b0b0b0",
+            borderRadius: 8,
+            "&:hover": {
+              backgroundColor: "#909090",
+            },
+          },
+        }}
+      >
+        {selectedEmail ? (
+          <EmailView
+            sender={selectedEmail.sender}
+            email={selectedEmail.email}
+            timestamp={selectedEmail.time}
+            subject={selectedEmail.subject}
+            content={selectedEmail.content}
+            attachment={selectedEmail.attachment}
+            replies={selectedEmail.replies} // Pass replies to EmailView
+            onReply={handleReply} // Pass the reply handler
+          />
+        ) : (
           <Box
-            mt={3}
-            p={2}
-            bgcolor="#f7f7f7"
-            borderRadius={2}
             display="flex"
+            justifyContent="center"
             alignItems="center"
-            justifyContent="space-between"
+            height="100%"
           >
-            <Box display="flex" alignItems="center">
-              <AttachFile sx={{ mr: 2, color: "primary.main" }} />
-              <Box>
-                <Typography
-                  variant="body2"
-                  fontWeight={500}
-                  sx={{ wordBreak: "break-word" }}
-                >
-                  {attachment.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {attachment.size}
-                </Typography>
-              </Box>
-            </Box>
-            <Tooltip title="Download Attachment">
-              <IconButton color="primary">
-                <AttachFile />
-              </IconButton>
-            </Tooltip>
+            <Typography variant="h6" color="text.secondary">
+              Select an email to view its details.
+            </Typography>
           </Box>
         )}
-      </CardContent>
-
-      <Divider sx={{ my: 2 }} />
-
-      {/* Reply Section */}
-      {!isReplying && (
-        <Box display="flex" justifyContent="flex-end">
-          <Button
-            variant="contained"
-            startIcon={<Reply />}
-            sx={{
-              textTransform: "none",
-              bgcolor: "primary.main",
-              "&:hover": { bgcolor: "primary.dark" },
-            }}
-            onClick={() => setIsReplying(true)}
-          >
-            Reply
-          </Button>
-        </Box>
-      )}
-
-      {isReplying && (
-        <Box mt={3}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Replying to <strong>{email}</strong>
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            minRows={3}
-            maxRows={5}
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            placeholder="Write your reply here..."
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                bgcolor: "#f9f9f9",
-                borderRadius: 2,
-              },
-            }}
-          />
-          <Box display="flex" justifyContent="space-between">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSendReply}
-              disabled={!replyContent.trim()}
-            >
-              Send
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<Cancel />}
-              onClick={() => {
-                setIsReplying(false);
-                setReplyContent(""); // Reset reply editor
-              }}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      )}
-    </Card>
+      </Box>
+    </Box>
   );
 };
 
-export default EmailView;
+export default MailContainer;
