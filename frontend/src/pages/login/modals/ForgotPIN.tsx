@@ -8,8 +8,17 @@ import {
   TextField,
   Box,
 } from "@mui/material";
-import Profile from "../Profiles";
 import Icon from "../icon.png";
+
+interface Profile {
+  id: number;
+  name: string;
+  email: string;
+  phone: number;
+  role: string;
+  image: Blob;
+  pin: string;
+}
 
 interface ForgotPasswordProps {
   selectedProfile: Profile;

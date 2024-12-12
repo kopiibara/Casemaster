@@ -11,13 +11,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Set up multer storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir); // Specify the folder where files should be stored
+    cb(null, uploadsDir); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Rename the file to avoid conflicts
+    cb(null, Date.now() + '-' + file.originalname); 
   },
 });
 

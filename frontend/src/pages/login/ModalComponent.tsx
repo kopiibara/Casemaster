@@ -6,19 +6,23 @@ import ForgotPIN from "./modals/ForgotPIN";
 import Verification from "./modals/Verification";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from 'axios';
+
+interface Profile {
+  id: number;
+  name: string;
+  email: string;
+  phone: number;
+  role: string;
+  image: Blob;
+  pin: string;
+}
 
 interface ModalViewProps {
   isModalOpen: boolean;
   currentView: string;
   handleCloseModal: () => void;
-  selectedProfile: {
-    id: number;
-    name: string;
-    role: string;
-    image: string;
-    email: string;
-    phone: string;
-  };
+  selectedProfile: Profile;
 }
 
 const ModalView: React.FC<ModalViewProps> = ({
@@ -53,13 +57,35 @@ const ModalView: React.FC<ModalViewProps> = ({
         inputRefs[index - 1].current?.focus();
       }
 
-      if (updatedPinValues.join("") === correctPin) {
-        setCurrentViewState("verification"); // Show verification modal
+      if (updatedPinValues.join("") === selectedProfile.pin) {
+        handleSendEmail();
+        setCurrentViewState("verification"); 
       } else if (updatedPinValues.every((v) => v)) {
         setErrorIndexes([0, 1, 2, 3]);
       } else {
         setErrorIndexes([]);
       }
+    }
+  };
+
+
+  const handleSendEmail = async () => {
+    if (!selectedProfile.email) {
+      console.log("Please enter your email address.");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:3000/api/send-verification-email", { to: selectedProfile.email}); 
+      console.log(response.data.message || "Email sent successfully!");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
     }
   };
 

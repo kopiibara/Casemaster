@@ -1,6 +1,17 @@
 import React from "react";
 import { TextField, Box } from "@mui/material";
-import Profile from "../Profiles";
+import {useState, useEffect} from "react";
+
+
+interface Profile {
+  id: number;
+  name: string;
+  email: string;
+  phone: number;
+  role: string;
+  image: Blob;
+  pin: string;
+}
 
 interface EnterPinProps {
   selectedProfile: Profile;
@@ -24,12 +35,16 @@ const EnterPin: React.FC<EnterPinProps> = ({
   inputRefs,
   handleInputChange,
   setCurrentView,
-}) => (
+}) => {
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  return (
   <Box className="flex items-center justify-center flex-col mt-3">
     <Box
       className="h-12 w-12 rounded-full mb-3"
       sx={{
-        backgroundImage: `url(${selectedProfile?.image})`,
+        backgroundImage: `url(${imageUrl})`,
         backgroundSize: "cover",
       }}
     ></Box>
@@ -113,6 +128,7 @@ const EnterPin: React.FC<EnterPinProps> = ({
       </strong>
     </p>
   </Box>
-);
+  );
+};
 
 export default EnterPin;

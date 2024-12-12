@@ -25,7 +25,7 @@ const PINSetUp = () => {
   );
   const [setPin, setSetPin] = useState<string>("");
   const { profileData } = useAppContext(); 
-  const { fullName, email, phoneNo, image } = profileData;
+  const { fullName, email, phoneNo, image, } = profileData;
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); // State to store the object URL for the image
 
   useEffect(() => {
@@ -105,11 +105,11 @@ const PINSetUp = () => {
       console.log(pinValues.join(""));
       try {
      
-        const response = await axios.post("http://localhost:5000/api/save-profile", formData);
+        const response = await axios.post("http://localhost:3000/api/save-profile", formData);
         console.log(response.data);
         
     
-        navigate("/profile-selection");
+        navigate("/profiles");
       } catch (error) {
         console.error("Error:", error);
       }

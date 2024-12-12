@@ -2,14 +2,13 @@ import express, { Request, Response } from 'express';
 import { sendVerificationEmail } from '../services/emailService';
 
 const router = express.Router();
-const verificationCodes: Record<string, string> = {}; // In-memory storage
+const verificationCodes: Record<string, string> = {}; 
 
-// Function to generate a 6-digit verification code
+
 const generateVerificationCode = (): string => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // Ensures 6 digits
+  return Math.floor(100000 + Math.random() * 900000).toString(); 
 };
 
-// Send verification email route
 router.post('/send-verification-email', async (req: Request, res: Response): Promise<void> => {
   const { to } = req.body;
 
@@ -19,7 +18,7 @@ router.post('/send-verification-email', async (req: Request, res: Response): Pro
   }
 
   const code = generateVerificationCode();
-  verificationCodes[to] = code; // Store the code in memory
+  verificationCodes[to] = code; 
 
   try {
     await sendVerificationEmail(to, code);
@@ -29,7 +28,7 @@ router.post('/send-verification-email', async (req: Request, res: Response): Pro
   }
 });
 
-// Validate verification code route
+
 router.post('/validate-verification-code', (req: Request, res: Response): void => {
   const { to, code } = req.body;
 
@@ -39,7 +38,7 @@ router.post('/validate-verification-code', (req: Request, res: Response): void =
   }
 
   if (verificationCodes[to] && verificationCodes[to] === code) {
-    delete verificationCodes[to]; // Clear the code after successful validation
+    delete verificationCodes[to];
     res.status(200).json({ message: 'Verification successful' });
   } else {
     res.status(400).json({ error: 'Invalid verification code' });
