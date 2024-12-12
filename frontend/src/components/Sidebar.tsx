@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -20,14 +20,8 @@ import Avatar from "@mui/material/Avatar";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import IconButton from "@mui/material/IconButton";
 import { useParams } from "react-router-dom";
-import ModalComponent from "../pages/settings/ModalComponent";
 
 export default function Sidebar() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
-
   const [activeItem, setActiveItem] = React.useState("Dashboard");
   const [openSections, setOpenSections] = React.useState<
     Record<string, boolean>
@@ -268,20 +262,23 @@ export default function Sidebar() {
 
       <Box className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
         <Avatar src="/broken-image.jpg" variant="rounded" />
-        <Box>
-          <Typography sx={{ color: "#f6f9ff" }} variant="subtitle1">
-            Kopibara
-          </Typography>
-          <Typography sx={{ color: "#f6f9ff" }} variant="subtitle2">
-            Branch Clerk
-          </Typography>
-        </Box>
-        <span className="ml-auto">
-          <IconButton onClick={handleOpenModal}>
-            <SettingsOutlinedIcon className="text-white" />
-          </IconButton>
-        </span>
-        <ModalComponent open={isModalOpen} onClose={handleCloseModal} />
+        {true && (
+          <Box className="">
+            <Typography sx={{ color: "#f6f9ff" }} variant="subtitle1">
+              Kopibara
+            </Typography>
+            <Typography sx={{ color: "#f6f9ff" }} variant="subtitle2">
+              Branch Clerk
+            </Typography>
+          </Box>
+        )}
+        {true && (
+          <span className="ml-auto">
+            <IconButton>
+              <SettingsOutlinedIcon className="text-white" />
+            </IconButton>
+          </span>
+        )}
       </Box>
     </Stack>
   );

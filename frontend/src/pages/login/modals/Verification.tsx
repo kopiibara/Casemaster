@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 interface VerificationProps {
   isOpen: boolean;
   onConfirm: () => void;
   onClose: () => void;
   email: string;
-  phone: number;
+  phone: string;
   method: "email" | "phone";
   handleCloseModal: () => void;
 }
@@ -22,33 +20,9 @@ const Verification: React.FC<VerificationProps> = ({
 }) => {
   const [verificationMethod, setVerificationMethod] = useState(method);
   const [code, setCode] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const navigate = useNavigate();
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
-  };
-
-  const handleVerifyCode = async () => {
-    try {
-      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
-        to: email,
-        code: verificationCode,
-      });
-      console.log(response.data.message || "Email verified successfully!");
-      handleCloseModal();
-      navigate("/dashboard"); 
-      
-    } catch (err: any) {
-      if (err.response) {
-        console.log(err.response.data.error || "Invalid verification code.");
-      } else if (err.request) {
-        console.log("No response from the server. Please try again.");
-      } else {
-        console.log("Error: " + err.message);
-      }
-    } finally {
-    }
   };
 
   const verificationText =
@@ -168,7 +142,7 @@ const Verification: React.FC<VerificationProps> = ({
                 boxShadow: "none",
               },
             }}
-            onClick={handleVerifyCode}
+            onClick={onConfirm}
           >
             Confirm
           </Button>

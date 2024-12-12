@@ -7,7 +7,6 @@ interface ProfileData {
   email: string;
   phoneNo: string;
   image: Blob | null;  
-  role: string;
 }
 
 // Define the context type, which includes the profile data and setter function
@@ -38,7 +37,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     email: "",
     phoneNo: "",
     image: null,  // Initialize with null as a default
-    role:"",
   });
 
   return (

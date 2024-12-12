@@ -1,27 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
+import ProfileIcon from "./capy.jpg";
 import Button from "@mui/material/Button";
 import { Box } from "@mui/material";
-import { useAppContext } from "../../AppContext";
 
+interface Profile {
+  id: number;
+  name: string;
+  role: string;
+  image: string;
+  email: string;
+  phone: string;
+}
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { profileData } = useAppContext(); 
-   const { fullName, email, phoneNo, image, role } = profileData;
-   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
-
- useEffect(() => {
-    if (image) {
-      const objectURL = URL.createObjectURL(image);
-      setImageUrl(objectURL);
-      return () => {
-        URL.revokeObjectURL(objectURL);
-      };
-    }
-  }, [image]);
-
+  const [profiles] = useState<Profile[]>([
+    {
+      id: 1,
+      name: "Mon Rivamonte",
+      role: "Admin",
+      image: ProfileIcon,
+      email: "mon.rivamonte@gmail.com",
+      phone: "09123456789",
+    },
+  ]);
 
   const handleBack = () => {
     navigate("/");
@@ -116,7 +120,7 @@ const Profile = () => {
       >
         <Box
           sx={{
-            backgroundImage: `url(${imageUrl})`,
+            backgroundImage: `url(${profiles[0].image})`,
             width: "70px",
             height: "70px",
             backgroundSize: "cover",
@@ -133,7 +137,7 @@ const Profile = () => {
             mb: "0.5rem",
           }}
         >
-          {fullName}
+          {profiles[0].name}
         </Box>
         <Box
           component="p"
@@ -143,7 +147,7 @@ const Profile = () => {
             opacity: 0.6,
           }}
         >
-          {role}
+          {profiles[0].role}
         </Box>
       </Box>
 

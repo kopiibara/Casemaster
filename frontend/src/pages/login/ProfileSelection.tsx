@@ -1,54 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import ProfileIcon from "./capy.jpg";
 import { Box, Button, IconButton } from "@mui/material";
 import ModalView from "./ModalComponent";
-import axios from "axios";
 
 interface Profile {
   id: number;
   name: string;
-  email: string;
-  phone: number;
   role: string;
-  image: Blob;
-  pin: string;
+  image: string;
+  email: string;
+  phone: string;
 }
 
 const ProfileSelection = () => {
   const navigate = useNavigate();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [imageUrls, setImageUrls] = useState<{ [key: number]: string }>({});
+  const [profiles] = useState<Profile[]>([
+    {
+      id: 1,
+      name: "Mon Rivamonte",
+      role: "Admin",
+      image: ProfileIcon,
+      email: "mon@gmail.com",
+      phone: "09123456789",
+    },
+  ]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
-
-  useEffect(() => {
-      const fetchProfiles = async () => {
-       
-        try {
-          const response = await axios.get("http://localhost:3000/api/get-profiles"); 
-          setProfiles(response.data);
-
-          const urls: { [key: number]: string } = {};
-        response.data.forEach((profile: Profile) => {
-          if (profile.image) {
-            const url = URL.createObjectURL(profile.image);
-            urls[profile.id] = url;
-          }
-        });
-        setImageUrls(urls);
-        } catch (err: any) {
-          console.log("Failed to fetch profiles. Please try again.");
-          console.error(err.message);
-        } finally {
-          console.log(false);
-        }
-      };
-  
-      fetchProfiles();
-    }, []);
 
   const handleBack = () => {
     navigate("/");
@@ -61,12 +42,12 @@ const ProfileSelection = () => {
 
   const goToProfile = (profile: Profile) => {
     console.log(`Selected Profile ID: ${profile.id}`);
-    setSelectedProfile(profile);
+    setSelectedProfile(profile); // Set the clicked profile as the selected profile
     setIsModalOpen(true);
   };
 
   const handleAddNewProfile = () => {
-    navigate("/add-existing-profile"); 
+    navigate("/add-existing-profile"); // Navigate to the "Add New Profile" page
   };
 
   return (
@@ -145,10 +126,10 @@ const ProfileSelection = () => {
         }}
       >
         {/* Existing Profiles */}
-        {profiles.map((profiles) => (
+        {profiles.map((profile) => (
           <Box
-            key={profiles.id}
-            onClick={() => goToProfile(profiles)}
+            key={profile.id}
+            onClick={() => goToProfile(profile)}
             sx={{
               width: "16rem",
               height: "14rem",
@@ -168,7 +149,7 @@ const ProfileSelection = () => {
           >
             <Box
               sx={{
-                backgroundImage: `url(${ProfileIcon})`,
+                backgroundImage: `url(${profile.image})`,
                 width: "70px",
                 height: "70px",
                 backgroundSize: "cover",
@@ -185,7 +166,7 @@ const ProfileSelection = () => {
                 mb: "0.5rem",
               }}
             >
-              {profiles.name}
+              {profile.name}
             </Box>
             <Box
               component="p"
@@ -195,7 +176,7 @@ const ProfileSelection = () => {
                 opacity: 0.6,
               }}
             >
-              {profiles.role}
+              {profile.role}
             </Box>
           </Box>
         ))}
