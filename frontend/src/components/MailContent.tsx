@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -8,8 +8,11 @@ import {
   CardHeader,
   Divider,
   Typography,
+  Tooltip,
+  IconButton,
+  TextField,
 } from "@mui/material";
-import { Reply, AttachFile } from "@mui/icons-material";
+import { Reply, AttachFile, MailOutline, Cancel } from "@mui/icons-material";
 
 interface EmailViewProps {
   sender: string;
@@ -21,42 +24,72 @@ interface EmailViewProps {
     name: string;
     size: string;
   };
+  onReply: (replyContent: string) => void; // Add onReply prop
 }
 
-export default function EmailView({
-  sender = "Kendo Jenner",
-  email = "kendo_counsel@gmail.com",
-  timestamp = "October 17, 2024 10:00 PM",
-  subject = "CHI MING TSOI, petitioner, vs. COURT OF APPEALS, GINA LAO TSOI",
-  content = `Good day, Attorney.
+const EmailView: React.FC<EmailViewProps> = ({
+  sender,
+  email,
+  timestamp,
+  subject,
+  content,
+  attachment,
+  onReply,
+}) => {
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyContent, setReplyContent] = useState<string>("");
 
-It appears that there is absence of empathy between petitioner and private respondent. That is — a shared feeling which between husband and wife must be experienced not only by having spontaneous sexual intimacy but a deep sense of spiritual communion. Marital union is a two-way process. An expressive interest in each other's feelings at a time it is needed by the other can go a long way in deepening the marital relationship. Marriage is definitely not for children but for two consenting adults who view the relationship with love, amor dignit amorem, respect, sacrifice and a continuing commitment to compromise, conscious of its value as a sublime social institution.
+  const handleSendReply = () => {
+    onReply(replyContent); // Call the parent handler
+    setIsReplying(false);
+    setReplyContent(""); // Reset reply editor
+  };
 
-IN VIEW OF THE FOREGOING PREMISES, the assailed decision of the Court of Appeals dated November 29, 1994 is hereby AFFIRMED in all respects and the petition is hereby DENIED for lack of merit.`,
-  attachment = {
-    name: "101424_motion_recon.pdf",
-    size: "198KB",
-  },
-}: EmailViewProps) {
+
   return (
-    <Card sx={{ maxWidth: 800, p: 3, boxShadow: "none" }}>
+    <Card
+      sx={{
+        maxWidth: "100%",
+        p: 3,
+        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
+        borderRadius: 4,
+        backgroundColor: "#fefefe",
+      }}
+    >
+      {/* Email Header */}
       <CardHeader
         avatar={
-          <Avatar>
+          <Avatar sx={{ bgcolor: "primary.main" }}>
             {sender
               .split(" ")
-              .map((n) => n[0])
+              .map((name) => name[0])
               .join("")}
           </Avatar>
         }
-        title={<Typography variant="h6">{sender}</Typography>}
-        subheader={
-          <Typography variant="body2" color="text.secondary">
-            {email}
+        title={
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {sender}
           </Typography>
         }
+        subheader={
+          <Tooltip title={`Email: ${email}`}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+                "&:hover": { textDecoration: "underline" },
+              }}
+            >
+              <MailOutline fontSize="small" sx={{ mr: 0.5 }} />
+              {email}
+            </Typography>
+          </Tooltip>
+        }
         action={
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="caption" color="text.secondary">
             {timestamp}
           </Typography>
         }
@@ -64,48 +97,135 @@ IN VIEW OF THE FOREGOING PREMISES, the assailed decision of the Court of Appeals
 
       <Divider sx={{ my: 2 }} />
 
+      {/* Email Content */}
       <CardContent>
-        <Typography variant="h5" gutterBottom>
-          {subject}
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+            color: "primary.main",
+          }}
+        >
+          {subject || "No Subject"}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" paragraph>
-          {content.split("\n\n").map((paragraph, index) => (
-            <Box key={index} mb={2}>
-              {paragraph}
-            </Box>
-          ))}
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          paragraph
+          sx={{ lineHeight: 1.8 }}
+        >
+          {content
+            ? content.split("\n\n").map((paragraph, index) => (
+                <Box key={index} mb={2}>
+                  {paragraph}
+                </Box>
+              ))
+            : "No content available for this email."}
         </Typography>
 
+        {/* Attachment Section */}
         {attachment && (
           <Box
             mt={3}
             p={2}
-            bgcolor="grey.100"
+            bgcolor="#f7f7f7"
             borderRadius={2}
             display="flex"
             alignItems="center"
+            justifyContent="space-between"
           >
-            <AttachFile sx={{ mr: 2 }} color="error" />
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
-                {attachment.name}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {attachment.size}
-              </Typography>
+            <Box display="flex" alignItems="center">
+              <AttachFile sx={{ mr: 2, color: "primary.main" }} />
+              <Box>
+                <Typography
+                  variant="body2"
+                  fontWeight={500}
+                  sx={{ wordBreak: "break-word" }}
+                >
+                  {attachment.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {attachment.size}
+                </Typography>
+              </Box>
             </Box>
+            <Tooltip title="Download Attachment">
+              <IconButton color="primary">
+                <AttachFile />
+              </IconButton>
+            </Tooltip>
           </Box>
         )}
       </CardContent>
 
       <Divider sx={{ my: 2 }} />
 
-      <Box display="flex" justifyContent="flex-end">
-        <Button variant="outlined" startIcon={<Reply />}>
-          Reply
-        </Button>
-      </Box>
+      {/* Reply Section */}
+      {!isReplying && (
+        <Box display="flex" justifyContent="flex-end">
+          <Button
+            variant="contained"
+            startIcon={<Reply />}
+            sx={{
+              textTransform: "none",
+              bgcolor: "primary.main",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+            onClick={() => setIsReplying(true)}
+          >
+            Reply
+          </Button>
+        </Box>
+      )}
+
+      {isReplying && (
+        <Box mt={3}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Replying to <strong>{email}</strong>
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            maxRows={5}
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            placeholder="Write your reply here..."
+            sx={{
+              mb: 2,
+              "& .MuiOutlinedInput-root": {
+                bgcolor: "#f9f9f9",
+                borderRadius: 2,
+              },
+            }}
+          />
+          <Box display="flex" justifyContent="space-between">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSendReply}
+              disabled={!replyContent.trim()}
+            >
+              Send
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<Cancel />}
+              onClick={() => {
+                setIsReplying(false);
+                setReplyContent(""); // Reset reply editor
+              }}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Box>
+      )}
     </Card>
   );
-}
+};
+
+export default EmailView;
