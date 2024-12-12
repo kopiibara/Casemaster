@@ -3,22 +3,38 @@ import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Modal, Box, TextField, Button } from "@mui/material";
 import React, { ChangeEvent } from "react";
+import { useAppContext } from "../../AppContext";
+
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState(false);
   const [currentModalView, setCurrentModalView] = useState("email");
-  const [inputValue, setInputValue] = useState("");
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [uploadedImage, setUploadedImage] = useState<Blob | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [fullName, setFullName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phoneNo, setPhoneNo] = useState<string>("");
+  const { setProfileData } = useAppContext();
+  
 
   const handleCancel = () => {
     navigate(-1);
   };
 
   const handleNext = () => {
-    navigate("/pin-setup");
+    if (fullName && email && phoneNo) {
+      // Pass image as-is, whether it’s null or a Blob
+      setProfileData({
+        fullName,
+        email,
+        phoneNo,
+        image: uploadedImage,  // Pass the uploadedImage directly (could be null or Blob)
+      });
+      navigate("/pin-setup");  // Navigate to next step
+    }
   };
 
   const handleUploadImage = () => {
@@ -30,10 +46,12 @@ const ProfileSetup = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUploadedImage(imageUrl);
+      setUploadedImage(file); 
     }
   };
+
+ 
+  const imageUrl = uploadedImage ? URL.createObjectURL(uploadedImage) : null;
 
   const handleRemoveImage = () => {
     setUploadedImage(null);
@@ -46,7 +64,7 @@ const ProfileSetup = () => {
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setInputValue("");
+    setVerificationCode("");
   };
 
   return (
@@ -87,7 +105,7 @@ const ProfileSetup = () => {
               }}
             >
               <img
-                src={uploadedImage || "https://via.placeholder.com/128"}
+                src={imageUrl || "https://via.placeholder.com/128"}
                 alt="Profile Preview"
                 style={{
                   width: "100%",
@@ -179,7 +197,8 @@ const ProfileSetup = () => {
                   id="fullName"
                   name="fullname"
                   className="bg-transparent border border-[rgba(15,32,67,0.3)] text-xs rounded-md h-8 pl-2 focus:outline-none focus:border-[#517FD3] flex-1 w-[80%]"
-                />
+                  onChange={(e) => setFullName(e.target.value)}
+               />
               </Box>
               <Box className="flex items-center">
                 <label htmlFor="email" className="w-32 text-sm">
@@ -190,7 +209,8 @@ const ProfileSetup = () => {
                   id="email"
                   name="email"
                   className="bg-transparent border border-[rgba(15,32,67,0.3)] text-xs rounded-md h-8 pl-2 focus:outline-none focus:border-[#517FD3] flex-1 w-[80%]"
-                />
+                  onChange={(e) => setEmail(e.target.value)}
+               />
               </Box>
               <Box className="flex items-center">
                 <label htmlFor="phoneNo" className="w-32 text-sm">
@@ -202,6 +222,7 @@ const ProfileSetup = () => {
                   name="phoneNo"
                   placeholder="+63 |"
                   className="bg-transparent border border-[rgba(15,32,67,0.3)] rounded-md h-8 pl-2 text-xs focus:outline-none focus:border-[#517FD3] flex-1 w-[80%]"
+                  onChange={(e) => setPhoneNo(e.target.value)}
                 />
               </Box>
             </Box>
@@ -232,7 +253,7 @@ const ProfileSetup = () => {
 
           {/* Next Button */}
           <Button
-            onClick={handleOpenModal}
+            onClick={handleNext}
             variant="contained"
             sx={{
               backgroundColor: "#517FD3",
@@ -311,8 +332,8 @@ const ProfileSetup = () => {
               <TextField
                 label="Enter Code"
                 variant="outlined"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
                 className="w-[70%]"
               />
               <Box className="w-[70%] mt-4">
@@ -367,8 +388,8 @@ const ProfileSetup = () => {
               <TextField
                 label="Enter Code"
                 variant="outlined"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
                 className="w-[70%]"
               />
               <Box className="w-[70%] mt-4">

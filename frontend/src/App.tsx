@@ -23,12 +23,17 @@ import AddExistingProfile from "./pages/login/ExistingProfile/AddExistingProfile
 import ConfirmExistingProfile from "./pages/login/ExistingProfile/ConfirmExistingProfile";
 import ProfileSelection from "./pages/login/ProfileSelection";
 import ForgotPINExisting from "./pages/login/ExistingProfile/ForgotPinExistingProfile";
+import { AppProvider } from "./AppContext";
+
 
 function App() {
   return (
+    <AppProvider>
     <Router>
       <Routes>
+     
         {/* Public Routes */}
+        
         <Route path="/" element={<SignIn />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/pin-setup" element={<PINSetup />} />
@@ -69,9 +74,12 @@ function App() {
           <Route path="/attachments/Starred" element={<StarredAttachments />} />
           <Route path="/attachments/Archive" element={<ArchiveAttachments />} />
           <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
+          
         </Route>
+        
       </Routes>
     </Router>
+    </AppProvider>
   );
 }
 

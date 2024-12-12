@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-import { saveProfile } from '../services/profileService';
+import { saveProfile, getProfiles } from '../services/profileService';
 
 const router = express.Router();
 
@@ -24,11 +24,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to handle profile setup with file upload
-router.post('/save-profile', upload.single('profileImage'), async (req, res, next) => {
+router.post('/save-profile', upload.single('image'), async (req, res, next) => {
   try {
-    const { name, role, email, phone } = req.body;
+    const { name, role, email, phone, pin } = req.body;
 
-    if (!name || !role || !email || !phone) {
+    if (!name || !role || !email || !phone || !pin) {
       res.status(400).json({ error: 'All fields (name, role, email, phone) are required.' });
       return;
     }
@@ -47,11 +47,22 @@ router.post('/save-profile', upload.single('profileImage'), async (req, res, nex
       email: email.trim(),
       phone: parseInt(phone, 10), 
       image,
+      pin,
     };
 
  
     await saveProfile(profileData); 
     res.status(200).json({ message: 'Profile saved successfully' });
+  } catch (error) {
+    next(error); 
+  }
+});
+
+
+router.get('/get-profiles', async (req, res, next) => {
+  try {
+    const profiles = await getProfiles();  // Get profiles from the database
+    res.status(200).json(profiles);  // Return profiles as JSON response
   } catch (error) {
     next(error); 
   }
