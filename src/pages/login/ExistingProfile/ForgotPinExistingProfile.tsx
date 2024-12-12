@@ -3,42 +3,38 @@ import {
   Radio,
   RadioGroup,
   FormControlLabel,
-  FormLabel,
   Button,
   TextField,
   Box,
+  FormLabel,
 } from "@mui/material";
-import Profile from "../Profiles";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom"; // Assuming you're using React Router
 import Icon from "../icon.png";
 
-interface ForgotPasswordProps {
-  selectedProfile: Profile;
-  handleCloseModal: () => void;
-  setCurrentView: (view: string) => void;
-}
+const ForgotPINExisting: React.FC = () => {
+  // Mock profile data
+  const selectedProfile = {
+    email: "user@example.com",
+    phone: "+1234567890",
+  };
 
-const ForgotPassword: React.FC<ForgotPasswordProps> = ({
-  selectedProfile,
-  handleCloseModal,
-}) => {
   const [selectedMethod, setSelectedMethod] = useState<string>("email");
   const [currentStep, setCurrentStep] = useState<string>("method-selection");
   const [code, setCode] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleMethodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedMethod(event.target.value);
   };
 
   const handleSubmitMethod = () => {
-    if (selectedMethod === "email") {
-      setCurrentStep("email-verification");
-    } else if (selectedMethod === "phone") {
-      setCurrentStep("sms-verification");
-    }
+    setCurrentStep(
+      selectedMethod === "email" ? "email-verification" : "sms-verification"
+    );
   };
 
   const handleSubmitCode = () => {
-    console.log("Submitted code:", code);
     setCurrentStep("reset-pin");
   };
 
@@ -47,32 +43,24 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
   };
 
   const VerificationView = ({ type }: { type: string }) => {
-    const [isEmailVerification, setIsEmailVerification] = useState<boolean>(
-      type === "email"
-    );
-
-    const toggleVerificationMethod = () => {
-      setIsEmailVerification(!isEmailVerification);
-    };
+    const isEmailVerification = type === "email";
 
     return (
-      // EMAIL VERIFICATION
-      <Box className="flex items-center justify-center flex-col item mt-8">
+      <Box className="flex items-center justify-center flex-col mt-8">
         <h3 className="font-semibold text-3xl text-[#0f2043] mt-2">
           Enter Security Code
         </h3>
-        <p className="text-[#0f2043] text-opacity-40 mt-4 text-center">
-          A 6-digit verification code was
-        </p>
-        <p className="text-[#0f2043] text-opacity-40 text-center mb-6">
-          just sent to{" "}
+        <FormLabel
+          component="legend"
+          className="text-xl text-[#0f2043] text-opacity-40 mt-4 mb-5 tracking-tight text-center"
+        >
+          A 6-digit verification code was just sent to{" "}
           <b>
             {isEmailVerification
               ? selectedProfile.email
-              : selectedProfile.phone}{" "}
-          </b>
-          .
-        </p>
+              : selectedProfile.phone}
+          </b>{" "}
+        </FormLabel>
         <TextField
           label="Enter Code"
           variant="outlined"
@@ -82,20 +70,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
           className="mb-4"
           sx={{ width: "100%" }}
         />
-        <Box className="flex justify-between items-center w-full mt-3">
-          <Box className="mt-4">
-            <p className="flex justify-center items-start flex-col">
-              <span className="tracking-tight text-[#517FD3] cursor-pointer text-xs">
-                Resend Code
-              </span>
-              <span
-                className="tracking-tight text-[#517FD3] cursor-pointer text-xs mt-1"
-                onClick={toggleVerificationMethod}
-              >
-                Verify {isEmailVerification ? "phone" : "email"} instead
-              </span>
-            </p>
-          </Box>
+        <Box className="flex justify-center items-center w-full mt-3">
           <Button
             variant="contained"
             color="primary"
@@ -123,13 +98,14 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
       <h3 className="font-semibold text-3xl text-[#0f2043] mt-2">
         Set New PIN
       </h3>
-      <p className="text-sm text-[#0f2043] text-opacity-40 text-center mt-4">
-        Avoid using easy to guess PINs like
-      </p>
-      <p className="text-sm text-[#0f2043] text-opacity-40 text-center">
-        1234 or 0000 or your birthdate.
-      </p>
-      <Box className="flex flex-col items-center w-full mt-6 gap-5">
+      <FormLabel
+        component="legend"
+        className="text-xl text-[#0f2043] text-opacity-40 mt-4 tracking-tight text-center"
+      >
+        Avoid using easy to guess PINs like <br /> 1234 or 0000 or your
+        birthdate.
+      </FormLabel>
+      <Box className="flex flex-col items-center w-full mt-6 mb-2 gap-5">
         <TextField
           label="New PIN"
           type="password"
@@ -150,7 +126,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         variant="contained"
         color="primary"
         onClick={handleResetPin}
-        className="mt-6"
+        className="mt-8"
         sx={{
           textTransform: "none",
           boxShadow: "none",
@@ -167,7 +143,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
   );
 
   const SuccessView = () => (
-    <Box className="flex items-center justify-center flex-col mt-14 gap-1">
+    <Box className="flex items-center justify-center flex-col mt-12 gap-1">
       <Box
         component="img"
         src={Icon}
@@ -177,14 +153,17 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
       <h3 className="font-semibold text-3xl text-[#0f2043] mt-2">
         PIN Successfully Reset
       </h3>
-      <p className="text-sm text-[#0f2043] text-opacity-40 text-center mt-4">
+      <FormLabel
+        component="legend"
+        className="text-xl text-[#0f2043] text-opacity-40 mt-4 tracking-tight text-center"
+      >
         Your PIN has been successfully reset. <br />
         You can now use your new PIN to access your account.
-      </p>
+      </FormLabel>
       <Button
         variant="contained"
         color="primary"
-        onClick={handleCloseModal}
+        onClick={() => navigate("/login")}
         className="mt-4"
         sx={{
           textTransform: "none",
@@ -203,69 +182,89 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
 
   const MethodSelectionView = () => (
     <Box className="flex items-center justify-center flex-col mt-3">
-      <Box
-        className="h-12 w-12 rounded-full mb-3"
-        sx={{
-          backgroundImage: `url(${selectedProfile?.image})`,
-          backgroundSize: "cover",
-        }}
-      ></Box>
-      <p style={{ fontSize: "0.9rem", color: "#0f2043" }}>
-        {selectedProfile?.name}
-      </p>
-      <h3 className="font-semibold text-3xl text-[#0f2043] mt-2">
+      <h3 className="font-semibold text-3xl text-[#0f2043] mt-2 mb-3">
         Forgot your PIN?
       </h3>
       <FormLabel
         component="legend"
-        className="text-xl text-[#0f2043] text-opacity-40 mt-4 mb-2 tracking-tight text-center"
+        className="text-xl text-[#0f2043] text-opacity-40 mt-2 mb-2 tracking-tight text-center"
       >
         Choose how you want to recover your account:
       </FormLabel>
-      <Box
-        className="justify-center mt-2 text-[#0f2043]"
-        sx={{ maxWidth: "100%" }}
+      <RadioGroup
+        value={selectedMethod}
+        onChange={handleMethodChange}
+        className="mb-4"
       >
-        <RadioGroup
-          value={selectedMethod}
-          onChange={handleMethodChange}
-          className="mb-4"
-        >
-          <FormControlLabel
-            value="email"
-            control={<Radio />}
-            label={`Send code via email (${selectedProfile.email})`}
-          />
-          <FormControlLabel
-            value="phone"
-            control={<Radio />}
-            label={`Send code via sms ${selectedProfile.phone}`}
-          />
-        </RadioGroup>
-        <Box className="flex items-center justify-center">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmitMethod}
-            className="mt-4"
-            sx={{
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "#3D6FBF",
-                boxShadow: "none",
-              },
-              textTransform: "none",
-            }}
-          >
-            Confirm
-          </Button>
-        </Box>
-      </Box>
+        <FormControlLabel
+          value="email"
+          control={<Radio />}
+          label={`Send code via email (${selectedProfile.email})`}
+        />
+        <FormControlLabel
+          value="phone"
+          control={<Radio />}
+          label={`Send code via sms ${selectedProfile.phone}`}
+        />
+      </RadioGroup>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleSubmitMethod}
+        sx={{
+          boxShadow: "none",
+          "&:hover": {
+            backgroundColor: "#3D6FBF",
+            boxShadow: "none",
+          },
+          textTransform: "none",
+        }}
+      >
+        Confirm
+      </Button>
     </Box>
   );
 
   return (
-    <>
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "#f9fafb",
+        textAlign: "center",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          top: "5rem",
+          left: "3rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
+      >
+        <Box
+          onClick={() => navigate(-1)}
+          className="cursor-pointer hover:bg-gray-200"
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+        >
+          <ArrowBackIcon sx={{ color: "#0f2043" }} />
+        </Box>
+        <Box sx={{ fontSize: "0.875rem", color: "#0f2043" }}>Back</Box>
+      </Box>
       {currentStep === "method-selection" && <MethodSelectionView />}
       {currentStep === "email-verification" && (
         <VerificationView type="email" />
@@ -273,8 +272,8 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
       {currentStep === "sms-verification" && <VerificationView type="sms" />}
       {currentStep === "reset-pin" && <ResetPinView />}
       {currentStep === "success" && <SuccessView />}
-    </>
+    </Box>
   );
 };
 
-export default ForgotPassword;
+export default ForgotPINExisting;

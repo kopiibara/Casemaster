@@ -22,6 +22,7 @@ import ExistingProfilePin from "./pages/login/ExistingProfile/ExistingProfilePin
 import AddExistingProfile from "./pages/login/ExistingProfile/AddExistingProfile";
 import ConfirmExistingProfile from "./pages/login/ExistingProfile/ConfirmExistingProfile";
 import ProfileSelection from "./pages/login/ProfileSelection";
+import ForgotPINExisting from "./pages/login/ExistingProfile/ForgotPinExistingProfile";
 
 function App() {
   return (
@@ -42,10 +43,8 @@ function App() {
           path="/confirm-existing-profile"
           element={<ConfirmExistingProfile />}
         />
-        {/* New Routes */}
+        <Route path="/forgot-pin-existing" element={<ForgotPINExisting />} />
         <Route path="/profile-selection" element={<ProfileSelection />} />{" "}
-        {/* Add this route */}
-        {/* Protected Routes (with Sidebar and Header) */}
         <Route element={<MainLayout />}>
           <Route
             path="/dashboard/Dashboard/:profileId?"

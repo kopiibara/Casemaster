@@ -54,6 +54,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
   );
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = React.useState<string>("");
+  const [maxRows, setMaxRows] = React.useState<number>(7);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -74,11 +75,28 @@ const TableComponent: React.FC<TableComponentProps> = ({
     setOrderBy("");
   };
 
+  const calculateMaxRows = () => {
+    // Adjust the row height and padding for an accurate calculation
+    const rowHeight = 48; // Approximate height of a table row in pixels
+    const containerPadding = 150; // Adjust for headers, paddings, etc.
+    const availableHeight = window.innerHeight - containerPadding;
+    setMaxRows(Math.floor(availableHeight / rowHeight));
+  };
+
+  React.useEffect(() => {
+    calculateMaxRows(); // Initial calculation
+    window.addEventListener("resize", calculateMaxRows);
+    return () => {
+      window.removeEventListener("resize", calculateMaxRows);
+    };
+  }, []);
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
   // Sort the table body data based on the current sorting state
   const sortedData = stableSort(tableBodyData, getComparator(order, orderBy));
+  const displayedData = sortedData.slice(0, maxRows);
 
   return (
     <TableContainer
@@ -98,13 +116,9 @@ const TableComponent: React.FC<TableComponentProps> = ({
           },
         },
       }}
-      className="bg-white rounded-lg max-h-[78vh] h-[78vh] min-h-[30vh] "
+      className="bg-white rounded-lg max-h-[78vh]"
     >
-      <Table
-        className="min-w-[300px], min-h-full"
-        stickyHeader
-        aria-label="dynamic table"
-      >
+      <Table className="h-full" stickyHeader aria-label="dynamic table">
         <TableHead className="bg-[#DCE5F6] [&_.MuiTableCell-head]:font-bold [&_.MuiTableCell-head]:text-[#0F2043] [&_.MuiTableCell-head]:text-sm">
           <TableRow>
             {tableHeadData.map((header, index) => (
@@ -151,7 +165,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
             "& .MuiTableCell-body": { color: "#0F2043", fontSize: "0.875rem" },
           }}
         >
-          {sortedData.map((row, rowIndex) => (
+          {displayedData.map((row, rowIndex) => (
             <TableRow
               key={rowIndex}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}

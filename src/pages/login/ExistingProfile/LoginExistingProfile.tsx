@@ -1,54 +1,131 @@
-import React, { useRef, useState } from 'react';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-
+import React from "react";
+import { Box } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
 
 const LoginExistingProfile = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleContinue = () => {
-  navigate('/existing-profile-pin');
-}
-
+  const handleContinue = () => {
+    navigate("/existing-profile-pin");
+  };
 
   return (
-    <div style={{position:'relative'}}>
-       <div style={{
-          position: 'absolute',
-          top: '-5rem',
-          left: '5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-            <button className="w-8 h-8 border border-[#0f2043] rounded-full flex justify-center items-center" >
-            <ArrowBackIcon />
-            </button>
-            <p>Back</p>
-      </div>
-      <div className='mt-56'>
-          <div className='flex justify-center items-center flex-col'>
-            <h1 className="font-bold text-3xl text-[#0f2043] mt-8">Log into an existing profile</h1>
-            <p className="text-xl text-[#0f2043] text-opacity-40 mt-4">Use your email or phone to log your profile</p>
-            <div className='flex justify-center items-center flex-col mt-6'>
-                <input className='w-96 h-12 bg-tranparent border rounded-md'></input>
-                <div className='flex justify-between items-center gap-40 mt-10'>
-                    <p className='text-sm text-[#517fd3]'>Set up new profile</p>
-                    <Button
-                    variant='contained'
-                    sx={{textTransform:'none', borderRadius:'0.5rem'}}
-                    onClick={handleContinue}
-                    >Continue</Button>
-                </div>
-            </div>
-          <div>
-          </div>
-            
-        </div> 
-      </div> 
-      
-    </div>
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "#f9fafb", // Optional background color
+        textAlign: "center",
+      }}
+    >
+      {/* Back Button */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: "5rem",
+          left: "3rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
+      >
+        <Box
+          onClick={() => navigate(-1)}
+          className="cursor-pointer hover:bg-gray-200"
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+        >
+          <ArrowBackIcon sx={{ color: "#0f2043" }} />
+        </Box>
+        <Box sx={{ fontSize: "0.875rem", color: "#0f2043" }}>Back</Box>
+      </Box>
+
+      {/* Centered Content */}
+      <Box>
+        <h1 className="font-semibold text-3xl text-[#0f2043] mb-2">
+          Log into an existing profile
+        </h1>
+        <p className="text-base text-[#0f2043] text-opacity-40 mb-7">
+          Use your email or phone to log your profile.
+        </p>
+      </Box>
+
+      {/* Input and Buttons */}
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: "400px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          component="input"
+          className="w-96 h-12 bg-transparent border rounded-md"
+          sx={{
+            width: "100%",
+            height: "3rem",
+            border: "1px solid rgba(0, 0, 0, 0.23)",
+            borderRadius: "0.375rem",
+            padding: "0.5rem",
+            mb: 4,
+            "&:focus": {
+              outline: "none",
+              borderColor: "#517fd3",
+            },
+          }}
+        />
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "2rem",
+          }}
+        >
+          <Box
+            component="p"
+            sx={{
+              fontSize: "0.875rem",
+              color: "#517fd3",
+              cursor: "pointer",
+            }}
+          >
+            Set up new profile
+          </Box>
+          <Button
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              borderRadius: "0.5rem",
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor: "#3D6FBF",
+                boxShadow: "none",
+              },
+            }}
+            onClick={handleContinue}
+          >
+            Continue
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

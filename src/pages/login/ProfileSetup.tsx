@@ -50,8 +50,8 @@ const ProfileSetup = () => {
   };
 
   return (
-    <Box className="flex items-center justify-center min-h-screen">
-      <Box className="w-full max-w-md p-4">
+    <Box className="flex items-center justify-center min-h-screen w-full">
+      <Box className="w-full max-w-md">
         {/* Profile Setup Title Section */}
         <Box className="flex justify-center items-center flex-col mb-8">
           <p className="text-[2.5rem] font-semibold text-[#0f2043]">
@@ -103,7 +103,7 @@ const ProfileSetup = () => {
                 sx={{
                   color: "#2E49D5",
                   borderColor: "#2E49D5",
-                  backgroundColor: "rgba(46,73,213,0.3)",
+                  backgroundColor: "rgba(46,73,213,0.1)",
                   borderRadius: "0.5rem",
                   height: "2rem",
                   width: "7rem",
@@ -124,7 +124,7 @@ const ProfileSetup = () => {
                 sx={{
                   color: "#E13D3D",
                   borderColor: "#D52E2E",
-                  backgroundColor: "rgba(213,46,46,0.3)",
+                  backgroundColor: "rgba(213,46,46,0.1)",
                   borderRadius: "0.5rem",
                   height: "2rem",
                   width: "7rem",
@@ -148,14 +148,13 @@ const ProfileSetup = () => {
             </Box>
           </Box>
 
-        {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        onChange={handleFileChange}
-      />
-
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
         </Box>
 
         <Box className="mb-8">
@@ -209,7 +208,7 @@ const ProfileSetup = () => {
           </Box>
         </Box>
 
-        <Box className="w-full flex justify-end items-center mt-4 gap-2">
+        <Box className="flex justify-end items-center mt-4 gap-2">
           {/* Cancel Button */}
           <Button
             onClick={handleCancel}
@@ -277,10 +276,9 @@ const ProfileSetup = () => {
           onClick={(e) => e.stopPropagation()}
         >
           {currentModalView === "email" ? (
-            <Box className="flex justify-center items-center flex-col">
+            <Box className="flex items-center justify-center flex-col item">
               {/* Close Icon */}
               <Box className="flex w-full justify-end mt-6 mr-12">
-                <Box flexGrow={1}></Box>
                 <Box
                   onClick={handleCloseModal}
                   sx={{
@@ -396,7 +394,6 @@ const ProfileSetup = () => {
               color="primary"
               sx={{
                 marginRight: "5rem",
-                marginTop: "1rem",
                 borderRadius: "10px",
                 boxShadow: "none",
                 textTransform: "none",

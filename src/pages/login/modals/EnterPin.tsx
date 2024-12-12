@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField } from "@mui/material";
+import { TextField, Box } from "@mui/material";
 import Profile from "../Profiles";
 
 interface EnterPinProps {
@@ -8,7 +8,10 @@ interface EnterPinProps {
   showPin: boolean;
   errorIndexes: number[];
   inputRefs: React.RefObject<HTMLInputElement>[];
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
+  handleInputChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    index: number
+  ) => void;
   handleCloseModal: () => void;
   setCurrentView: (view: string) => void;
 }
@@ -22,20 +25,21 @@ const EnterPin: React.FC<EnterPinProps> = ({
   handleInputChange,
   setCurrentView,
 }) => (
-  <div className="flex items-center justify-center flex-col mt-16">
-
-    <div
-      className="h-12 w-12 rounded-full"
-      style={{
+  <Box className="flex items-center justify-center flex-col mt-3">
+    <Box
+      className="h-12 w-12 rounded-full mb-3"
+      sx={{
         backgroundImage: `url(${selectedProfile?.image})`,
         backgroundSize: "cover",
       }}
-    ></div>
-    <p>{selectedProfile?.name}</p>
-    <h3 className="text-4xl font-medium mb-4 text-[#0f2043] font-bold mt-2">
-      Enter Your PIN
+    ></Box>
+    <p style={{ fontSize: "0.9rem", color: "#0f2043" }}>
+      {selectedProfile?.name}
+    </p>
+    <h3 className="text-3xl font-semibold mb-6 text-[#0f2043] mt-2">
+      Enter your PIN
     </h3>
-    <div className="flex justify-center mt-2">
+    <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
       {inputRefs.map((ref, index) => (
         <TextField
           key={index}
@@ -51,7 +55,7 @@ const EnterPin: React.FC<EnterPinProps> = ({
             },
           }}
           value={pinValues[index]}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(e, index)}
+          onChange={(e) => handleInputChange(e, index)}
           className="w-20 mr-2"
           variant="outlined"
           error={errorIndexes.includes(index)}
@@ -61,31 +65,45 @@ const EnterPin: React.FC<EnterPinProps> = ({
             "& .MuiOutlinedInput-root": {
               borderRadius: "10px",
               height: "5.5rem",
-              backgroundColor: pinValues[index] !== "" ? "#517fd3" : "",
+              backgroundColor:
+                pinValues[index] !== "" ? "#517FD3" : "transparent",
               "& fieldset": {
-                borderColor: "#517FD3",
+                borderColor: errorIndexes.includes(index)
+                  ? "#D32F2F" // Red border for errors
+                  : pinValues[index] !== ""
+                  ? "#517FD3"
+                  : "rgba(0,0,0,0.1)",
+                transition: "border-color 0.3s ease-in-out", // Smooth border color transition
               },
               "&:hover fieldset": {
-                borderColor: "#517FD3",
+                borderColor:
+                  pinValues[index] === "" ? "rgba(0,0,0,0.2)" : "#517FD3",
               },
               "&.Mui-focused fieldset": {
-                borderColor: "#517FD3",
+                borderColor: errorIndexes.includes(index)
+                  ? "#D32F2F"
+                  : "#517FD3",
               },
-              "& input": {
-                backgroundColor: pinValues[index] !== "" ? "#517fd3" : "",
-                color: pinValues[index] !== "" ? "#fff" : "",
-                height: "100%",
-                boxSizing: "border-box",
-                padding: 0,
-                margin: 0,
-                borderRadius: "10px",
-              },
+            },
+            "& input": {
+              color: pinValues[index] !== "" ? "#fff" : "inherit",
+              height: "100%",
+              boxSizing: "border-box",
+              padding: 0,
+              margin: 0,
+              borderRadius: "10px",
+              textAlign: "center",
+              fontSize: "2rem",
+            },
+            "&.Mui-error": {
+              borderColor: "#D32F2F", // Error border when the entire component has an error state
+              backgroundColor: "rgba(211, 47, 47, 0.1)", // Light red background for errors
             },
           }}
         />
       ))}
-    </div>
-    <p className="text-[#517fd3] text-xs mt-8">
+    </Box>
+    <p className="text-[#517fd3] text-xs">
       Forgot your PIN?{" "}
       <strong
         className="cursor-pointer"
@@ -94,7 +112,7 @@ const EnterPin: React.FC<EnterPinProps> = ({
         Click here for help
       </strong>
     </p>
-  </div>
+  </Box>
 );
 
 export default EnterPin;

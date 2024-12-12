@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Button from "@mui/material/Button";
-import { Box, Typography, TextField } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Box, Typography, TextField, Button } from "@mui/material";
 
-const ConfirmExistingProfile = () => {
-  const [verificationMethod, setVerificationMethod] = useState("email");
-  const navigate = useNavigate();
+interface VerificationProps {
+  isOpen: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+  email: string;
+  phone: string;
+  method: "email" | "phone";
+  handleCloseModal: () => void;
+}
+
+const Verification: React.FC<VerificationProps> = ({
+  method = "email",
+  handleCloseModal,
+  email,
+  phone,
+  onConfirm,
+}) => {
+  const [verificationMethod, setVerificationMethod] = useState(method);
+  const [code, setCode] = useState("");
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
@@ -41,48 +54,15 @@ const ConfirmExistingProfile = () => {
   return (
     <Box
       sx={{
-        position: "relative",
-        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "#f9fafb",
         textAlign: "center",
+        width: "100%",
       }}
     >
-      {/* Back Button */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: "5rem",
-          left: "3rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}
-      >
-        <Box
-          onClick={() => navigate(-1)}
-          className="cursor-pointer hover:bg-gray-200"
-          sx={{
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            cursor: "pointer",
-          }}
-        >
-          <ArrowBackIcon sx={{ color: "#0f2043" }} />
-        </Box>
-        <Typography sx={{ fontSize: "0.875rem", color: "#0f2043" }}>
-          Back
-        </Typography>
-      </Box>
-
-      {/* Verification Content */}
+      {/* Header */}
       <Typography
         variant="h4"
         sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
@@ -95,7 +75,6 @@ const ConfirmExistingProfile = () => {
           color: "#0f2043",
           opacity: 0.6,
           mb: 3,
-          textAlign: "center",
         }}
       >
         {verificationText}
@@ -106,6 +85,8 @@ const ConfirmExistingProfile = () => {
         <TextField
           label="Enter Code"
           variant="outlined"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
           inputProps={{ maxLength: 6 }}
           sx={{
             width: "24rem",
@@ -161,6 +142,7 @@ const ConfirmExistingProfile = () => {
                 boxShadow: "none",
               },
             }}
+            onClick={onConfirm}
           >
             Confirm
           </Button>
@@ -170,4 +152,4 @@ const ConfirmExistingProfile = () => {
   );
 };
 
-export default ConfirmExistingProfile;
+export default Verification;

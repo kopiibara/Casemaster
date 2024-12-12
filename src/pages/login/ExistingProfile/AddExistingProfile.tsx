@@ -1,70 +1,112 @@
-import React, { useState } from 'react';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-
-
+import React from "react";
+import { Box } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
 
 const AddExistingProfile = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const handleBack = () => {
-  navigate('/');
-}
-const loginExistingProfile = () => {
-  navigate('/login-existing-profile');
-}
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  const loginExistingProfile = () => {
+    navigate("/login-existing-profile");
+  };
+
   return (
-    <div style={{position:'relative'}}>
-       <div style={{
-          position: 'absolute',
-          top: '-5rem',
-          left: '5rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem'
-        }}>
-        <button  onClick={handleBack} className="w-8 h-8 border border-[#0f2043] rounded-full flex justify-center items-center">
-          <ArrowBackIcon />
-        </button>
-        <p>Back</p>
-      </div >
-      <div className='mt-56'>
-        <div className='flex jusstify-cente items-center flex-col'>
-        <h1 className="font-bold text-3xl text-[#0f2043] mt-8">What would you like to do?</h1>
-        <p className="text-xl text-[#0f2043] text-opacity-40 mt-4">To continue, choose an option to either create a new one or</p>
-        <p className="text-xl text-[#0f2043] text-opacity-40">log into an existing profile.</p>
-        <div className='flex justify-center items-center flex-col'>
-        <Button 
-        variant='contained'
+    <Box
+      sx={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "#f9fafb", // Optional background color
+        textAlign: "center",
+      }}
+    >
+      {/* Back Button */}
+      <Box
         sx={{
-          marginTop:'2rem',
-          backgroundColor:'#0f2043',
-          textTransform:'none',
-          width:'100%',
-          borderRadius:'0.5rem',
+          position: "absolute",
+          top: "5rem",
+          left: "3rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
         }}
+      >
+        <Box
+          onClick={handleBack}
+          className="cursor-pointer hover:bg-gray-200"
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+        >
+          <ArrowBackIcon sx={{ color: "#0f2043" }} />
+        </Box>
+        <Box sx={{ fontSize: "0.875rem", color: "#0f2043" }}>Back</Box>
+      </Box>
+
+      {/* Centered Content */}
+      <Box>
+        <h1 className="font-semibold text-4xl text-[#0f2043] mb-4">
+          What would you like to do?
+        </h1>
+        <p className="text-base text-[#0f2043] text-opacity-40 mb-1">
+          To continue, choose an option to either create a new one or
+        </p>
+        <p className="text-base text-[#0f2043] text-opacity-40 mb-2">
+          log into an existing profile.
+        </p>
+      </Box>
+
+      {/* Buttons */}
+      <Box>
+        <Button
+          variant="contained"
+          sx={{
+            marginTop: "1rem",
+            backgroundColor: "#0f2043",
+            textTransform: "none",
+            width: "100%",
+            maxWidth: "300px",
+            borderRadius: "0.5rem",
+            boxShadow: "none",
+            "&:hover": {
+              backgroundColor: "#0c1833",
+              boxShadow: "none",
+            },
+          }}
         >
           Set up a New Profile
         </Button>
         <Button
-        variant='outlined'
-        sx={{
-          marginTop:'1rem',
-          borderColor:'#0f2043',
-          color:'#0f2043',
-          textTransform:'none',
-          borderRadius:'0.5rem',
-        }}
-        onClick={loginExistingProfile}
+          variant="outlined"
+          sx={{
+            marginTop: "1rem",
+            borderColor: "#0f2043",
+            color: "#0f2043",
+            textTransform: "none",
+            width: "100%",
+            maxWidth: "300px",
+            borderRadius: "0.5rem",
+          }}
+          onClick={loginExistingProfile}
         >
           Log in Existing Profile
         </Button>
-        </div>
-        </div>
-      </div>
-
-    </div>
+      </Box>
+    </Box>
   );
 };
 

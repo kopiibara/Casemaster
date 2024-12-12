@@ -10,6 +10,8 @@ interface Profile {
   name: string;
   role: string;
   image: string;
+  email: string;
+  phone: string;
 }
 
 const Profile = () => {
@@ -20,6 +22,8 @@ const Profile = () => {
       name: "Mon Rivamonte",
       role: "Admin",
       image: ProfileIcon,
+      email: "mon.rivamonte@gmail.com",
+      phone: "09123456789",
     },
   ]);
 

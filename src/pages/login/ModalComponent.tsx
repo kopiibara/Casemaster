@@ -3,7 +3,9 @@ import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import EnterPin from "./modals/EnterPin";
 import ForgotPIN from "./modals/ForgotPIN";
+import Verification from "./modals/Verification";
 import { useNavigate } from "react-router-dom";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface ModalViewProps {
   isModalOpen: boolean;
@@ -35,7 +37,7 @@ const ModalView: React.FC<ModalViewProps> = ({
   const correctPin = "1234";
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     index: number
   ) => {
     const { value } = e.target;
@@ -52,17 +54,13 @@ const ModalView: React.FC<ModalViewProps> = ({
       }
 
       if (updatedPinValues.join("") === correctPin) {
-        navigate("/dashboard/Dashboard");
+        setCurrentViewState("verification"); // Show verification modal
       } else if (updatedPinValues.every((v) => v)) {
         setErrorIndexes([0, 1, 2, 3]);
       } else {
         setErrorIndexes([]);
       }
     }
-  };
-
-  const setCurrentView = (view: string) => {
-    setCurrentViewState(view);
   };
 
   const renderView = () => {
@@ -77,7 +75,7 @@ const ModalView: React.FC<ModalViewProps> = ({
             inputRefs={inputRefs}
             handleInputChange={handleInputChange}
             handleCloseModal={handleCloseModal}
-            setCurrentView={setCurrentView}
+            setCurrentView={setCurrentViewState}
           />
         );
       case "forgot-pin":
@@ -85,7 +83,22 @@ const ModalView: React.FC<ModalViewProps> = ({
           <ForgotPIN
             selectedProfile={selectedProfile}
             handleCloseModal={handleCloseModal}
-            setCurrentView={setCurrentView}
+            setCurrentView={setCurrentViewState}
+          />
+        );
+
+      case "verification":
+        return (
+          <Verification
+            method="email" // Optionally use method dynamically
+            email={selectedProfile.email} // Pass email
+            phone={selectedProfile.phone} // Pass phone
+            handleCloseModal={handleCloseModal}
+            isOpen={isModalOpen}
+            onConfirm={() => {
+              navigate("/dashboard/Dashboard");
+            }}
+            onClose={handleCloseModal}
           />
         );
 
@@ -116,15 +129,29 @@ const ModalView: React.FC<ModalViewProps> = ({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* X button to close the modal */}
-        <div
-          onClick={() => {
-            handleCloseModal();
-          }}
-          className="absolute top-10 right-14 w-8 h-8 border border-[#0f2043] rounded-full flex justify-center items-center cursor-pointer text-[#0f2043] bg-white"
-        >
-          X
-        </div>
+        {/* Close Button */}
+        <Box className="flex w-full justify-end mt-6 mr-12">
+          <Box flexGrow={1}></Box>
+          <Box
+            onClick={handleCloseModal}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              color: "#808080", // Grayish color
+              cursor: "pointer",
+              transition: "background-color 0.2s ease",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.1)", // Light gray on hover
+              },
+            }}
+          >
+            <CloseIcon />
+          </Box>
+        </Box>
         {renderView()}
       </Box>
     </Modal>

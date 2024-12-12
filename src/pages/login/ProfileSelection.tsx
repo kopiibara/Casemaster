@@ -23,7 +23,7 @@ const ProfileSelection = () => {
       name: "Mon Rivamonte",
       role: "Admin",
       image: ProfileIcon,
-      email: "mon.rivamontepalomares@gmail.com",
+      email: "mon@gmail.com",
       phone: "09123456789",
     },
   ]);
