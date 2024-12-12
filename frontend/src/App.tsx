@@ -23,12 +23,12 @@ import AddExistingProfile from "./pages/login/ExistingProfile/AddExistingProfile
 import ConfirmExistingProfile from "./pages/login/ExistingProfile/ConfirmExistingProfile";
 import ProfileSelection from "./pages/login/ProfileSelection";
 import ForgotPINExisting from "./pages/login/ExistingProfile/ForgotPinExistingProfile";
-import { AppProvider } from "./AppContext";
+
 
 
 function App() {
   return (
-    <AppProvider>
+
     <Router>
       <Routes>
      
@@ -79,7 +79,7 @@ function App() {
         
       </Routes>
     </Router>
-    </AppProvider>
+  
   );
 }
 

@@ -33,11 +33,11 @@ const Verification: React.FC<VerificationProps> = ({
     try {
       const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
         to: email,
-        code: verificationCode,
+        code: code,
       });
       console.log(response.data.message || "Email verified successfully!");
       handleCloseModal();
-      navigate("/dashboard"); 
+      navigate("/dashboard/Dashboard/:profileId?"); 
       
     } catch (err: any) {
       if (err.response) {

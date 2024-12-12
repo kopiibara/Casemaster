@@ -10,13 +10,14 @@ import {
 } from "@mui/material";
 import Icon from "../icon.png";
 
+
 interface Profile {
-  id: number;
+  user_id: number;
   name: string;
   email: string;
   phone: number;
   role: string;
-  image: Blob;
+  image: string;
   pin: string;
 }
 

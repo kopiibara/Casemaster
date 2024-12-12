@@ -4,12 +4,12 @@ import {useState, useEffect} from "react";
 
 
 interface Profile {
-  id: number;
+  user_id: number;
   name: string;
   email: string;
   phone: number;
   role: string;
-  image: Blob;
+  image: string;
   pin: string;
 }
 
@@ -44,7 +44,7 @@ const EnterPin: React.FC<EnterPinProps> = ({
     <Box
       className="h-12 w-12 rounded-full mb-3"
       sx={{
-        backgroundImage: `url(${imageUrl})`,
+        backgroundImage: `url(${selectedProfile?.image})`,
         backgroundSize: "cover",
       }}
     ></Box>

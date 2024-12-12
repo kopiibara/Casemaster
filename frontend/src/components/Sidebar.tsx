@@ -20,6 +20,7 @@ import Avatar from "@mui/material/Avatar";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import IconButton from "@mui/material/IconButton";
 import { useParams } from "react-router-dom";
+import {useAppContext} from "../AppContext";
 
 export default function Sidebar() {
   const [activeItem, setActiveItem] = React.useState("Dashboard");
@@ -31,6 +32,7 @@ export default function Sidebar() {
     attachments: false,
   });
 
+  const {profileData} = useAppContext();
   const navigate = useNavigate(); // useNavigate hook for routing
 
   const { profileId } = useParams();
@@ -261,14 +263,14 @@ export default function Sidebar() {
       <Box flexGrow={2} />
 
       <Box className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
-        <Avatar src="/broken-image.jpg" variant="rounded" />
+        <Avatar src={profileData.image} variant="rounded" />
         {true && (
           <Box className="">
             <Typography sx={{ color: "#f6f9ff" }} variant="subtitle1">
-              Kopibara
+              {profileData.fullName}
             </Typography>
             <Typography sx={{ color: "#f6f9ff" }} variant="subtitle2">
-              Branch Clerk
+              {profileData.role}
             </Typography>
           </Box>
         )}

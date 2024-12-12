@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
-import ProfileIcon from "./capy.jpg";
+import ProfileIcon from "./capy.jpg"; // Default image
 import { Box, Button, IconButton } from "@mui/material";
 import ModalView from "./ModalComponent";
 import axios from "axios";
+import { useAppContext } from '../../AppContext';
 
 interface Profile {
-  id: number;
+  user_id: number;
   name: string;
   email: string;
   phone: number;
   role: string;
-  image: Blob;
+  image: string; // Ensure this is nullable if image can be missing
   pin: string;
 }
 
@@ -23,32 +24,34 @@ const ProfileSelection = () => {
   const [imageUrls, setImageUrls] = useState<{ [key: number]: string }>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const { setProfileData } = useAppContext();
 
   useEffect(() => {
-      const fetchProfiles = async () => {
-       
-        try {
-          const response = await axios.get("http://localhost:3000/api/get-profiles"); 
-          setProfiles(response.data);
-
-          const urls: { [key: number]: string } = {};
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/get-profiles");
+        setProfiles(response.data);
+  
+        // Map profiles to set image URLs or Base64 data
+        const urls: { [key: number]: string } = {};
         response.data.forEach((profile: Profile) => {
           if (profile.image) {
-            const url = URL.createObjectURL(profile.image);
-            urls[profile.id] = url;
+            // Set the image source as a Data URL using Base64
+            urls[profile.user_id] = `data:image/png;base64,${profile.image}`;
           }
         });
-        setImageUrls(urls);
-        } catch (err: any) {
-          console.log("Failed to fetch profiles. Please try again.");
-          console.error(err.message);
-        } finally {
-          console.log(false);
-        }
-      };
   
-      fetchProfiles();
-    }, []);
+        console.log("Image URLs:", urls);
+        setImageUrls(urls); // Store the image URLs in state
+      } catch (err: any) {
+        console.log("Failed to fetch profiles. Please try again.");
+        console.error(err.message);
+      }
+    };
+  
+    fetchProfiles();
+  }, []);
+  
 
   const handleBack = () => {
     navigate("/");
@@ -60,13 +63,21 @@ const ProfileSelection = () => {
   };
 
   const goToProfile = (profile: Profile) => {
-    console.log(`Selected Profile ID: ${profile.id}`);
+    console.log(`Selected Profile ID: ${profile.user_id}`);
     setSelectedProfile(profile);
     setIsModalOpen(true);
+
+    setProfileData({
+      fullName: profile.name,
+      email: profile.email,
+      phoneNo: profile.phone.toString(),
+      image: imageUrls[profile.user_id] || ProfileIcon,
+      role: profile.role,
+    });
   };
 
   const handleAddNewProfile = () => {
-    navigate("/add-existing-profile"); 
+    navigate("/add-existing-profile");
   };
 
   return (
@@ -145,10 +156,10 @@ const ProfileSelection = () => {
         }}
       >
         {/* Existing Profiles */}
-        {profiles.map((profiles) => (
+        {profiles.map((profile) => (
           <Box
-            key={profiles.id}
-            onClick={() => goToProfile(profiles)}
+            key={profile.user_id}
+            onClick={() => goToProfile(profile)}
             sx={{
               width: "16rem",
               height: "14rem",
@@ -168,7 +179,7 @@ const ProfileSelection = () => {
           >
             <Box
               sx={{
-                backgroundImage: `url(${ProfileIcon})`,
+                backgroundImage: `url(${imageUrls[profile.user_id] || ProfileIcon})`, // Show profile image or fallback to default
                 width: "70px",
                 height: "70px",
                 backgroundSize: "cover",
@@ -185,7 +196,7 @@ const ProfileSelection = () => {
                 mb: "0.5rem",
               }}
             >
-              {profiles.name}
+              {profile.name}
             </Box>
             <Box
               component="p"
@@ -195,7 +206,7 @@ const ProfileSelection = () => {
                 opacity: 0.6,
               }}
             >
-              {profiles.role}
+              {profile.role}
             </Box>
           </Box>
         ))}

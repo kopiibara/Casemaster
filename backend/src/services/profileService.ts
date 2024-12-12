@@ -1,28 +1,57 @@
-import db from '../config/db';
 
-export const saveProfile = (profileData: { name: string, role: string, image: Buffer | null, email: string, phone: number, pin:string }) => {
-  return new Promise((resolve, reject) => {
-    const query = 'INSERT INTO users (name, email, phone, role, image, pin) VALUES (?, ?, ?, ?, ?,?)';
-    db.query(query, [profileData.name, profileData.email, profileData.phone, profileData.role, profileData.image, profileData.pin], (err, result) => {
-      if (err) {
-        console.error('Database Error:', err);
-        return reject(err);
-      }
-      console.log('Database Result:', result);
-      resolve(result);
+import { Request, Response } from 'express';
+import db from '../config/db'; // Importing your database connection
+
+export const saveProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, email, phone, role, pin } = req.body;
+    const image = req.file ? req.file.buffer : null; // Retrieve image buffer from the uploaded file
+
+    // Validate required fields
+    if (!name || !email || !phone || !role || !pin) {
+      res.status(400).json({ message: 'All fields are required.' });
+      return;
+    }
+
+    // Insert the user data into the database
+    const query = `
+      INSERT INTO users (name, email, phone, role, image, pin)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const result = await db.execute(query, [name, email, phone, role, image, pin]);
+
+    res.status(201).json({
+      message: 'Profile saved successfully.',
+      userId: (result as any).insertId, // Returning the inserted user ID
     });
-  });
+  } catch (error) {
+    console.error('Error saving profile:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
 };
+
 
 export const getProfiles = () => {
   return new Promise((resolve, reject) => {
     const query = 'SELECT * FROM users';  
-    db.query(query, (err, results) => {
+    db.query(query, (err, results: any[]) => {
       if (err) {
         console.error('Database Error:', err);
         return reject(err);
       }
-      resolve(results); 
+
+      // Encode the image as Base64 if it exists
+      const profiles = results.map(profile => {
+        if (profile.image) {
+          // Convert the image BLOB to a Base64 string
+          profile.image = Buffer.from(profile.image).toString('base64');
+        }
+        return profile;
+      });
+
+      resolve(profiles);
     });
   });
 };
+

@@ -31,12 +31,11 @@ const PINSetUp = () => {
   useEffect(() => {
     if (image) {
       // If there's an image (Blob or File), create an object URL to display
-      const objectURL = URL.createObjectURL(image);
-      setImageUrl(objectURL);
+      setImageUrl(image);
 
       // Cleanup the object URL when the component is unmounted or image changes
       return () => {
-        URL.revokeObjectURL(objectURL);
+     
       };
     }
   }, [image]);
@@ -93,27 +92,34 @@ const PINSetUp = () => {
   };
 
   const handleCreateProfile = async () => {
-      const formData = new FormData();
-      formData.append("name", fullName);
-      formData.append("email", email);
-      formData.append("phone", phoneNo);
-      formData.append("role", "Staff");
-      if (image) {
-        formData.append("image", image);  
-      }
-      formData.append("pin", pinValues.join(""));
-      console.log(pinValues.join(""));
-      try {
-     
-        const response = await axios.post("http://localhost:3000/api/save-profile", formData);
-        console.log(response.data);
-        
-    
-        navigate("/profiles");
-      } catch (error) {
-        console.error("Error:", error);
-      }
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("email", email);
+    formData.append("phone", phoneNo);
+    formData.append("role", "Staff");
+  
+    if (image) {
+      formData.append("image", image);
+    }
+  
+    formData.append("pin", pinValues.join(""));
+  
+    console.log(pinValues.join(""));
+  
+    try {
+      const response = await axios.post("http://localhost:3000/api/save-profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Ensure the correct content type for file uploads
+        },
+      });
+
+      console.log(response.data);
+      navigate("/profiles"); // Redirect after successful profile creation
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
+  
 
   return (
     <Box

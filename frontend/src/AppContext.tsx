@@ -6,7 +6,7 @@ interface ProfileData {
   fullName: string;
   email: string;
   phoneNo: string;
-  image: Blob | null;  
+  image: string;  
   role: string;
 }
 
@@ -37,7 +37,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fullName: "",
     email: "",
     phoneNo: "",
-    image: null,  // Initialize with null as a default
+    image: "",  // Initialize with null as a default
     role:"",
   });
 
