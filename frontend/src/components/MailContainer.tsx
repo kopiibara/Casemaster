@@ -1,5 +1,5 @@
 import { Box, Typography, Divider } from "@mui/material";
-import EmailPreview from "./EmailPreview";
+import { EmailPreview } from "./EmailPreview";
 import EmailView from "./MailContent";
 import { useState } from "react";
 
@@ -17,6 +17,13 @@ interface Email {
     name: string;
     size: string;
   };
+  replies?: Reply[]; // Add replies field
+}
+
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
 }
 
 const MailContainer = () => {
@@ -25,9 +32,17 @@ const MailContainer = () => {
   // Function to handle reply submission
   const handleReply = (replyContent: string) => {
     if (selectedEmail) {
-      console.log(`Replying to: ${selectedEmail.email}`);
-      console.log(`Reply content: ${replyContent}`);
-      // Clear or update state if needed
+      const newReply: Reply = {
+        id: Date.now(),
+        content: replyContent,
+        time: new Date().toLocaleTimeString(),
+      };
+      const updatedEmail = {
+        ...selectedEmail,
+        replies: [...(selectedEmail.replies || []), newReply],
+      };
+      setSelectedEmail(updatedEmail);
+      // Update the emails array if needed
     }
   };
 
@@ -142,6 +157,7 @@ const MailContainer = () => {
             subject={selectedEmail.subject}
             content={selectedEmail.content}
             attachment={selectedEmail.attachment}
+            replies={selectedEmail.replies} // Pass replies to EmailView
             onReply={handleReply} // Pass the reply handler
           />
         ) : (

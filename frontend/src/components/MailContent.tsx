@@ -24,7 +24,14 @@ interface EmailViewProps {
     name: string;
     size: string;
   };
+  replies?: Reply[]; // Add replies prop
   onReply: (replyContent: string) => void; // Add onReply prop
+}
+
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
 }
 
 const EmailView: React.FC<EmailViewProps> = ({
@@ -34,6 +41,7 @@ const EmailView: React.FC<EmailViewProps> = ({
   subject,
   content,
   attachment,
+  replies,
   onReply,
 }) => {
   const [isReplying, setIsReplying] = useState(false);
@@ -44,7 +52,6 @@ const EmailView: React.FC<EmailViewProps> = ({
     setIsReplying(false);
     setReplyContent(""); // Reset reply editor
   };
-
 
   return (
     <Card
@@ -156,6 +163,23 @@ const EmailView: React.FC<EmailViewProps> = ({
                 <AttachFile />
               </IconButton>
             </Tooltip>
+          </Box>
+        )}
+
+        {/* Replies Section */}
+        {replies && replies.length > 0 && (
+          <Box mt={3}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Replies
+            </Typography>
+            {replies.map((reply) => (
+              <Box key={reply.id} mb={2} p={2} bgcolor="#f9f9f9" borderRadius={2}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  {reply.time}
+                </Typography>
+                <Typography variant="body1">{reply.content}</Typography>
+              </Box>
+            ))}
           </Box>
         )}
       </CardContent>
