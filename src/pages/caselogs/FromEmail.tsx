@@ -42,48 +42,6 @@ const FromEmail: React.FC = () => {
       "Date Added": "2024-11-30",
       Status: "Closed",
     },
-    {
-      "Case No.": 24680,
-      Title: "GOVERNMENT VS CITIZEN",
-      "Date Added": "2024-11-29",
-      Status: "New",
-    },
-    {
-      "Case No.": 13579,
-      Title: "VP LENI ROBREDO VS SENATOR PACQUIAO",
-      "Date Added": "2024-11-28",
-      Status: "Appealed",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
   ];
 
   const popoverContent = (

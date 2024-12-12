@@ -2,14 +2,16 @@ import { Box } from "@mui/system";
 import React, { useState } from "react";
 import FilterButtons from "../../components/FilterButtons";
 import TableComponent from "../../components/TableComponent";
-import TrackerDetailsComponent from "../../components/TrackerDetailsComponent";  {/* Changed here */}
+import TrackerDetailsComponent from "../../components/TrackerDetailsComponent"; 
 import { Button, IconButton, Tooltip, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CancelIcon from "@mui/icons-material/Cancel";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import AddNewCase from "../../components/AddNewCase";  // Import AddNewCase component
 
 const CaseTracker: React.FC = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);  // Modal state
 
   const CaseType = ["Case Type", "Civil Case", "Special Case", "Criminal Case"];
   const Deadline = ["Deadline", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
@@ -23,33 +25,14 @@ const CaseTracker: React.FC = () => {
       Deadline: "2024-12-10",
       Status: "Active",
     },
-    {
-      "Case No.": 67890,
-      Title: "CITIZEN VS GOVERNMENT",
-      Deadline: "2024-12-15",
-      Status: "Closed",
-    },
-    {
-      "Case No.": 24680,
-      Title: "GOVERNMENT VS CITIZEN",
-      Deadline: "2024-12-20",
-      Status: "New",
-    },
-    {
-      "Case No.": 13579,
-      Title: "VP LENI ROBREDO VS SENATOR PACQUIAO",
-      Deadline: "2024-12-25",
-      Status: "Appealed",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      Deadline: "2024-12-30",
-      Status: "Archived",
-    },
+    // Add other cases as needed
   ];
 
   const handleDetailsToggle = () => setIsDetailsOpen((prev) => !prev);
+  
+  const toggleModal = () => {
+    setIsModalOpen((prev) => !prev); // Toggle modal visibility
+  };
 
   return (
     <Box sx={{ marginX: 3, marginTop: 1 }}>
@@ -65,11 +48,11 @@ const CaseTracker: React.FC = () => {
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             variant="contained"
-            onClick={() => console.log("Add New Case")}
+            onClick={toggleModal}  // Open the modal when clicked
             sx={{
               backgroundColor: "#0F2043",
               color: "#FFFFFF",
-              borderRadius: "12px",
+              borderRadius: "0.3rem",
               textTransform: "none",
               paddingX: 3,
               paddingY: 1,
@@ -85,7 +68,6 @@ const CaseTracker: React.FC = () => {
 
         {/* Right Side Buttons */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* See Edit History Button */}
           <Box
             sx={{
               display: "flex",
@@ -93,10 +75,9 @@ const CaseTracker: React.FC = () => {
               gap: 1,
               cursor: "pointer",
               paddingX: 0.5,
-              borderRadius: "8px", // Rounded rectangle
-              transition: "background-color 0.3s ease, box-shadow 0.3s ease",
+              borderRadius: "8px",
               "&:hover": {
-                backgroundColor: "#eeeee", 
+                backgroundColor: "#eeeee",
                 boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
               },
             }}
@@ -114,7 +95,6 @@ const CaseTracker: React.FC = () => {
             </Typography>
           </Box>
 
-          {/* View Details Button */}
           <Tooltip
             title={isDetailsOpen ? "Close Details" : "View Details"}
             arrow
@@ -139,8 +119,14 @@ const CaseTracker: React.FC = () => {
             popoverContent={undefined}
           />
         </Box>
-        {isDetailsOpen && <TrackerDetailsComponent />}  {/* Changed here */}
+        {isDetailsOpen && <TrackerDetailsComponent />}
       </Box>
+
+      {/* Modal Logic */}
+      <AddNewCase
+        open={isModalOpen}  // Pass the state here to control visibility
+        onClose={toggleModal}  // Pass the toggle function to close the modal
+      />
     </Box>
   );
 };
