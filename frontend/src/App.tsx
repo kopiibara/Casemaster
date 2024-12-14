@@ -25,60 +25,70 @@ import ProfileSelection from "./pages/login/ProfileSelection";
 import ForgotPINExisting from "./pages/login/ExistingProfile/ForgotPinExistingProfile";
 import { AppProvider } from "./AppContext";
 
-
 function App() {
   return (
     <AppProvider>
-    <Router>
-      <Routes>
-     
-        {/* Public Routes */}
-        
-        <Route path="/" element={<SignIn />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
-        <Route path="/pin-setup" element={<PINSetup />} />
-        <Route path="/profiles" element={<Profiles />} />
-        <Route
-          path="/login-existing-profile"
-          element={<LoginExistingProfile />}
-        />
-        <Route path="/add-existing-profile" element={<AddExistingProfile />} />
-        <Route path="/existing-profile-pin" element={<ExistingProfilePin />} />
-        <Route
-          path="/confirm-existing-profile"
-          element={<ConfirmExistingProfile />}
-        />
-        <Route path="/forgot-pin-existing" element={<ForgotPINExisting />} />
-        <Route path="/profile-selection" element={<ProfileSelection />} />{" "}
-        <Route element={<MainLayout />}>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<SignIn />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="/pin-setup" element={<PINSetup />} />
+          <Route path="/profiles" element={<Profiles />} />
           <Route
-            path="/dashboard/Dashboard/:profileId?"
-            element={<DashboardPage />}
+            path="/login-existing-profile"
+            element={<LoginExistingProfile />}
           />
+          <Route
+            path="/add-existing-profile"
+            element={<AddExistingProfile />}
+          />
+          <Route
+            path="/existing-profile-pin"
+            element={<ExistingProfilePin />}
+          />
+          <Route
+            path="/confirm-existing-profile"
+            element={<ConfirmExistingProfile />}
+          />
+          <Route path="/forgot-pin-existing" element={<ForgotPINExisting />} />
+          <Route
+            path="/profile-selection"
+            element={<ProfileSelection />}
+          />{" "}
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard/Dashboard" element={<DashboardPage />} />
 
-          <Route path="/caselogs/FromEmail" element={<FromEmail />} />
-          <Route path="/caselogs/ManualInput" element={<ManualInput />} />
-          <Route path="/mails/Inbox" element={<InboxMails />} />
-          <Route path="/mails/Sent" element={<SentMails />} />
-          <Route path="/mails/Starred" element={<StarredMails />} />
-          <Route path="/mails/Archive" element={<ArchiveMails />} />
-          <Route
-            path="/attachments/AllAttachments"
-            element={<AllAttachments />}
-          />
-          <Route
-            path="/attachments/MyAttachments"
-            element={<MyAttachments />}
-          />
-          <Route path="/attachments/SharedWithMe" element={<SharedWithMe />} />
-          <Route path="/attachments/Starred" element={<StarredAttachments />} />
-          <Route path="/attachments/Archive" element={<ArchiveAttachments />} />
-          <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
-          
-        </Route>
-        
-      </Routes>
-    </Router>
+            <Route path="/caselogs/FromEmail" element={<FromEmail />} />
+            <Route path="/caselogs/ManualInput" element={<ManualInput />} />
+            <Route path="/mails/Inbox" element={<InboxMails />} />
+            <Route path="/mails/Sent" element={<SentMails />} />
+            <Route path="/mails/Starred" element={<StarredMails />} />
+            <Route path="/mails/Archive" element={<ArchiveMails />} />
+            <Route
+              path="/attachments/AllAttachments"
+              element={<AllAttachments />}
+            />
+            <Route
+              path="/attachments/MyAttachments"
+              element={<MyAttachments />}
+            />
+            <Route
+              path="/attachments/SharedWithMe"
+              element={<SharedWithMe />}
+            />
+            <Route
+              path="/attachments/Starred"
+              element={<StarredAttachments />}
+            />
+            <Route
+              path="/attachments/Archive"
+              element={<ArchiveAttachments />}
+            />
+            <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
+          </Route>
+        </Routes>
+      </Router>
     </AppProvider>
   );
 }

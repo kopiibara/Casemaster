@@ -1,12 +1,70 @@
+// SignIn.tsx
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button";
-import { Box } from "@mui/material";
+import { Button, Box } from "@mui/material";
+import {
+  PublicClientApplication,
+  AuthenticationResult,
+  Configuration,
+} from "@azure/msal-browser";
+import { config } from "../../../config";
+import { useAuth } from "./../../../context/AuthContext"; // Import useAuth hook
 
-const SignIn = () => {
+const msalConfig: Configuration = {
+  auth: {
+    clientId: config.appId,
+    authority: config.authority,
+    redirectUri: config.redirectUri,
+  },
+  cache: {
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
+  },
+};
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+const SignIn: React.FC = () => {
   const navigate = useNavigate();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { setAccessToken } = useAuth(); // Access the function to set the token
 
-  const handleSignIn = () => {
-    navigate("/profile-setup");
+  useEffect(() => {
+    const initializeMsal = async () => {
+      try {
+        await msalInstance.initialize();
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("MSAL initialization failed:", error);
+      }
+    };
+
+    initializeMsal();
+  }, []);
+
+  const handleSignIn = async (): Promise<void> => {
+    if (!isInitialized) {
+      console.error("MSAL is not initialized yet.");
+      return;
+    }
+
+    try {
+      const loginResponse: AuthenticationResult = await msalInstance.loginPopup(
+        {
+          scopes: ["User.Read", "Mail.Read"],
+          prompt: "select_account",
+        }
+      );
+
+      const accessToken = loginResponse.accessToken;
+      console.log("Access Token:", accessToken);
+
+      setAccessToken(accessToken); // Store the token in context
+
+      navigate("/dashboard/Dashboard");
+    } catch (error) {
+      console.error("Sign-in failed:", error);
+    }
   };
 
   return (

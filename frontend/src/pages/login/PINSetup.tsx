@@ -1,4 +1,4 @@
-import React, { useState, useRef ,useEffect} from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
@@ -6,7 +6,6 @@ import TextField from "@mui/material/TextField";
 import { Box } from "@mui/material";
 import { useAppContext } from "../../AppContext";
 import axios from "axios";
-
 
 const PINSetUp = () => {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ const PINSetUp = () => {
     "set-pin"
   );
   const [setPin, setSetPin] = useState<string>("");
-  const { profileData } = useAppContext(); 
+  const { profileData } = useAppContext();
   const { fullName, email, phoneNo, image } = profileData;
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); // State to store the object URL for the image
 
@@ -81,7 +80,9 @@ const PINSetUp = () => {
     } else if (currentView === "confirm-pin") {
       const enteredPin = pinValues.join("");
       if (enteredPin === setPin) {
-        handleCreateProfile();
+        navigate("/Dashboard/dashboard");
+        //handleCreateProfile();
+        //setPinValues(["", "", "", ""]); // Reset here after successful profile creation
       } else {
         setErrorIndexes([0, 1, 2, 3]);
         setTimeout(() => {
@@ -93,26 +94,26 @@ const PINSetUp = () => {
   };
 
   const handleCreateProfile = async () => {
-      const formData = new FormData();
-      formData.append("name", fullName);
-      formData.append("email", email);
-      formData.append("phone", phoneNo);
-      formData.append("role", "Staff");
-      if (image) {
-        formData.append("image", image);  
-      }
-      formData.append("pin", pinValues.join(""));
-      console.log(pinValues.join(""));
-      try {
-     
-        const response = await axios.post("http://localhost:5000/api/save-profile", formData);
-        console.log(response.data);
-        
-    
-        navigate("/profile-selection");
-      } catch (error) {
-        console.error("Error:", error);
-      }
+    const formData = new FormData();
+    formData.append("name", fullName);
+    formData.append("email", email);
+    formData.append("phone", phoneNo);
+    formData.append("role", "Staff");
+    if (image) {
+      formData.append("image", image);
+    }
+    formData.append("pin", setPin); // Use setPin instead of pinValues.join("")
+    console.log(setPin);
+    try {
+      const response = await axios.post(
+        "http://localhost:3304/api/save-profile",
+        formData
+      );
+      console.log(response.data);
+      navigate("/profile-selection");
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -161,8 +162,6 @@ const PINSetUp = () => {
 
       {/* Centered Content */}
       <Box>
-
-            
         <h1 className="font-bold text-3xl text-[#0f2043] mb-2">
           {currentView === "set-pin"
             ? "Set your PIN Code"
@@ -239,8 +238,8 @@ const PINSetUp = () => {
             }}
           />
         ))}
-          <p>{profileData.email}</p>
-          <img src={imageUrl} alt="Profile" width="100" height="100" />
+        <p>{profileData.email}</p>
+        <img src={imageUrl} alt="Profile" width="100" height="100" />
       </Box>
 
       {/* Confirm Button */}

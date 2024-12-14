@@ -1,96 +1,73 @@
-import { Box, Typography, Divider } from "@mui/material";
-import { EmailPreview } from "./EmailPreview";
+import React, { useEffect, useState } from "react";
+import { Box, Typography } from "@mui/material";
+import EmailPreview from "./EmailPreview";
 import EmailView from "./MailContent";
-import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { Client } from "@microsoft/microsoft-graph-client";
 
-// Define the structure for emails
 interface Email {
-  id: number;
-  sender: string;
-  email: string;
+  id: string;
   subject: string;
-  time: string;
-  preview: string;
-  content: string;
-  date: string; // Add date for grouping
-  attachment?: {
-    name: string;
-    size: string;
+  sender: {
+    emailAddress: {
+      name: string;
+      address: string;
+    };
   };
-  replies?: Reply[]; // Add replies field
+  receivedDateTime: string;
+  hasAttachments: boolean;
+  bodyPreview: string;
 }
 
-interface Reply {
-  id: number;
-  content: string;
-  time: string;
-}
-
-const MailContainer = () => {
+const MailContainer: React.FC = () => {
+  const { accessToken } = useAuth();
+  const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Function to handle reply submission
-  const handleReply = (replyContent: string) => {
-    if (selectedEmail) {
-      const newReply: Reply = {
-        id: Date.now(),
-        content: replyContent,
-        time: new Date().toLocaleTimeString(),
-      };
-      const updatedEmail = {
-        ...selectedEmail,
-        replies: [...(selectedEmail.replies || []), newReply],
-      };
-      setSelectedEmail(updatedEmail);
-      // Update the emails array if needed
-    }
-  };
+  useEffect(() => {
+    const fetchEmails = async () => {
+      if (!accessToken) return;
 
-  // Mock Email Data
-  const emails: Email[] = [
-    {
-      id: 1,
-      sender: "Alice Cooper",
-      email: "alice.cooper@example.com",
-      subject: "Meeting Update",
-      time: "10:30 AM",
-      date: "Today",
-      preview: "Hi team, please find the updated meeting agenda...",
-      content: "Detailed meeting agenda goes here.",
-    },
-    {
-      id: 2,
-      sender: "Bob Marley",
-      email: "bob.marley@example.com",
-      subject: "Invoice Attached",
-      time: "9:00 AM",
-      date: "Today",
-      preview: "Dear Customer, please find the attached invoice...",
-      content: "Invoice details and summary.",
-      attachment: { name: "invoice.pdf", size: "300KB" },
-    },
-    {
-      id: 3,
-      sender: "Charlie Brown",
-      email: "charlie.brown@example.com",
-      subject: "Project Deadline",
-      time: "11:00 AM",
-      date: "Yesterday",
-      preview: "Reminder: The project deadline is approaching quickly.",
-      content: "Project deadline details and next steps.",
-    },
-  ];
+      setLoading(true);
+      setError(null);
 
-  // Group emails by date
-  const groupedEmails = emails.reduce((groups, email) => {
-    if (!groups[email.date]) groups[email.date] = [];
-    groups[email.date].push(email);
-    return groups;
-  }, {} as { [key: string]: Email[] });
+      try {
+        const client = Client.init({
+          authProvider: (done) => done(null, accessToken),
+        });
+
+        const response = await client
+          .api("/me/messages")
+          .select(
+            "id,subject,sender,receivedDateTime,hasAttachments,bodyPreview"
+          )
+          .get();
+
+        setEmails(response.value);
+      } catch (err) {
+        console.error("Error fetching emails:", err);
+        setError("Failed to load emails.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmails();
+  }, [accessToken]);
+
+  if (loading) {
+    return <Typography>Loading emails...</Typography>;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
 
   return (
     <Box display="flex" height="77vh" overflow="hidden">
-      {/* Email List Section */}
+      {/* Email List */}
       <Box
         sx={{
           width: "35%",
@@ -109,28 +86,21 @@ const MailContainer = () => {
           },
         }}
       >
-        {Object.keys(groupedEmails).map((date) => (
-          <Box key={date} sx={{ padding: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-              {date}
-            </Typography>
-            <Divider />
-            {groupedEmails[date].map((email) => (
-              <EmailPreview
-                key={email.id}
-                sender={email.sender}
-                subject={email.subject}
-                time={email.time}
-                preview={email.preview}
-                onClick={() => setSelectedEmail(email)}
-                selected={selectedEmail?.id === email.id}
-              />
-            ))}
-          </Box>
+        {emails.map((email) => (
+          <EmailPreview
+            key={email.id}
+            sender={email.sender.emailAddress.name}
+            subject={email.subject}
+            time={new Date(email.receivedDateTime).toLocaleString()}
+            preview={email.bodyPreview}
+            onClick={() => setSelectedEmail(email)}
+            selected={selectedEmail?.id === email.id}
+            hasAttachment={email.hasAttachments}
+          />
         ))}
       </Box>
 
-      {/* Email View Section */}
+      {/* Email Details */}
       <Box
         sx={{
           width: "65%",
@@ -151,14 +121,14 @@ const MailContainer = () => {
       >
         {selectedEmail ? (
           <EmailView
-            sender={selectedEmail.sender}
-            email={selectedEmail.email}
-            timestamp={selectedEmail.time}
+            sender={selectedEmail.sender.emailAddress.name}
+            email={selectedEmail.sender.emailAddress.address}
+            timestamp={new Date(
+              selectedEmail.receivedDateTime
+            ).toLocaleString()}
             subject={selectedEmail.subject}
-            content={selectedEmail.content}
-            attachment={selectedEmail.attachment}
-            replies={selectedEmail.replies} // Pass replies to EmailView
-            onReply={handleReply} // Pass the reply handler
+            content={selectedEmail.bodyPreview}
+            attachment={selectedEmail.hasAttachments ? "Yes" : "No"}
           />
         ) : (
           <Box
@@ -168,7 +138,7 @@ const MailContainer = () => {
             height="100%"
           >
             <Typography variant="h6" color="text.secondary">
-              Select an email to view its details.
+              Select an email to view its details ...
             </Typography>
           </Box>
         )}
