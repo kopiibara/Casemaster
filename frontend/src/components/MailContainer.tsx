@@ -114,7 +114,12 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
   // Render loading state
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100%"
+      >
         <CircularProgress />
       </Box>
     );
@@ -123,7 +128,12 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
   // Render error state
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100%"
+      >
         <Typography color="error">{error}</Typography>
       </Box>
     );
@@ -189,7 +199,9 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
           <EmailView
             sender={selectedEmail.sender.emailAddress.name}
             email={selectedEmail.sender.emailAddress.address}
-            timestamp={new Date(selectedEmail.receivedDateTime).toLocaleString()}
+            timestamp={new Date(
+              selectedEmail.receivedDateTime
+            ).toLocaleString()}
             subject={selectedEmail.subject}
             content={selectedEmail.bodyPreview}
             attachments={selectedEmail.attachments}

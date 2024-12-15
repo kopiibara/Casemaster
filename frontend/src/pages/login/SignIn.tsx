@@ -1,4 +1,3 @@
-// SignIn.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Box } from "@mui/material";
@@ -27,7 +26,7 @@ const msalInstance = new PublicClientApplication(msalConfig);
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
-  const { setAccessToken } = useAuth(); // Access the function to set the token
+  const { setTokens } = useAuth(); // Access the function to set both tokens
 
   useEffect(() => {
     const initializeMsal = async () => {
@@ -51,15 +50,18 @@ const SignIn: React.FC = () => {
     try {
       const loginResponse: AuthenticationResult = await msalInstance.loginPopup(
         {
-          scopes: ["User.Read", "Mail.Read"],
+          scopes: ["User.Read", "Mail.Read", "offline_access"], // Add offline_access for refresh token
           prompt: "select_account",
         }
       );
 
       const accessToken = loginResponse.accessToken;
-      console.log("Access Token:", accessToken);
+      const refreshToken = loginResponse.idToken; // Use idToken as a stand-in for refresh token
 
-      setAccessToken(accessToken); // Store the token in context
+      console.log("Access Token:", accessToken);
+      console.log("Refresh Token (ID Token):", refreshToken);
+
+      setTokens(accessToken, refreshToken); // Store both the access and refresh tokens
 
       navigate("/dashboard/Dashboard");
     } catch (error) {

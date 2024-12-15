@@ -3,17 +3,16 @@ import {
   Box,
   Modal,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   Divider,
   TextField,
   Button,
   IconButton,
   MenuItem,
 } from "@mui/material";
-import { PDFDocument } from "pdf-lib";
 import CloseIcon from "@mui/icons-material/Close";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import * as pdfjsLib from "pdfjs-dist";
 
 interface Attachment {
   name: string;
@@ -35,43 +34,18 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   attachments,
   selectedAttachment,
 }) => {
-  const [currentAttachment, setCurrentAttachment] = useState<Attachment | null>(selectedAttachment);
+  const [currentAttachment, setCurrentAttachment] = useState<Attachment | null>(
+    selectedAttachment
+  );
   const [caseNo, setCaseNo] = useState<number | null>(null);
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [partyFiler, setPartyFiler] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
-  const [pdfPages, setPdfPages] = useState<string[]>([]);
 
   useEffect(() => {
     setCurrentAttachment(selectedAttachment);
-    if (selectedAttachment && selectedAttachment.type === "application/pdf") {
-      loadPdf(selectedAttachment.url);
-    }
   }, [selectedAttachment]);
-
-  const loadPdf = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch PDF");
-      }
-      const arrayBuffer = await response.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
-      const pages = pdfDoc.getPages();
-      const pageImages = await Promise.all(
-        pages.map(async (page) => {
-          const { width, height } = page.getSize();
-          const pdfPage = await pdfDoc.embedPage(page);
-          const pngImage = await pdfPage.renderToPng({ width, height });
-          return URL.createObjectURL(pngImage);
-        })
-      );
-      setPdfPages(pageImages);
-    } catch (error) {
-      console.error("Error loading PDF:", error);
-    }
-  };
 
   const handleAddTag = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && newTag.trim() !== "") {
@@ -97,8 +71,14 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         }}
       >
         {/* Left Side - Form and Import Info */}
-        <Box sx={{ width: "30%", borderRight: "1px solid #ddd", paddingRight: 2 }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box
+          sx={{ width: "30%", borderRight: "1px solid #ddd", paddingRight: 2 }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="h6">Import to Case Logs</Typography>
             <IconButton onClick={onClose}>
               <CloseIcon />
@@ -142,7 +122,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               SelectProps={{
                 multiple: true,
                 value: tags,
-                renderValue: (selected) => selected.join(", "),
+                renderValue: (value: unknown) => (value as string[]).join(", "),
               }}
             >
               {tags.map((tag, index) => (
@@ -173,11 +153,19 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                 Type: {currentAttachment.type}, Size: {currentAttachment.size}
               </Typography>
               {currentAttachment.type === "application/pdf" ? (
-                pdfPages.map((page, index) => (
-                  <img key={index} src={page} alt={`Page ${index + 1}`} style={{ width: "100%", marginBottom: "1rem" }} />
-                ))
+                <div style={{ height: "600px" }}>
+                  <Worker
+                    workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
+                  >
+                    <Viewer fileUrl={currentAttachment.url} />
+                  </Worker>
+                </div>
               ) : (
-                <img src={currentAttachment.url} alt={currentAttachment.name} style={{ width: "100%" }} />
+                <img
+                  src={currentAttachment.url}
+                  alt={currentAttachment.name}
+                  style={{ width: "100%" }}
+                />
               )}
             </>
           ) : (
