@@ -17,8 +17,30 @@ import {
   ListItemText,
   IconButton,
 } from "@mui/material";
-import { Reply, AttachFile, MailOutline, Cancel, Description, Download, Visibility } from "@mui/icons-material";
+import {
+  Reply,
+  AttachFile,
+  MailOutline,
+  Cancel,
+  Description,
+  Download,
+  Visibility,
+} from "@mui/icons-material";
 import AttachmentModal from "./AttachmentModal";
+
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
+}
+
+interface Attachment {
+  name: string;
+  size: string;
+  type: string;
+  url: string;
+  "@odata.mediaContentUrl"?: string; // Optional field for mediaContentUrl
+}
 
 interface EmailViewProps {
   sender: string;
@@ -26,15 +48,9 @@ interface EmailViewProps {
   timestamp: string;
   subject: string;
   content: string;
-  attachments?: { name: string; size: string; type: string; url: string }[]; // Updated to include URL for attachments
-  replies?: Reply[]; // Add replies prop
-  onReply: (replyContent: string) => void; // Add onReply prop
-}
-
-interface Reply {
-  id: number;
-  content: string;
-  time: string;
+  attachments?: Attachment[]; // Updated to include the Attachment interface
+  replies?: Reply[];
+  onReply: (replyContent: string) => void;
 }
 
 const EmailView: React.FC<EmailViewProps> = ({
@@ -51,7 +67,8 @@ const EmailView: React.FC<EmailViewProps> = ({
   const [replyContent, setReplyContent] = useState<string>("");
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAttachment, setSelectedAttachment] = useState<{ name: string; size: string; type: string; url: string } | null>(null);
+  const [selectedAttachment, setSelectedAttachment] =
+    useState<Attachment | null>(null);
 
   const handleSendReply = () => {
     onReply(replyContent); // Call the parent handler
@@ -83,7 +100,29 @@ const EmailView: React.FC<EmailViewProps> = ({
     }
   };
 
-  const handleViewAttachment = (attachment: { name: string; size: string; type: string; url: string }) => {
+  const handleViewAttachment = (attachment: Attachment) => {
+    // Log the original URL (this is the URL you fetched for the attachment)
+    console.log("Original Attachment URL:", attachment.url);
+
+    // Check if the attachment has a URL and log accordingly
+    let validUrl = attachment.url;
+    if (!validUrl && attachment["@odata.mediaContentUrl"]) {
+      // Fallback to the mediaContentUrl if the regular URL is invalid
+      validUrl = attachment["@odata.mediaContentUrl"];
+      console.log("Using mediaContentUrl as fallback:", validUrl);
+    }
+
+    // Log the final URL that is being used
+    if (validUrl) {
+      console.log("Final Attachment URL:", validUrl);
+    } else {
+      console.error(
+        "Error: No valid URL found for attachment",
+        attachment.name
+      );
+    }
+
+    // Open the modal with the selected attachment
     setSelectedAttachment(attachment);
     setIsModalOpen(true);
   };
@@ -155,7 +194,12 @@ const EmailView: React.FC<EmailViewProps> = ({
         <Box sx={{ lineHeight: 1.8 }}>
           {content
             ? content.split("\n\n").map((paragraph, index) => (
-                <Typography key={index} variant="body1" color="text.secondary" paragraph>
+                <Typography
+                  key={index}
+                  variant="body1"
+                  color="text.secondary"
+                  paragraph
+                >
                   {paragraph}
                 </Typography>
               ))
@@ -196,7 +240,9 @@ const EmailView: React.FC<EmailViewProps> = ({
                   <IconButton
                     edge="end"
                     aria-label="download"
-                    onClick={() => handleDownload(attachment.url, attachment.name)}
+                    onClick={() =>
+                      handleDownload(attachment.url, attachment.name)
+                    }
                   >
                     <Download />
                   </IconButton>
@@ -213,8 +259,18 @@ const EmailView: React.FC<EmailViewProps> = ({
               Replies
             </Typography>
             {replies.map((reply) => (
-              <Box key={reply.id} mb={2} p={2} bgcolor="#f9f9f9" borderRadius={2}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Box
+                key={reply.id}
+                mb={2}
+                p={2}
+                bgcolor="#f9f9f9"
+                borderRadius={2}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   {reply.time}
                 </Typography>
                 <Typography variant="body1">{reply.content}</Typography>
@@ -278,7 +334,7 @@ const EmailView: React.FC<EmailViewProps> = ({
               variant="outlined"
               color="secondary"
               startIcon={<Cancel />}
-              onClick={() => { 
+              onClick={() => {
                 setIsReplying(false);
                 setReplyContent(""); // Reset reply editor
               }}
@@ -296,11 +352,13 @@ const EmailView: React.FC<EmailViewProps> = ({
         message="Reply sent successfully!"
         onClose={() => setShowSnackbar(false)}
       />
+
+      {/* Modal for Attachment View */}
       <AttachmentModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        attachments={attachments || []}
+        attachments={selectedAttachment ? [selectedAttachment] : []}
         selectedAttachment={selectedAttachment}
+        onClose={() => setIsModalOpen(false)}
       />
     </Card>
   );
