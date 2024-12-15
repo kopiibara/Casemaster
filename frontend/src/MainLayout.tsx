@@ -22,6 +22,7 @@ const MainLayout = () => {
       "/attachments/SharedWithMe": "Shared with Me",
       "/attachments/Starred": "Starred Attachments",
       "/attachments/Archive": "Archived Attachments",
+      "/attachments/FolderPage": "Attachments",
       "/casetracker/CaseTracker": "Case Tracker",
     };
 

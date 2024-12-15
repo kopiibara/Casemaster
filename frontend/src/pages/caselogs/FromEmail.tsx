@@ -46,7 +46,7 @@ const FromEmail: React.FC = () => {
 
   const popoverContent = (
     <Box style={{ padding: "1rem" }}>
-      <Stack direction={"column"} spacing={2}>
+      <Stack direction={"column"} spacing={1}>
         <Button
           variant="contained"
           color="primary"
