@@ -9,10 +9,16 @@ import {
   Divider,
   Typography,
   Tooltip,
-  IconButton,
   TextField,
+  Snackbar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
-import { Reply, AttachFile, MailOutline, Cancel } from "@mui/icons-material";
+import { Reply, AttachFile, MailOutline, Cancel, Description, Download, Visibility } from "@mui/icons-material";
+import AttachmentModal from "./AttachmentModal";
 
 interface EmailViewProps {
   sender: string;
@@ -20,10 +26,7 @@ interface EmailViewProps {
   timestamp: string;
   subject: string;
   content: string;
-  attachment?: {
-    name: string;
-    size: string;
-  };
+  attachments?: { name: string; size: string; type: string; url: string }[]; // Updated to include URL for attachments
   replies?: Reply[]; // Add replies prop
   onReply: (replyContent: string) => void; // Add onReply prop
 }
@@ -40,17 +43,49 @@ const EmailView: React.FC<EmailViewProps> = ({
   timestamp,
   subject,
   content,
-  attachment,
+  attachments,
   replies,
   onReply,
 }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState<string>("");
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAttachment, setSelectedAttachment] = useState<{ name: string; size: string; type: string; url: string } | null>(null);
 
   const handleSendReply = () => {
     onReply(replyContent); // Call the parent handler
+    setShowSnackbar(true);
     setIsReplying(false);
     setReplyContent(""); // Reset reply editor
+  };
+
+  const handleDownload = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading attachment:", error);
+    }
+  };
+
+  const handleDownloadAll = () => {
+    if (attachments) {
+      attachments.forEach((attachment) => {
+        handleDownload(attachment.url, attachment.name);
+      });
+    }
+  };
+
+  const handleViewAttachment = (attachment: { name: string; size: string; type: string; url: string }) => {
+    setSelectedAttachment(attachment);
+    setIsModalOpen(true);
   };
 
   return (
@@ -117,52 +152,57 @@ const EmailView: React.FC<EmailViewProps> = ({
           {subject || "No Subject"}
         </Typography>
 
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          paragraph
-          sx={{ lineHeight: 1.8 }}
-        >
+        <Box sx={{ lineHeight: 1.8 }}>
           {content
             ? content.split("\n\n").map((paragraph, index) => (
-                <Box key={index} mb={2}>
+                <Typography key={index} variant="body1" color="text.secondary" paragraph>
                   {paragraph}
-                </Box>
+                </Typography>
               ))
             : "No content available for this email."}
-        </Typography>
+        </Box>
 
-        {/* Attachment Section */}
-        {attachment && (
-          <Box
-            mt={3}
-            p={2}
-            bgcolor="#f7f7f7"
-            borderRadius={2}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Box display="flex" alignItems="center">
-              <AttachFile sx={{ mr: 2, color: "primary.main" }} />
-              <Box>
-                <Typography
-                  variant="body2"
-                  fontWeight={500}
-                  sx={{ wordBreak: "break-word" }}
-                >
-                  {attachment.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {attachment.size}
-                </Typography>
-              </Box>
-            </Box>
-            <Tooltip title="Download Attachment">
-              <IconButton color="primary">
-                <AttachFile />
-              </IconButton>
-            </Tooltip>
+        {/* Attachments Section */}
+        {attachments && attachments.length > 0 && (
+          <Box mt={3}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Attachments
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Download />}
+              onClick={handleDownloadAll}
+              sx={{ mb: 2 }}
+            >
+              Download All
+            </Button>
+            <List>
+              {attachments.map((attachment, index) => (
+                <ListItem key={index}>
+                  <ListItemIcon>
+                    <Description />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={attachment.name}
+                    secondary={`Size: ${attachment.size}, Type: ${attachment.type}`}
+                  />
+                  <IconButton
+                    edge="end"
+                    aria-label="view"
+                    onClick={() => handleViewAttachment(attachment)}
+                  >
+                    <Visibility />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="download"
+                    onClick={() => handleDownload(attachment.url, attachment.name)}
+                  >
+                    <Download />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
           </Box>
         )}
 
@@ -238,7 +278,7 @@ const EmailView: React.FC<EmailViewProps> = ({
               variant="outlined"
               color="secondary"
               startIcon={<Cancel />}
-              onClick={() => {
+              onClick={() => { 
                 setIsReplying(false);
                 setReplyContent(""); // Reset reply editor
               }}
@@ -248,6 +288,20 @@ const EmailView: React.FC<EmailViewProps> = ({
           </Box>
         </Box>
       )}
+
+      {/* Snackbar for Confirmation */}
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={3000}
+        message="Reply sent successfully!"
+        onClose={() => setShowSnackbar(false)}
+      />
+      <AttachmentModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        attachments={attachments || []}
+        selectedAttachment={selectedAttachment}
+      />
     </Card>
   );
 };
