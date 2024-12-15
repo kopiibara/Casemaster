@@ -28,21 +28,29 @@ import {
 } from "@mui/icons-material";
 import AttachmentModal from "./AttachmentModal";
 
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
+}
+
+interface Attachment {
+  name: string;
+  size: string;
+  type: string;
+  url: string;
+  "@odata.mediaContentUrl"?: string; // Optional field for mediaContentUrl
+}
+
 interface EmailViewProps {
   sender: string;
   email: string;
   timestamp: string;
   subject: string;
   content: string;
-  attachments?: { name: string; size: string; type: string; url: string }[]; // Updated to include URL for attachments
-  replies?: Reply[]; // Add replies prop
-  onReply: (replyContent: string) => void; // Add onReply prop
-}
-
-interface Reply {
-  id: number;
-  content: string;
-  time: string;
+  attachments?: Attachment[]; // Updated to include the Attachment interface
+  replies?: Reply[];
+  onReply: (replyContent: string) => void;
 }
 
 const EmailView: React.FC<EmailViewProps> = ({
@@ -59,12 +67,8 @@ const EmailView: React.FC<EmailViewProps> = ({
   const [replyContent, setReplyContent] = useState<string>("");
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAttachment, setSelectedAttachment] = useState<{
-    name: string;
-    size: string;
-    type: string;
-    url: string;
-  } | null>(null);
+  const [selectedAttachment, setSelectedAttachment] =
+    useState<Attachment | null>(null);
 
   const handleSendReply = () => {
     onReply(replyContent); // Call the parent handler
@@ -96,12 +100,29 @@ const EmailView: React.FC<EmailViewProps> = ({
     }
   };
 
-  const handleViewAttachment = (attachment: {
-    name: string;
-    size: string;
-    type: string;
-    url: string;
-  }) => {
+  const handleViewAttachment = (attachment: Attachment) => {
+    // Log the original URL (this is the URL you fetched for the attachment)
+    console.log("Original Attachment URL:", attachment.url);
+
+    // Check if the attachment has a URL and log accordingly
+    let validUrl = attachment.url;
+    if (!validUrl && attachment["@odata.mediaContentUrl"]) {
+      // Fallback to the mediaContentUrl if the regular URL is invalid
+      validUrl = attachment["@odata.mediaContentUrl"];
+      console.log("Using mediaContentUrl as fallback:", validUrl);
+    }
+
+    // Log the final URL that is being used
+    if (validUrl) {
+      console.log("Final Attachment URL:", validUrl);
+    } else {
+      console.error(
+        "Error: No valid URL found for attachment",
+        attachment.name
+      );
+    }
+
+    // Open the modal with the selected attachment
     setSelectedAttachment(attachment);
     setIsModalOpen(true);
   };
@@ -331,11 +352,13 @@ const EmailView: React.FC<EmailViewProps> = ({
         message="Reply sent successfully!"
         onClose={() => setShowSnackbar(false)}
       />
+
+      {/* Modal for Attachment View */}
       <AttachmentModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        attachments={attachments || []}
+        attachments={selectedAttachment ? [selectedAttachment] : []}
         selectedAttachment={selectedAttachment}
+        onClose={() => setIsModalOpen(false)}
       />
     </Card>
   );

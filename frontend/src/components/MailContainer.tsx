@@ -41,7 +41,6 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
   const [error, setError] = useState<string | null>(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
 
-  // Fetch emails from Microsoft API
   useEffect(() => {
     const fetchEmails = async () => {
       if (!accessToken) return;
@@ -62,17 +61,29 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
           .expand("attachments")
           .get();
 
+        // Map through the emails and attachments to get the correct URL
         const emailsWithAttachments = response.value.map((email: any) => ({
           ...email,
-          attachments: email.attachments?.map((attachment: any) => ({
-            name: attachment.name,
-            size: attachment.size,
-            type: attachment.contentType,
-            url: attachment.contentUrl, // Assuming the URL is provided in the response
-          })),
+          attachments: email.attachments?.map((attachment: any) => {
+            // Check if attachment has contentUrl or use mediaContentUrl for larger files
+            let url =
+              attachment.contentUrl || attachment["@odata.mediaContentUrl"];
+
+            if (!url && attachment.contentBytes) {
+              // Handle the case where contentBytes is present for small files
+              url = `data:${attachment.contentType};base64,${attachment.contentBytes}`;
+            }
+
+            return {
+              name: attachment.name,
+              size: attachment.size,
+              type: attachment.contentType,
+              url, // Use the correct URL (either contentUrl, mediaContentUrl, or contentBytes)
+            };
+          }),
         }));
 
-        setEmails(emailsWithAttachments);
+        setEmails(emailsWithAttachments); // Set emails with attachments data
       } catch (err) {
         console.error("Error fetching emails:", err);
         setError("Failed to load emails.");
