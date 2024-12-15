@@ -93,109 +93,40 @@ const ManualInput: React.FC = () => {
     },
   ];
 
+  const buttonData = [
+    "View Details",
+    "Edit Details",
+    "View Email",
+    "Import to Case Tracker",
+    "Archive",
+  ];
+
   const popoverContent = (
     <Box style={{ padding: "1rem" }}>
-      <Stack direction={"column"} spacing={2}>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            color: "#0F2043",
-            justifyContent: "flex-start",
-            "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
-            },
-          }}
-        >
-          <SubMenuIcon
-            sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
-            className={"text-[#0F2043]"}
-          />
-          View Details
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            color: "#0F2043",
-            justifyContent: "flex-start",
-            "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
-            },
-          }}
-        >
-          <SubMenuIcon
-            sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
-            className={"text-[#0F2043]"}
-          />
-          Edit Details
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            color: "#0F2043",
-            justifyContent: "flex-start",
-            "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
-            },
-          }}
-        >
-          <SubMenuIcon
-            sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
-            className={"text-[#0F2043]"}
-          />
-          View Email
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            color: "#0F2043",
-            justifyContent: "flex-start",
-            "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
-            },
-          }}
-        >
-          <SubMenuIcon
-            sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
-            className={"text-[#0F2043]"}
-          />
-          Import to Case Tracker
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          disableElevation
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            color: "#0F2043",
-            justifyContent: "flex-start",
-            "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
-            },
-          }}
-        >
-          <SubMenuIcon
-            sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
-            className={"text-[#0F2043]"}
-          />
-          Archive
-        </Button>
+      <Stack direction={"column"} spacing={1}>
+        {buttonData.map((text) => (
+          <Button
+            key={text}
+            variant="contained"
+            color="primary"
+            disableElevation
+            sx={{
+              textTransform: "none",
+              backgroundColor: "transparent",
+              color: "#0F2043",
+              justifyContent: "flex-start",
+              "&:hover": {
+                backgroundColor: "#DCE5F6",
+              },
+            }}
+          >
+            <SubMenuIcon
+              sx={{ width: "0.5rem", height: "0.5rem", marginRight: "0.5rem" }}
+              className={"text-[#0F2043]"}
+            />
+            {text}
+          </Button>
+        ))}
       </Stack>
     </Box>
   );

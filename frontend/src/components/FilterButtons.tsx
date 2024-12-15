@@ -14,11 +14,13 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 interface FilterButtonsProps {
   options: string[];
   defaultIndex?: number; // Optional prop for the default selected index
+  disabledOptions?: number[]; // Optional prop for disabled button indices
 }
 
 const FilterButtons: React.FC<FilterButtonsProps> = ({
   options,
   defaultIndex = 0, // Default to the first option if not provided
+  disabledOptions = [], // Default to no disabled options
 }) => {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -71,6 +73,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           onClick={handleClick}
           sx={{ textTransform: "none" }}
           className="normal-case"
+          disabled={disabledOptions.includes(selectedIndex)} // Disable if the current option is in disabledOptions
         >
           {options[selectedIndex]}
         </Button>
@@ -108,7 +111,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                   {options.map((option, index) => (
                     <MenuItem
                       key={option}
-                      disabled={index === 0}
+                      disabled={disabledOptions.includes(index)} // Disable menu items based on disabledOptions
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}
                       sx={{

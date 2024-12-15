@@ -118,7 +118,12 @@ const TableComponent: React.FC<TableComponentProps> = ({
       }}
       className="bg-white rounded-lg max-h-[78vh]"
     >
-      <Table className="h-full" stickyHeader aria-label="dynamic table">
+      <Table
+        className="h-full"
+        size={orderBy ? "small" : "medium"}
+        stickyHeader
+        aria-label="dynamic table"
+      >
         <TableHead className="bg-[#DCE5F6] [&_.MuiTableCell-head]:font-bold [&_.MuiTableCell-head]:text-[#0F2043] [&_.MuiTableCell-head]:text-sm">
           <TableRow>
             {tableHeadData.map((header, index) => (
