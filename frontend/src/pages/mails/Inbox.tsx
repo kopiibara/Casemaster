@@ -1,6 +1,6 @@
 import { Box } from "@mui/system";
 import Stack from "@mui/material/Stack";
-import FilterButtons from "../../components/FilterButtons"; // Assuming these are your filters
+import MailsFilterButtons from "../../components/MailsFilter"; // Assuming these are your filters
 import MailContainer from "../../components/MailContainer";
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ const Inbox = () => {
     <Box sx={{ marginX: 3, marginY: 2 }}>
       <Stack spacing={2}>
         {/* Filter Buttons */}
-        <FilterButtons
+        <MailsFilterButtons
           filters={filters}
           onFilterSelect={handleFilterSelect}
           selectedFilter={selectedFilter}
