@@ -66,6 +66,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
           marginTop: "5%",
           backgroundColor: "white",
           boxShadow: 24,
+          borderRadius: 2,
           p: 4,
           overflow: "hidden",
         }}

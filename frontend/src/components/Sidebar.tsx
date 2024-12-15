@@ -144,9 +144,6 @@ export default function Sidebar() {
     minWidth: "unset",
     marginRight: "0.25rem",
     color: activeItem === item ? "#0f2043" : "#f6f9ff",
-    "&:hover": {
-      color: "#0f2043",
-    },
   });
 
   const renderListItem = (
