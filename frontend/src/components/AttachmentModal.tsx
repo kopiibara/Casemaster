@@ -13,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import * as pdfjsLib from "pdfjs-dist";
+import axios from "axios";
 
 interface Attachment {
   name: string;
@@ -51,6 +52,33 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
     if (event.key === "Enter" && newTag.trim() !== "") {
       setTags([...tags, newTag.trim()]);
       setNewTag("");
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const data = {
+        caseNo,
+        caseTitle,
+        partyFiler,
+        tags,
+      };
+
+      // Replace '/api/caselogs' with your backend endpoint
+      const response = await axios.post(
+        "http://localhost:3000/api/caselogs",
+        data
+      );
+
+      if (response.status === 200) {
+        alert("Case log saved successfully!");
+        onClose();
+      } else {
+        alert("Failed to save case log. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error saving case log:", error);
+      alert("An error occurred while saving the case log.");
     }
   };
 
@@ -136,7 +164,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               <Button variant="outlined" onClick={onClose}>
                 Discard
               </Button>
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="primary" onClick={handleSave}>
                 Save
               </Button>
             </Box>
