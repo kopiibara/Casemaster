@@ -69,7 +69,7 @@ const Folders: React.FC<FoldersProps> = ({
                 {folderContent}
               </Typography>
               <DotRecordIcon
-                sx={{ width: "0.7rem", height: "0.7rem", color: "#0F2043" }}
+                sx={{ width: "0.4rem", height: "0.4rem", color: "#0F2043" }}
               />
               {/* File Size */}
               <Typography variant="body2" className="text-[#0F2043] ">
