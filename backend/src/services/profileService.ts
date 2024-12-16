@@ -54,3 +54,40 @@ export const getProfiles = (req: Request) => {
 };
 
 
+export const approveAccount = (userId: number, isApproved: boolean) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE users SET isApproved = ? WHERE user_id = ?`;
+
+    db.query(query, [isApproved, userId], (err, result: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); // Account approval was successful
+        } else {
+          resolve(false); // No user found with the provided ID
+        }
+      }
+    });
+  });
+};
+
+// Function to update the role of a user to 'Branch Clerk'
+export const transferRole = (userId: number, newRole: string) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE users SET role = ? WHERE user_id = ?`;
+
+    db.query(query, [newRole, userId], (err, result: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); // Role updated successfully
+        } else {
+          resolve(false); // No user found with the provided ID
+        }
+      }
+    });
+  });
+};
+

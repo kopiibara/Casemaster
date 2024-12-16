@@ -118,6 +118,7 @@ const ModalView: React.FC<ModalViewProps> = ({
         return (
           <Verification
             method="email" // Optionally use method dynamically
+            user_id={selectedProfile.user_id} // Pass user_id
             email={selectedProfile.email} // Pass email
             phone={selectedProfile.phone}
             role={selectedProfile.role}

@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 
 // Define the ProfileData interface
 interface ProfileData {
+  id?: number;
   fullName: string;
   email: string;
   phoneNo: string;
@@ -36,6 +37,7 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // State to hold profile data
   const [profileData, setProfileData] = useState<ProfileData>({
+    id: 0,
     fullName: "",
     email: "",
     phoneNo: "",
