@@ -1,22 +1,22 @@
 import db from '../config/db'; // database connection
-import fs from 'fs';
-import path from 'path';
-
+import { Request } from 'express';
 
 interface Profile {
   name: string;
   email: string;
   phone: string;
   role: string;
-  image: Buffer; // Store the image path (string) instead of Buffer
+  image: string; // Change this to string, as it will store the base64 encoded string
   pin: string;
 }
+
 // Function to create a new user
 export const createUser = (data: any) => {
   const { name, email, phone, role, pin, image } = data;
 
+  // Insert the base64 image string into the database
   const query = `INSERT INTO users (name, email, phone, role, pin, image) 
-                 VALUES (?, ?, ?, ?, ?, ?)`;
+                 VALUES (?, ?, ?, ?, ?, ?)`; 
 
   return new Promise((resolve, reject) => {
     db.query(query, [name, email, phone, role, pin, image], (err, result) => {
@@ -29,30 +29,27 @@ export const createUser = (data: any) => {
   });
 };
 
-import { Request } from 'express';
-// Modify the getProfiles function to accept the request object
+// Modify the getProfiles function to return profiles with base64 image data
 export const getProfiles = (req: Request) => {
   return new Promise((resolve, reject) => {
     const query = 'SELECT * FROM users';
-    db.query(query, (err, results: any[]) => {
+    db.query(query, (err, results: any[]) => { // results is the rows array
       if (err) {
         console.error('Database Error:', err);
         return reject(err);
       }
 
-      // Get the base URL from the request
-      const baseUrl = `${req.protocol}://${req.get('host')}/`;
-
-      // Map through results to construct image URLs
-      const profiles = results.map(profile => {
+      // Map through results to include image base64
+      const profiles = results.map((profile: any) => {
         if (profile.image) {
-          // Ensure no duplicate 'uploads/' in the path
-          profile.image = `${baseUrl}${profile.image}`;
+          profile.image = `data:image/jpeg;base64,${profile.image}`;
         }
         return profile;
       });
 
-      resolve(profiles); // Return the profiles with image URLs
+      resolve(profiles); // Return profiles with base64 image data
     });
   });
 };
+
+
