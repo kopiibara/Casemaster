@@ -30,11 +30,16 @@ export default function Header({ title }: { title: string }) {
         sx={{ backgroundColor: "#f6f9ff" }}
       >
         <Toolbar>
-          <Stack direction="column" spacing={1}>
+          <Stack direction="column" spacing={0.1}>
             <Typography variant="body1" className="text-[#828CA0]">
               {formattedDate}
             </Typography>
-            <Typography variant="h4" component="div" className="text-[#0F2043]">
+            <Typography
+              variant="h4"
+              component="div"
+              className="text-[#0F2043]"
+              fontWeight={"bold"}
+            >
               {title}
             </Typography>
           </Stack>
