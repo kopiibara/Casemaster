@@ -24,21 +24,25 @@ const PINSetUp = () => {
   );
   const [setPin, setSetPin] = useState<string>("");
   const { profileData } = useAppContext();
-  const { fullName, email, phoneNo, image } = profileData;
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); // State to store the object URL for the image
+  const { fullName, email, phoneNo, image, role } = profileData;
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); 
 
   useEffect(() => {
     if (image) {
-      // If there's an image (Blob or File), create an object URL to display
       const objectURL = URL.createObjectURL(image);
       setImageUrl(objectURL);
 
-      // Cleanup the object URL when the component is unmounted or image changes
       return () => {
         URL.revokeObjectURL(objectURL);
       };
     }
   }, [image]);
+
+
+  useEffect(() => {
+    console.log(profileData);  // Check if fullName is properly populated
+  }, [profileData]);
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -80,9 +84,9 @@ const PINSetUp = () => {
     } else if (currentView === "confirm-pin") {
       const enteredPin = pinValues.join("");
       if (enteredPin === setPin) {
-        navigate("/Dashboard/dashboard");
-        //handleCreateProfile();
-        //setPinValues(["", "", "", ""]); // Reset here after successful profile creation
+
+        handleSubmitProfile();
+        setPinValues(["", "", "", ""]); // Reset here after successful profile creation
       } else {
         setErrorIndexes([0, 1, 2, 3]);
         setTimeout(() => {
@@ -93,28 +97,31 @@ const PINSetUp = () => {
     }
   };
 
-  const handleCreateProfile = async () => {
+  const handleSubmitProfile = async () => {
     const formData = new FormData();
     formData.append("name", fullName);
     formData.append("email", email);
     formData.append("phone", phoneNo);
-    formData.append("role", "Staff");
     if (image) {
-      formData.append("image", image);
+      formData.append("image", image); // Add image file to form data
     }
-    formData.append("pin", setPin); // Use setPin instead of pinValues.join("")
-    console.log(setPin);
+    formData.append("role", role);
+    formData.append("pin", pinValues.join(""));
+  
     try {
-      const response = await axios.post(
-        "http://localhost:3304/api/save-profile",
-        formData
-      );
-      console.log(response.data);
-      navigate("/profile-selection");
-    } catch (error) {
-      console.error("Error:", error);
+      const response = await axios.post("http://localhost:3000/api/users", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Profile setup successful", response.data);
+      navigate("/profiles");
+    } catch (err) {
+      console.error("Error uploading profile", err);
     }
   };
+  
+  
 
   return (
     <Box
@@ -239,6 +246,7 @@ const PINSetUp = () => {
           />
         ))}
         <p>{profileData.email}</p>
+        <p>{profileData.fullName}</p>
         <img src={imageUrl} alt="Profile" width="100" height="100" />
       </Box>
 

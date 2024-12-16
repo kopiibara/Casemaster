@@ -1,28 +1,70 @@
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAppContext } from "../../../AppContext";
 
 interface VerificationProps {
   isOpen: boolean;
   onConfirm: () => void;
   onClose: () => void;
+  name: string;
   email: string;
   phone: string;
   method: "email" | "phone";
+  role: string;
+  image: string | null;
   handleCloseModal: () => void;
 }
 
 const Verification: React.FC<VerificationProps> = ({
+  name,
   method = "email",
   handleCloseModal,
   email,
   phone,
+  role,
+  image,
   onConfirm,
 }) => {
   const [verificationMethod, setVerificationMethod] = useState(method);
   const [code, setCode] = useState("");
+  const { setProfileData } = useAppContext();
+  const navigate = useNavigate();
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
+  };
+
+  
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
+        to: email,
+        code: code,
+      });
+      console.log(response.data.message || "Email verified successfully!");
+      setProfileData({
+        fullName: name,
+        email: email,
+        phoneNo: phone,
+        image: null,
+        selectedProfileImage: image,
+        role: role,
+      });
+      handleCloseModal();
+      navigate("/dashboard/Dashboard"); 
+
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Invalid verification code.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
   };
 
   const verificationText =
@@ -142,7 +184,7 @@ const Verification: React.FC<VerificationProps> = ({
                 boxShadow: "none",
               },
             }}
-            onClick={onConfirm}
+            onClick={handleVerifyEmail}
           >
             Confirm
           </Button>
