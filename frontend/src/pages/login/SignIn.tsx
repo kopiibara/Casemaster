@@ -63,7 +63,7 @@ const SignIn: React.FC = () => {
 
       setTokens(accessToken, refreshToken); // Store both the access and refresh tokens
 
-      navigate("/dashboard/Dashboard");
+      navigate("/profile-setup");
     } catch (error) {
       console.error("Sign-in failed:", error);
     }
