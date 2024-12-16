@@ -8,6 +8,7 @@ import {
   TextField,
   Divider,
   Button,
+  Switch, // Import the Switch component
 } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import MenuItem from "@mui/material/MenuItem";
@@ -31,49 +32,22 @@ interface StaffPersonalDetailsProps {
   onClose: () => void;        // Function to handle closing
 }
 
-const position = [
-  {
-    value: "branch-clerk",
-    label: "Branch Clerk",
-  },
-  {
-    value: "staff",
-    label: "Staff",
-  },
-];
-
-const accountStatus = [
-  {
-    value: "active",
-    label: "Active",
-  },
-  {
-    value: "inactive",
-    label: "Inactive",
-  },
-  {
-    value: "pending",
-    label: "Pending",
-  },
-];
 
 const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
   employee,   // Receive the employee object
   onClose,
 }) => {
-  // Track profile status with state
-  const [profileStatus, setProfileStatus] = useState<string>(employee.isApproved ? "Active" : "Pending");
 
-  // Set branch position based on employee role
-  const [branchPosition, setBranchPosition] = useState<string>("");
+  // Add state for the toggle button
+  const [isApproved, setIsApproved] = useState<boolean>(employee.isApproved);
 
-  useEffect(() => {
-    setProfileStatus(employee.isApproved ? "Active" : "Pending");
-    setBranchPosition(employee.role === "branch-clerk" ? "Branch Clerk" : "Staff");
-  }, [employee]);
 
   const lastName = employee.name.split(" ").pop();
-  const roleValue = employee.role === "branch-clerk" ? "Branch Clerk" : "Staff"; // Determine the role value
+
+  // Handle toggle change
+  const handleToggleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsApproved(event.target.checked);
+  };
 
   return (
     <Box className="p-6">
@@ -94,7 +68,47 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
         </Stack>
 
         {/* Staff Details */}
-        <Avatar src={employee.image} alt={employee.name} sx={{ width: 96, height: 96 }} />
+        <Stack direction="column" alignItems="center" justifyContent="center">
+  {/* Avatar */}
+  <Avatar src={employee.image} alt={employee.name} sx={{ width: 96, height: 96 }} />
+
+  {/* IOS-style toggle switch and text */}
+  <Stack direction="row" alignItems="center" justifyContent="center" sx={{ marginTop: 2 }} gap={2}>
+    {/* Toggle switch */}
+    <Switch
+          checked={isApproved}
+              onChange={handleToggleChange}
+           color="primary"
+           size="small"
+             sx={{
+            transform: "scale(1.5)",  // Increase the size of the switch
+             "& .MuiSwitch-switchBase.Mui-checked": {
+      color: "#4caf50",  // Set the color to #4caf50 when active
+    },
+    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+      backgroundColor: "#4caf50",  // Set the track to green when active
+    },
+    "& .MuiSwitch-track": {
+      backgroundColor: "#868FA0",  // Set the default track color when inactive
+    },
+  }}
+/>
+
+
+    {/* Status text with green glow when active */}
+    <Typography
+      variant="subtitle1"
+      sx={{
+        color: isApproved ? "#4caf50" : "#868FA0",  // Change color based on approval
+        textShadow: isApproved ? "0 0 10px #4caf50, 0 0 20px #4caf50, 0 0 30px #4caf50" : "none", // Green glow when active
+        display: "inline-block",  // Ensure the text stays inline with the switch
+      }}
+    >
+      {isApproved ? "Active" : "Pending"}
+    </Typography>
+  </Stack>
+</Stack>
+
 
         {/* Profile Details */}
         <Stack spacing={2.5}>
@@ -192,7 +206,6 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
         </Stack>
 
         <Divider />
-       
 
         <Stack spacing={1}>
           <Typography variant="subtitle1">{lastName}'s System Logs</Typography>
