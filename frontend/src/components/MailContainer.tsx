@@ -43,52 +43,62 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
 
   useEffect(() => {
     const fetchEmails = async () => {
-      if (!accessToken) return;
+      if (!accessToken) {
+        // Log a message in the console if no access token is available
+        console.error("Debug: No access token found. Please authenticate.");
+        setError("Failed to load emails: No access token.");
+        setLoading(false);
+        return; // Exit the function early
+      }
 
       setLoading(true);
       setError(null);
 
-      try {
-        const client = Client.init({
-          authProvider: (done) => done(null, accessToken),
-        });
+      const maxRetries = 3;
+      let attempt = 0;
 
-        const response = await client
-          .api("/me/messages")
-          .select(
-            "id,subject,sender,receivedDateTime,hasAttachments,bodyPreview,isRead,importance"
-          )
-          .expand("attachments")
-          .get();
+      while (attempt < maxRetries) {
+        try {
+          const client = Client.init({
+            authProvider: (done) => done(null, accessToken),
+          });
 
-        // Map through the emails and attachments to get the correct URL
-        const emailsWithAttachments = response.value.map((email: any) => ({
-          ...email,
-          attachments: email.attachments?.map((attachment: any) => {
-            // Check if attachment has contentUrl or use mediaContentUrl for larger files
-            let url =
-              attachment.contentUrl || attachment["@odata.mediaContentUrl"];
+          const response = await client
+            .api("/me/messages")
+            .select(
+              "id,subject,sender,receivedDateTime,hasAttachments,bodyPreview,isRead,importance"
+            )
+            .expand("attachments")
+            .get();
 
-            if (!url && attachment.contentBytes) {
-              // Handle the case where contentBytes is present for small files
-              url = `data:${attachment.contentType};base64,${attachment.contentBytes}`;
-            }
+          const emailsWithAttachments = response.value.map((email: any) => ({
+            ...email,
+            attachments: email.attachments?.map((attachment: any) => {
+              let url =
+                attachment.contentUrl || attachment["@odata.mediaContentUrl"];
+              if (!url && attachment.contentBytes) {
+                url = `data:${attachment.contentType};base64,${attachment.contentBytes}`;
+              }
+              return {
+                name: attachment.name,
+                size: attachment.size,
+                type: attachment.contentType,
+                url,
+              };
+            }),
+          }));
 
-            return {
-              name: attachment.name,
-              size: attachment.size,
-              type: attachment.contentType,
-              url, // Use the correct URL (either contentUrl, mediaContentUrl, or contentBytes)
-            };
-          }),
-        }));
-
-        setEmails(emailsWithAttachments); // Set emails with attachments data
-      } catch (err) {
-        console.error("Error fetching emails:", err);
-        setError("Failed to load emails.");
-      } finally {
-        setLoading(false);
+          setEmails(emailsWithAttachments);
+          break; // Success, exit the loop
+        } catch (err) {
+          console.error(`Error fetching emails (attempt ${attempt + 1}):`, err);
+          if (attempt === maxRetries - 1) {
+            setError("Failed to load emails.");
+          }
+          attempt++;
+        } finally {
+          setLoading(false);
+        }
       }
     };
 

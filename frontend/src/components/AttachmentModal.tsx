@@ -12,8 +12,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
-import * as pdfjsLib from "pdfjs-dist";
 import axios from "axios";
+import * as pdfjsLib from "pdfjs-dist";
 
 interface Attachment {
   name: string;
@@ -43,6 +43,16 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   const [partyFiler, setPartyFiler] = useState<string>("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState<string>("");
+  const [caseType, setCaseType] = useState("");
+
+  const caseTypes = [
+    "Civil Case",
+    "Criminal Case",
+    "Special Case",
+    "Motion",
+    "Incident",
+    "Pleading",
+  ];
 
   useEffect(() => {
     setCurrentAttachment(selectedAttachment);
@@ -56,29 +66,61 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   };
 
   const handleSave = async () => {
+    if (!caseNo || !caseTitle || !partyFiler || !caseType) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+
+    if (!currentAttachment) {
+      alert("No attachment selected.");
+      return;
+    }
+
+    // Upload file to cloud storage first
+    const formData = new FormData();
+    const response = await fetch(currentAttachment.url);
+    const blob = await response.blob();
+    formData.append("file", blob, currentAttachment.name);
+
     try {
-      const data = {
+      // Step 1: Upload the file to the cloud storage
+      const uploadResponse = await axios.post(
+        "http://localhost:3000/api/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      const fileUrl = uploadResponse.data.fileUrl; // Cloud URL returned after successful upload
+
+      // Step 2: Save the case log with the cloud URL
+      const caseData = {
         caseNo,
         caseTitle,
         partyFiler,
-        tags,
+        caseType,
+        source: "Manual", // Assuming source is 'Manual' for this case
+        emailLink: "", // Adjust if emailLink is applicable
+        file_name: currentAttachment.name,
+        file_url: fileUrl,
       };
 
-      // Replace '/api/caselogs' with your backend endpoint
       const response = await axios.post(
         "http://localhost:3000/api/caselogs",
-        data
+        caseData
       );
+      alert("Case log saved successfully!");
+      console.log("Response:", response.data);
 
-      if (response.status === 200) {
-        alert("Case log saved successfully!");
-        onClose();
-      } else {
-        alert("Failed to save case log. Please try again.");
-      }
+      // Reset form fields
+      setCaseNo(null);
+      setCaseTitle("");
+      setPartyFiler("");
+      setCaseType("");
     } catch (error) {
       console.error("Error saving case log:", error);
-      alert("An error occurred while saving the case log.");
+      alert("Failed to save case log. Please try again.");
     }
   };
 
@@ -99,7 +141,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
           overflow: "hidden",
         }}
       >
-        {/* Left Side - Form and Import Info */}
+        {/* Left Side - Form */}
         <Box
           sx={{ width: "30%", borderRight: "1px solid #ddd", paddingRight: 2 }}
         >
@@ -140,6 +182,20 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               onChange={(e) => setPartyFiler(e.target.value)}
               sx={{ mb: 2 }}
             />
+            <TextField
+              label="Case Type"
+              fullWidth
+              value={caseType}
+              onChange={(e) => setCaseType(e.target.value)}
+              sx={{ mb: 2 }}
+              select
+            >
+              {caseTypes.map((type, index) => (
+                <MenuItem key={index} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
               label="Tags"
               fullWidth
