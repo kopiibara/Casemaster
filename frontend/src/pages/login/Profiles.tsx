@@ -13,6 +13,7 @@ interface Profile {
   image: string;
   email: string;
   phone: string;
+  isApproved: boolean;
 }
 
 const Profile = () => {

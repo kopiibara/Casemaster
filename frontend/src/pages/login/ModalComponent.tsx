@@ -21,6 +21,7 @@ interface ModalViewProps {
     email: string;
     phone: string;
     pin: string;
+    isApproved: boolean;
   };
 }
 

@@ -11,10 +11,12 @@ import {
   InputAdornment,
 } from "@mui/material";
 import TransferRoleCard from "./TransferRoleCard";
+import { useAppContext } from "../../../AppContext";
 
 const Profile = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const { profileData } = useAppContext();
 
   return (
     <Box
@@ -45,7 +47,7 @@ const Profile = () => {
         <Stack direction={"row"} spacing={4}>
           <Box>
             <Avatar
-              src="/broken-image.jpg"
+              src={profileData.selectedProfileImage || undefined}
               sx={{ width: 104, height: 104 }}
             ></Avatar>
           </Box>
@@ -140,7 +142,7 @@ const Profile = () => {
             }}
           >
             <InputLabel htmlFor="full-name">Full Name</InputLabel>
-            <OutlinedInput id="full-name" label="Full Name" />
+            <OutlinedInput id="full-name" label="Full Name" value={profileData.fullName}/>
           </FormControl>
 
           {/* Personal Email */}
@@ -178,7 +180,7 @@ const Profile = () => {
             <InputLabel htmlFor="personal-email">Personal Email</InputLabel>
             <OutlinedInput
               id="personal-email"
-              value={email}
+              value={profileData.email}
               onChange={(e) => setEmail(e.target.value)}
               label="Personal Email"
               endAdornment={
@@ -237,7 +239,7 @@ const Profile = () => {
             <InputLabel htmlFor="phone-number">Phone Number</InputLabel>
             <OutlinedInput
               id="phone-number"
-              value={phone}
+              value={profileData.phoneNo}
               onChange={(e) => setPhone(e.target.value)}
               label="Phone Number"
               endAdornment={

@@ -11,10 +11,11 @@ interface Profile {
   user_id: number;
   name: string;
   role: string;
-  image: string;
+  image: string; 
   email: string;
   phone: string;
   pin: string;
+  isApproved: boolean;
 }
 
 const ProfileSelection = () => {

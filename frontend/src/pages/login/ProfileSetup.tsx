@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import { Modal, Box, TextField, Button } from "@mui/material";
@@ -20,27 +20,37 @@ const ProfileSetup = () => {
   const [phoneNo, setPhoneNo] = useState<string>("");
   const { setProfileData } = useAppContext();
   const [role, setRole] = useState<string>("Staff");
+  const [isEmpty, setIsEmpty] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+
   
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/get-profiles");
+        if (response.data.length === 0) {
+          setIsEmpty(true);
+          setRole("Branch Clerk");
+          setIsApproved(true);
+        } else {
+          setIsEmpty(false);
+          setRole("Staff");
+          setIsApproved(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profiles", error);
+      }
+    };
+    fetchProfiles();
+  }, []);
+
+
 
   const handleCancel = () => {
     navigate(-1);
   };
 
-
-  const handleNext = () => {
-    if (fullName && email && phoneNo) {
-      // Pass image as-is, whether it’s null or a Blob
-      setProfileData({
-        fullName,
-        email,
-        phoneNo,
-        image: uploadedImage,
-        role,
-        selectedProfileImage:"",// Pass the uploadedImage directly (could be null or Blob)
-      });
-      navigate("/pin-setup");  // Navigate to next step
-    }
-  };
 
   const handleUploadImage = () => {
     if (fileInputRef.current) {
@@ -95,6 +105,7 @@ const ProfileSetup = () => {
           image: uploadedImage,
           role,
           selectedProfileImage:"",// Pass the uploadedImage directly (could be null or Blob
+          isApproved,
         });
         navigate("/pin-setup"); 
       }

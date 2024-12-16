@@ -24,8 +24,16 @@ const PINSetUp = () => {
   );
   const [setPin, setSetPin] = useState<string>("");
   const { profileData } = useAppContext();
-  const { fullName, email, phoneNo, image, role } = profileData;
+  const { fullName, email, phoneNo, image, role, isApproved } = profileData;
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); 
+
+  const userEmail = localStorage.getItem("userEmail");
+if (userEmail) {
+  console.log("Retrieved User Email:", userEmail);
+} else {
+  console.error("No user email found in localStorage.");
+}
+
 
   useEffect(() => {
     if (image) {
@@ -107,6 +115,7 @@ const PINSetUp = () => {
     }
     formData.append("role", role);
     formData.append("pin", pinValues.join(""));
+    formData.append("isApproved", String(isApproved));
   
     try {
       const response = await axios.post("http://localhost:3000/api/users", formData, {
@@ -245,7 +254,7 @@ const PINSetUp = () => {
             }}
           />
         ))}
-        <p>{profileData.email}</p>
+        <p>{userEmail}</p>
         <p>{profileData.fullName}</p>
         <img src={imageUrl} alt="Profile" width="100" height="100" />
       </Box>

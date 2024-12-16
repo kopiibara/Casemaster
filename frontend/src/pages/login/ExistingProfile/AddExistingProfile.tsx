@@ -73,6 +73,7 @@ const AddExistingProfile = () => {
       {/* Buttons */}
       <Box>
         <Button
+          onClick={() => navigate("/profile-setup")}
           variant="contained"
           sx={{
             marginTop: "1rem",

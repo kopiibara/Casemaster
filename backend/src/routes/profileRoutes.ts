@@ -17,8 +17,8 @@ const router = express.Router();
 // POST route to create a user
 router.post('/users', upload.single('image'), async (req: Request, res: Response) => {
   try {
-    const { name, email, phone, role, pin } = req.body;
-
+    const { name, email, phone, role, pin, isApproved } = req.body;
+    const approved = isApproved === 'true'
     // If there's a file uploaded, convert it to base64
     let imageBase64 = null;
     if (req.file) {
@@ -26,10 +26,10 @@ router.post('/users', upload.single('image'), async (req: Request, res: Response
       imageBase64 = req.file.buffer.toString('base64'); 
     }
 
-    const query = `INSERT INTO users (name, email, phone, role, pin, image) 
-                   VALUES (?, ?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO users (name, email, phone, role, pin, image, isApproved) 
+                   VALUES (?, ?, ?, ?, ?, ?,?)`;
 
-    db.query(query, [name, email, phone, role, pin, imageBase64], (err, result) => {
+    db.query(query, [name, email, phone, role, pin, imageBase64, approved], (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ message: 'Error creating user' });
@@ -42,7 +42,8 @@ router.post('/users', upload.single('image'), async (req: Request, res: Response
         phone,
         role,
         pin,
-        image: imageBase64,  // Return the base64 image
+        image: imageBase64,
+        isApproved  // Return the base64 image
       });
     });
   } catch (error) {
