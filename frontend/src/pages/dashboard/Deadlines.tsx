@@ -40,7 +40,7 @@ const Deadline = ({ deadlines }: NotesProps) => {
   return (
     <Box className="flex flex-col w-full">
       <Stack
-        spacing={1}
+        spacing={3}
         sx={{
           height: "100%",
           maxHeight: "25rem", // Limit the max height of the stack
