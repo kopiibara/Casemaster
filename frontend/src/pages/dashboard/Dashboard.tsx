@@ -72,7 +72,7 @@ const Dashboard: React.FC = () => {
         </Paper>
 
         <Stack spacing={3}>
-          <Paper className="p-10 flex-grow w-auto">
+          <Paper className="p-10 flex-grow w-[18rem]">
             <Box>
               <Notes />
             </Box>

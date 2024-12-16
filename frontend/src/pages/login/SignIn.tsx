@@ -22,6 +22,7 @@ const msalConfig: Configuration = {
   },
 };
 
+
 const msalInstance = new PublicClientApplication(msalConfig);
 
 const SignIn: React.FC = () => {

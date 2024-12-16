@@ -25,8 +25,6 @@ interface ModalViewProps {
   };
 }
 
-
-
 const ModalView: React.FC<ModalViewProps> = ({
   isModalOpen,
   currentView,
@@ -40,7 +38,6 @@ const ModalView: React.FC<ModalViewProps> = ({
   );
   const navigate = useNavigate();
   const [currentViewState, setCurrentViewState] = useState<string>(currentView);
-  const correctPin = "1234";
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -76,7 +73,10 @@ const ModalView: React.FC<ModalViewProps> = ({
       return;
     }
     try {
-      const response = await axios.post("http://localhost:3000/api/send-verification-email", { to: selectedProfile.email }); 
+      const response = await axios.post(
+        "http://localhost:3000/api/send-verification-email",
+        { to: selectedProfile.email }
+      );
       console.log(response.data.message || "Email sent successfully!");
     } catch (err: any) {
       if (err.response) {
@@ -122,7 +122,9 @@ const ModalView: React.FC<ModalViewProps> = ({
             phone={selectedProfile.phone}
             role={selectedProfile.role}
             name={selectedProfile.name}
-            image={selectedProfile.image} // Pass phone
+            image={selectedProfile.image}
+            pin={selectedProfile.pin}
+            isApproved={selectedProfile.isApproved} // Pass phone
             handleCloseModal={handleCloseModal}
             isOpen={isModalOpen}
             onConfirm={() => {

@@ -14,12 +14,21 @@ import MenuItem from "@mui/material/MenuItem";
 
 import SystemLogs from "./SystemLogs";
 
-// Define props for the component
+interface EmployeeProfile {
+  user_id: number;
+  name: string;
+  role: string;
+  image: string;
+  email: string;
+  phone: string;
+  pin: string;
+  isApproved: boolean;
+}
+
+// Define props for the component based on EmployeeProfile
 interface StaffPersonalDetailsProps {
-  avatar: string;
-  fullName: string;
-  status: string;
-  onClose: () => void; // Function to handle closing
+  employee: EmployeeProfile;  // Pass the entire EmployeeProfile object as a prop
+  onClose: () => void;        // Function to handle closing
 }
 
 const position = [
@@ -49,19 +58,22 @@ const accountStatus = [
 ];
 
 const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
-  avatar,
-  fullName,
-  status,
+  employee,   // Receive the employee object
   onClose,
 }) => {
   // Track profile status with state
-  const [profileStatus, setProfileStatus] = useState<string>(status);
+  const [profileStatus, setProfileStatus] = useState<string>(employee.isApproved ? "Active" : "Pending");
 
-  const lastName = fullName.split(" ").pop();
+  // Set branch position based on employee role
+  const [branchPosition, setBranchPosition] = useState<string>("");
 
   useEffect(() => {
-    setProfileStatus(status); // Update status if prop changes
-  }, [status]);
+    setProfileStatus(employee.isApproved ? "Active" : "Pending");
+    setBranchPosition(employee.role === "branch-clerk" ? "Branch Clerk" : "Staff");
+  }, [employee]);
+
+  const lastName = employee.name.split(" ").pop();
+  const roleValue = employee.role === "branch-clerk" ? "Branch Clerk" : "Staff"; // Determine the role value
 
   return (
     <Box className="p-6">
@@ -76,20 +88,19 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
             {lastName}'s Personal Details
           </Typography>
           <Box flexGrow={1} />
-          <Box></Box>
           <IconButton onClick={onClose}>
             <CancelOutlinedIcon className="text-[#517FD3]" />
           </IconButton>
         </Stack>
 
         {/* Staff Details */}
-        <Avatar src={avatar} alt={fullName} sx={{ width: 96, height: 96 }} />
+        <Avatar src={employee.image} alt={employee.name} sx={{ width: 96, height: 96 }} />
 
-        {/* Profile Details*/}
+        {/* Profile Details */}
         <Stack spacing={2.5}>
           <TextField
             label="Full Name"
-            value={fullName}
+            value={employee.name}
             disabled
             size="small"
             sx={{
@@ -120,7 +131,7 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
           {/* Personal Email */}
           <TextField
             label="Personal Email"
-            value={lastName + "@example.com"}
+            value={employee.email}
             disabled
             size="small"
             sx={{
@@ -151,7 +162,7 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
           {/* Phone Number */}
           <TextField
             label="Phone Number"
-            value={"+63 | " + "09xxxxxxxx"}
+            value={employee.phone}
             disabled
             size="small"
             sx={{
@@ -179,16 +190,15 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
             }}
           />
         </Stack>
-        {/* Full Name */}
 
         <Divider />
         <Stack spacing={2.5}>
-          {/* Branch Position */}
+          {/* Branch Position Dropdown */}
           <TextField
-            id="outlined-select-currency"
+            id="outlined-select-branch-position"
             select
             label="Branch Position"
-            defaultValue="branch-clerk"
+            value={branchPosition}  // Controlled value based on employee role
             size="small"
             sx={{
               width: "100%",
@@ -229,12 +239,12 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
             ))}
           </TextField>
 
-          {/* Profile Status */}
+          {/* Profile Status Dropdown */}
           <TextField
-            id="outlined-select-currency"
+            id="outlined-select-status"
             select
             label="Profile Status"
-            value="active" // Controlled value
+            value={profileStatus} // Controlled value for status
             size="small"
             sx={{
               width: "100%",
@@ -290,10 +300,6 @@ const StaffPersonalDetails: React.FC<StaffPersonalDetailsProps> = ({
                 marginBottom: "0.5rem",
                 fontSize: "0.7rem",
                 textTransform: "none",
-
-                "&:hover": {
-                  backgroundColor: "rgba(46,73,213,0.1)",
-                },
               }}
             >
               Discard
