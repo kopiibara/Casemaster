@@ -85,23 +85,42 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   };
 
   const handleSave = async () => {
-    if (!validateFields()) return;
+    if (!validateFields() || !currentAttachment) return;
 
     try {
+      // Step 1: Upload the file to Google Drive
+      const uploadResponse = await axios.post(
+        "http://localhost:3000/api/upload-to-drive",
+        {
+          fileName: currentAttachment.name,
+          fileType: currentAttachment.type,
+          fileUrl: currentAttachment.url,
+        }
+      );
+
+      if (uploadResponse.status !== 200) {
+        setErrorMessage("Failed to upload file to Google Drive.");
+        return;
+      }
+
+      const { webContentLink } = uploadResponse.data;
+
+      // Step 2: Save the case log with the file URL
       const data = {
         caseNo,
         caseTitle,
         partyFiler,
         caseType,
-        tags, // Already processed to remove duplicates and trim spaces
+        tags,
+        file_url: webContentLink, // Add the Google Drive file URL
       };
 
-      const response = await axios.post(
+      const saveResponse = await axios.post(
         "http://localhost:3000/api/caselogs",
         data
       );
 
-      if (response.status === 201) {
+      if (saveResponse.status === 201) {
         setSuccessMessage("Case log saved successfully!");
         setErrorMessage(null);
 
@@ -115,11 +134,39 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         onClose();
       } else {
         setErrorMessage("Failed to save case log. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during save process:", error);
+      setErrorMessage("An error occurred while saving the case log.");
+    }
+  };
+
+  const uploadToGoogleDrive = async () => {
+    if (!currentAttachment) {
+      setErrorMessage("No attachment selected.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/upload-to-drive",
+        {
+          fileName: currentAttachment.name,
+          fileType: currentAttachment.type,
+          fileUrl: currentAttachment.url,
+        }
+      );
+
+      if (response.status === 200) {
+        setSuccessMessage("Attachment uploaded to Google Drive successfully!");
+        setErrorMessage(null);
+      } else {
+        setErrorMessage("Failed to upload attachment to Google Drive.");
         setSuccessMessage(null);
       }
     } catch (error) {
-      console.error("Error saving case log:", error);
-      setErrorMessage("An error occurred while saving the case log.");
+      console.error("Error uploading to Google Drive:", error);
+      setErrorMessage("An error occurred while uploading to Google Drive.");
       setSuccessMessage(null);
     }
   };

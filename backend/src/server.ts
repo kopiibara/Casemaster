@@ -1,14 +1,14 @@
 import express from "express";
-import bodyParser from "body-parser";
-import profileRoutes from "./routes/profileRoutes";
 import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
-import emailRoutes from "./routes/emailRoutes";
-import smsRoutes from "./routes/smsRoutes";
 import fileUpload from "express-fileupload";
 import pool from "../src/config/db";
+import profileRoutes from "./routes/profileRoutes";
+import emailRoutes from "./routes/emailRoutes";
+import smsRoutes from "./routes/smsRoutes";
 import caselogsRoutes from "./routes/caselogs";
+import { UploadedFile } from "express-fileupload";
 
 dotenv.config({ path: path.resolve(__dirname, "./config/.env") });
 
@@ -18,7 +18,6 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Other middleware and routes...
 // CORS configuration options
 const corsOptions = {
   origin: "http://localhost:5173", // frontend URL
@@ -27,10 +26,11 @@ const corsOptions = {
   credentials: true,
 };
 
-// Use CORS middleware
+// Middleware
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" })); // Replaces bodyParser.json()
+app.use(express.urlencoded({ limit: "50mb", extended: true })); // Replaces bodyParser.urlencoded()
+app.use(fileUpload());
 
 // Use routes
 app.use("/api", profileRoutes);
@@ -38,33 +38,49 @@ app.use("/api", emailRoutes);
 app.use("/api", smsRoutes);
 app.use("/api", caselogsRoutes);
 
-app.use(fileUpload());
-app.use(express.json());
-
+// Email routes
 app.post("/api/send-email", async (req, res) => {
   try {
-    const { to, subject, body } = req.body;
-    const attachments = req.files
-      ? Object.values(req.files).map((file) => file.name)
-      : [];
+    const files = req.files; // `files` is of type `FileArray`
+
+    const attachments: string[] = [];
+
+    if (files) {
+      Object.values(files).forEach((fileOrFiles) => {
+        // Handle single file (UploadedFile) or multiple files (UploadedFile[])
+        if (Array.isArray(fileOrFiles)) {
+          fileOrFiles.forEach((file) => {
+            const uploadedFile = file as UploadedFile; // Explicitly cast to `UploadedFile`
+            attachments.push(uploadedFile.name);
+
+            // Move the file to the uploads folder
+            uploadedFile.mv(`./uploads/${uploadedFile.name}`, (err) => {
+              if (err) {
+                console.error("Error saving file:", err);
+              }
+            });
+          });
+        } else {
+          const uploadedFile = fileOrFiles as UploadedFile; // Explicitly cast to `UploadedFile`
+          attachments.push(uploadedFile.name);
+
+          // Move the file to the uploads folder
+          uploadedFile.mv(`./uploads/${uploadedFile.name}`, (err) => {
+            if (err) {
+              console.error("Error saving file:", err);
+            }
+          });
+        }
+      });
+    }
 
     // Save email to database
+    const { to, subject, body } = req.body;
     const query =
       "INSERT INTO emails (recipient, subject, body, attachments, status) VALUES (?, ?, ?, ?, ?)";
     const values = [to, subject, body, JSON.stringify(attachments), "sent"];
 
     await pool.query(query, values);
-
-    // Save attachments to disk or cloud storage
-    if (req.files) {
-      Object.values(req.files).forEach((file) => {
-        file.mv(`./uploads/${file.name}`, (err: any) => {
-          if (err) {
-            console.error("Error saving file:", err);
-          }
-        });
-      });
-    }
 
     res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
