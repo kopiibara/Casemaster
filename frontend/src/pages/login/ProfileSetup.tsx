@@ -4,6 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Modal, Box, TextField, Button } from "@mui/material";
 import React, { ChangeEvent } from "react";
 import { useAppContext } from "../../AppContext";
+import axios from "axios";
 
 
 const ProfileSetup = () => {
@@ -18,11 +19,13 @@ const ProfileSetup = () => {
   const [email, setEmail] = useState<string>("");
   const [phoneNo, setPhoneNo] = useState<string>("");
   const { setProfileData } = useAppContext();
+  const [role, setRole] = useState<string>("Staff");
   
 
   const handleCancel = () => {
     navigate(-1);
   };
+
 
   const handleNext = () => {
     if (fullName && email && phoneNo) {
@@ -31,7 +34,9 @@ const ProfileSetup = () => {
         fullName,
         email,
         phoneNo,
-        image: uploadedImage,  // Pass the uploadedImage directly (could be null or Blob)
+        image: uploadedImage,
+        role,
+        selectedProfileImage:"",// Pass the uploadedImage directly (could be null or Blob)
       });
       navigate("/pin-setup");  // Navigate to next step
     }
@@ -50,6 +55,60 @@ const ProfileSetup = () => {
     }
   };
 
+
+  const handleSendEmail = async () => {
+    if (!email) {
+      console.log("Please enter your email address.");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:3000/api/send-verification-email", { to: email }); 
+      console.log(response.data.message || "Email sent successfully!");
+      setOpenModal(true);
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
+        to: email,
+        code: verificationCode,
+      });
+      console.log(response.data.message || "Email verified successfully!");
+      handleCloseModal();
+
+      if (fullName && email && phoneNo) {
+
+        setProfileData({
+          fullName,
+          email,
+          phoneNo,
+          image: uploadedImage,
+          role,
+          selectedProfileImage:"",// Pass the uploadedImage directly (could be null or Blob
+        });
+        navigate("/pin-setup"); 
+      }
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Invalid verification code.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
+  };
  
   const imageUrl = uploadedImage ? URL.createObjectURL(uploadedImage) : null;
 
@@ -57,10 +116,6 @@ const ProfileSetup = () => {
     setUploadedImage(null);
   };
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
-    setCurrentModalView("email");
-  };
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -253,7 +308,7 @@ const ProfileSetup = () => {
 
           {/* Next Button */}
           <Button
-            onClick={handleNext}
+            onClick={handleSendEmail}
             variant="contained"
             sx={{
               backgroundColor: "#517FD3",
@@ -422,7 +477,7 @@ const ProfileSetup = () => {
                   boxShadow: "none",
                 },
               }}
-              onClick={handleNext}
+              onClick={handleVerifyEmail}
             >
               Confirm
             </Button>

@@ -61,7 +61,7 @@ const SignIn: React.FC = () => {
 
       setAccessToken(accessToken); // Store the token in context
 
-      navigate("/dashboard/Dashboard");
+      navigate("/profile-setup");
     } catch (error) {
       console.error("Sign-in failed:", error);
     }

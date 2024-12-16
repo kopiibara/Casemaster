@@ -1,70 +1,68 @@
-import express from 'express';
-import multer from 'multer';
-import fs from 'fs';
+import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
-import { saveProfile, getProfiles } from '../services/profileService';
+import { getProfiles } from '../services/profileService';
+import multer from 'multer';
+import db from '../config/db'; // Import the DB connection
 
-const router = express.Router();
+// Set up Multer for file upload
+const uploadsDir = path.join(__dirname, '../uploads');
 
-const uploadsDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Set up multer storage configuration
+// Set up Multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir); // Specify the folder where files should be stored
+    cb(null, uploadsDir); // Use the absolute path to the uploads folder
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Rename the file to avoid conflicts
+    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename based on the timestamp
   },
 });
 
 const upload = multer({ storage });
 
-// Route to handle profile setup with file upload
-router.post('/save-profile', upload.single('image'), async (req, res, next) => {
+const router = express.Router();
+
+// POST route to create a user
+router.post('/users', upload.single('image'), async (req: Request, res: Response) => {
   try {
-    const { name, role, email, phone, pin } = req.body;
+    const { name, email, phone, role, pin } = req.body;
+    const image = req.file ? `uploads/${req.file.filename}` : null; // Store the relative path
 
-    if (!name || !role || !email || !phone || !pin) {
-      res.status(400).json({ error: 'All fields (name, role, email, phone) are required.' });
-      return;
-    }
+    const query = `INSERT INTO users (name, email, phone, role, pin, image) 
+                   VALUES (?, ?, ?, ?, ?, ?)`;
 
-    let image: Buffer | null = null;
+    db.query(query, [name, email, phone, role, pin, image], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Error creating user' });
+      }
 
-    if (req.file) {
-  
-      const filePath = path.join(uploadsDir, req.file.filename);
-      image = fs.readFileSync(filePath);
-    }
-
-    const profileData = {
-      name: name.trim(),
-      role: role.trim(),
-      email: email.trim(),
-      phone: parseInt(phone, 10), 
-      image,
-      pin,
-    };
-
- 
-    await saveProfile(profileData); 
-    res.status(200).json({ message: 'Profile saved successfully' });
+      // Respond with the created user data (omit auto-generated fields like ID)
+      res.status(201).json({
+        name,
+        email,
+        phone,
+        role,
+        pin,
+        image,
+      });
+    });
   } catch (error) {
-    next(error); 
+    console.error(error);
+    res.status(500).json({ message: 'Error creating user' });
   }
 });
 
 
-router.get('/get-profiles', async (req, res, next) => {
+// Handle GET request to fetch profiles
+router.get('/get-profiles', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const profiles = await getProfiles();  // Get profiles from the database
+    // Serve static files (images) from the uploads directory
+
+
+    const profiles = await getProfiles(req);  // Get profiles from the database
     res.status(200).json(profiles);  // Return profiles as JSON response
   } catch (error) {
-    next(error); 
+    next(error);
   }
 });
 

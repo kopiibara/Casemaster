@@ -22,11 +22,14 @@ import IconButton from "@mui/material/IconButton";
 import { useParams } from "react-router-dom";
 import ModalComponent from "../pages/settings/ModalComponent";
 
+import { useAppContext } from "../../../frontend/src/AppContext";
+
 export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
+  const { profileData } = useAppContext();
 
   const [activeItem, setActiveItem] = React.useState("Dashboard");
   const [openSections, setOpenSections] = React.useState<
@@ -267,13 +270,13 @@ export default function Sidebar() {
       <Box flexGrow={2} />
 
       <Box className="flex mt-auto mx-3 gap-3 items-center border-t pt-6">
-        <Avatar src="/broken-image.jpg" variant="rounded" />
+        <Avatar src={profileData.selectedProfileImage || undefined} variant="rounded" />
         <Box>
           <Typography sx={{ color: "#f6f9ff" }} variant="subtitle1">
-            Kopibara
+             {profileData?.fullName}
           </Typography>
           <Typography sx={{ color: "#f6f9ff" }} variant="subtitle2">
-            Branch Clerk
+            {profileData?.role}
           </Typography>
         </Box>
         <span className="ml-auto">
