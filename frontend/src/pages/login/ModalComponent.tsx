@@ -6,20 +6,25 @@ import ForgotPIN from "./modals/ForgotPIN";
 import Verification from "./modals/Verification";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
 
 interface ModalViewProps {
   isModalOpen: boolean;
   currentView: string;
   handleCloseModal: () => void;
+
   selectedProfile: {
-    id: number;
+    user_id: number;
     name: string;
     role: string;
     image: string;
     email: string;
     phone: string;
+    pin: string;
   };
 }
+
+
 
 const ModalView: React.FC<ModalViewProps> = ({
   isModalOpen,
@@ -53,13 +58,34 @@ const ModalView: React.FC<ModalViewProps> = ({
         inputRefs[index - 1].current?.focus();
       }
 
-      if (updatedPinValues.join("") === correctPin) {
+      if (updatedPinValues.join("") === selectedProfile.pin) {
+        handleSendEmail();
         setCurrentViewState("verification"); // Show verification modal
       } else if (updatedPinValues.every((v) => v)) {
         setErrorIndexes([0, 1, 2, 3]);
       } else {
         setErrorIndexes([]);
       }
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!selectedProfile.email) {
+      console.log("Please enter your email address.");
+      return;
+    }
+    try {
+      const response = await axios.post("http://localhost:3000/api/send-verification-email", { to: selectedProfile.email }); 
+      console.log(response.data.message || "Email sent successfully!");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
     }
   };
 
@@ -92,7 +118,10 @@ const ModalView: React.FC<ModalViewProps> = ({
           <Verification
             method="email" // Optionally use method dynamically
             email={selectedProfile.email} // Pass email
-            phone={selectedProfile.phone} // Pass phone
+            phone={selectedProfile.phone}
+            role={selectedProfile.role}
+            name={selectedProfile.name}
+            image={selectedProfile.image} // Pass phone
             handleCloseModal={handleCloseModal}
             isOpen={isModalOpen}
             onConfirm={() => {
