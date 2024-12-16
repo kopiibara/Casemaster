@@ -26,7 +26,7 @@ const PieGraph: React.FC<PieGraphProps> = ({ data }) => {
             })),
           },
         ]}
-        width={450}
+        width={300}
         height={300}
       />
       {/* Manual legend rendering */}
@@ -41,12 +41,27 @@ const PieGraph: React.FC<PieGraphProps> = ({ data }) => {
                 borderRadius: "50%",
               }}
             ></Box>
-            <Button variant="text" sx={{ textTransform: "none" }}>
-              <Stack direction={"row"} spacing={4}>
-                <Typography variant="subtitle2"> {item.label}</Typography>
-                <Typography variant="subtitle2" className="ml-auto">
-                  {" "}
-                  {item.value}{" "}
+            <Button
+              variant="text"
+              sx={{ textTransform: "none", width: "100%" }}
+            >
+              <Stack
+                direction={"row"}
+                spacing={4}
+                sx={{
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="subtitle2" className="text-[#0F2043]">
+                  {item.label}
+                </Typography>
+                <Typography
+                  variant="subtitle2"
+                  className="text-[#0F2043] text-right"
+                >
+                  {item.value}
                 </Typography>
               </Stack>
             </Button>

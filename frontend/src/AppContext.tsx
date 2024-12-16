@@ -6,8 +6,9 @@ interface ProfileData {
   fullName: string;
   email: string;
   phoneNo: string;
-  image: Blob | null;  
+  image: Blob | null;
   role: string;
+  pin: string;
   selectedProfileImage: string | null;
   isApproved?: boolean;
 }
@@ -17,7 +18,6 @@ interface AppContextType {
   profileData: ProfileData;
   setProfileData: React.Dispatch<React.SetStateAction<ProfileData>>;
 }
-
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -30,7 +30,7 @@ export const useAppContext = () => {
 };
 
 interface AppProviderProps {
-  children: ReactNode;  
+  children: ReactNode;
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
@@ -40,10 +40,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     email: "",
     phoneNo: "",
     image: null,
-    role:"",
+    role: "",
+    pin: "",
     selectedProfileImage: "",
     isApproved: false,
-      // Initialize with null as a default
+    // Initialize with null as a default
   });
 
   return (
