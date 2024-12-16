@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { Box, Stack } from "@mui/material";
+import { Box, Stack, Button, Typography } from "@mui/material";
 
 interface PieGraphProps {
   data: { id: number; value: number; label: string; color: string }[];
@@ -8,7 +8,7 @@ interface PieGraphProps {
 
 const PieGraph: React.FC<PieGraphProps> = ({ data }) => {
   return (
-    <Stack direction="row" className="flex items-center">
+    <Stack className="flex items-start justify-start" spacing={2}>
       <PieChart
         className="relative"
         series={[
@@ -41,7 +41,15 @@ const PieGraph: React.FC<PieGraphProps> = ({ data }) => {
                 borderRadius: "50%",
               }}
             ></Box>
-            <span>{item.label}</span>
+            <Button variant="text" sx={{ textTransform: "none" }}>
+              <Stack direction={"row"} spacing={4}>
+                <Typography variant="subtitle2"> {item.label}</Typography>
+                <Typography variant="subtitle2" className="ml-auto">
+                  {" "}
+                  {item.value}{" "}
+                </Typography>
+              </Stack>
+            </Button>
           </Box>
         ))}
       </Stack>
