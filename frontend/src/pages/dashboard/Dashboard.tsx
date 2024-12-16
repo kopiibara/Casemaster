@@ -45,10 +45,16 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ marginX: 3 }}>
-      <Stack direction={"row"} spacing={3} className="flex w-auto h-full">
+    <Box sx={{ marginX: 3 }} className="flex flex-col gap-3">
+      <Stack direction={"row"} spacing={3}>
         {/* Summary of Cases */}
-        <Paper className="p-10 flex-grow w-auto">
+        <Paper
+          className="p-10 flex-grow w-auto"
+          sx={{
+            borderRadius: 3,
+            overflow: "hidden",
+          }}
+        >
           <Stack spacing={3}>
             <Stack direction={"row"} spacing={2} className="flex ">
               <Stack direction={"row"} spacing={1.5} alignItems="center">
@@ -84,12 +90,22 @@ const Dashboard: React.FC = () => {
         </Paper>
 
         <Stack spacing={3}>
-          <Paper className="p-10 flex-grow w-[24rem]">
+          <Paper
+            className="p-6 flex-grow w-[26rem]"
+            sx={{
+              borderRadius: 3,
+            }}
+          >
             <Box>
               <Notes />
             </Box>
           </Paper>
-          <Paper className="p-10 flex-grow w-[24rem]">
+          <Paper
+            className="p-6 flex-grow w-[26rem]"
+            sx={{
+              borderRadius: 3,
+            }}
+          >
             <Box>
               <Deadlines deadlines={deadlineData} />
             </Box>

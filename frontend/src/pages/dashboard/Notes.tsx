@@ -71,7 +71,7 @@ const Notes = () => {
         spacing={1}
         sx={{
           height: "100%",
-          maxHeight: "25rem",
+          maxHeight: "15rem",
           display: "flex",
           flexDirection: "column",
         }}

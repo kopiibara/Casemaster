@@ -15,13 +15,11 @@ const DeadlineCard = ({ title, dueDate }: DeadlineCardProps) => (
       borderColor: "#D5D5D5",
       borderWidth: 1,
       borderStyle: "solid",
-      "&:hover": {
-        scale: 1.02,
-      },
+      width: "100%",
     }}
   >
     {/* Deadline Content */}
-    <Stack spacing={0.5} className="p-2 flex justify-start items-start">
+    <Stack spacing={1} className="flex justify-start items-start">
       <Typography variant="subtitle1" className="text-[#0F2043]">
         {title}
       </Typography>
@@ -40,19 +38,19 @@ const Deadline = ({ deadlines }: NotesProps) => {
   const Dates = ["Today", "Yesterday", "This Week", "Last Week"];
 
   return (
-    <Box className="flex flex-col w-full h-full">
+    <Box className="flex flex-col w-full">
       <Stack
-        spacing={2}
+        spacing={1}
         sx={{
           height: "100%",
-          maxHeight: "25rem",
+          maxHeight: "25rem", // Limit the max height of the stack
           display: "flex",
         }}
       >
         <Stack
           direction={"row"}
           spacing={1.5}
-          className="flex items-center justify-start"
+          className="flex items-start justify-start"
         >
           <img src={Icon} alt="icon" width={32} />
           <Typography variant="h6" className="text-[#0F2043]">
@@ -62,14 +60,24 @@ const Deadline = ({ deadlines }: NotesProps) => {
           <FilterButtons options={Dates} defaultIndex={0} />
         </Stack>
 
-        {/* Render dynamic DeadlineCard components based on the deadlines array */}
-        {deadlines.map((deadline, index) => (
-          <DeadlineCard
-            key={index}
-            title={deadline.title}
-            dueDate={deadline.dueDate}
-          />
-        ))}
+        {/* Container to hold the buttons and make it scrollable */}
+        <Stack
+          spacing={2}
+          sx={{
+            maxHeight: "20rem",
+            overflowY: "auto",
+            maxWidth: "100%",
+          }}
+        >
+          {/* Render dynamic DeadlineCard components based on the deadlines array */}
+          {deadlines.map((deadline, index) => (
+            <DeadlineCard
+              key={index}
+              title={deadline.title}
+              dueDate={deadline.dueDate}
+            />
+          ))}
+        </Stack>
       </Stack>
     </Box>
   );
