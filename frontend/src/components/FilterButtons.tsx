@@ -121,7 +121,6 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                           textTransform: "none",
                         },
                       }}
-                      className="text-[#0F2043] hover:bg-[#DCE5F6] normal-case"
                     >
                       {option}
                     </MenuItem>

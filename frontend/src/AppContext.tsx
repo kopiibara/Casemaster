@@ -3,10 +3,11 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 
 // Define the ProfileData interface
 interface ProfileData {
+  id?: number;
   fullName: string;
   email: string;
   phoneNo: string;
-  image: Blob | null;  
+  image: Blob | null;
   role: string;
   selectedProfileImage: string | null;
   isApproved?: boolean;
@@ -19,7 +20,6 @@ interface AppContextType {
   setProfileData: React.Dispatch<React.SetStateAction<ProfileData>>;
 }
 
-
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const useAppContext = () => {
@@ -31,21 +31,21 @@ export const useAppContext = () => {
 };
 
 interface AppProviderProps {
-  children: ReactNode;  
+  children: ReactNode;
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // State to hold profile data
   const [profileData, setProfileData] = useState<ProfileData>({
+    id: 0,
     fullName: "",
     email: "",
     phoneNo: "",
     image: null,
-    role:"",
+    role: "",
+    pin: "",
     selectedProfileImage: "",
     isApproved: false,
-    pin: "",
-      // Initialize with null as a default
   });
 
   return (

@@ -8,7 +8,8 @@ import TableRow from "@mui/material/TableRow";
 import ChipComponent from "./ChipComponent";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
-import { Popover, TableSortLabel, Button } from "@mui/material";
+
+import { Popover, TableSortLabel, Button, Paper } from "@mui/material";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 
 // Helper function to sort data

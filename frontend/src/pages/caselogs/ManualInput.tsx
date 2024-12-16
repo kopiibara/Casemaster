@@ -166,6 +166,7 @@ const ManualInput: React.FC = () => {
         <Stack spacing={1} direction="row">
           <Button
             variant="contained"
+            disableElevation
             sx={{
               backgroundColor: "#0F2043",
               color: "#FFFFFF",

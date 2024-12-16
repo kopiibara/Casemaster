@@ -16,10 +16,12 @@ interface VerificationProps {
   image: string | null;
   isApproved: boolean;
   pin: string;
+  user_id: number;
   handleCloseModal: () => void;
 }
 
 const Verification: React.FC<VerificationProps> = ({
+  user_id,
   name,
   method = "email",
   handleCloseModal,
@@ -49,6 +51,7 @@ const Verification: React.FC<VerificationProps> = ({
       });
       console.log(response.data.message || "Email verified successfully!");
       setProfileData({
+        id: user_id,
         fullName: name,
         email: email,
         phoneNo: phone,

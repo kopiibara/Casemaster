@@ -11,7 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { Stack, Typography } from "@mui/material";
+import { Stack, Typography, Skeleton } from "@mui/material";  // Import Skeleton
 import StaffPersonalDetails from "./StaffPersonalDetails"; // Assuming this is your component
 import axios from "axios";
 import { useEffect } from "react";
@@ -39,6 +39,7 @@ const DirectoryTable: React.FC = () => {
   const [open, setOpen] = React.useState(false);
   const [selectedStaff, setSelectedStaff] = React.useState<EmployeeProfile | null>(null);
   const [profilesData, setProfilesData] = React.useState<EmployeeProfile[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);  // Add loading state
 
   // Open dialog with selected Employee details
   const handleOpenDialog = (profile: EmployeeProfile) => {
@@ -53,75 +54,87 @@ const DirectoryTable: React.FC = () => {
   };
 
   // Fetch profiles data from the API
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/get-profiles');
-        const profilesWithValidImages = response.data.map((profile: EmployeeProfile) => ({
-          ...profile,
-          image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
-        }));
-        setProfilesData(profilesWithValidImages);
-        console.log(profilesWithValidImages);
-      } catch (error) {
-        console.error("Failed to fetch profiles", error);
-      }
-    };
+  const fetchProfiles = async () => {
+    try {
+      setLoading(true);  // Set loading to true while fetching data
+      const response = await axios.get('http://localhost:3000/api/get-profiles');
+      const profilesWithValidImages = response.data.map((profile: EmployeeProfile) => ({
+        ...profile,
+        image: profile.image || 'path/to/default/image.jpg', // Replace with your default image path
+      }));
+      setProfilesData(profilesWithValidImages);
+      setLoading(false);  // Set loading to false once data is fetched
+      console.log(profilesWithValidImages);
+    } catch (error) {
+      console.error("Failed to fetch profiles", error);
+      setLoading(false);  // Set loading to false if an error occurs
+    }
+  };
 
+  // Initial fetch of profiles when component mounts
+  useEffect(() => {
     fetchProfiles();
   }, []);
+
+  const handleStatusChange = () => {
+    fetchProfiles();  // Re-fetch profiles to update the status in the table
+  };
 
   return (
     <>
       <TableContainer component={Paper}>
-        <Table sx={{ maxWidth: "full" }} aria-label="directory table">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Profile</TableCell>
-              <TableCell align="left" sx={{ fontWeight: "bold" }}>
-                Status
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: "bold" }}></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {profilesData.map((profile) => (
-              <TableRow
-                key={profile.user_id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                onClick={() => handleOpenDialog(profile)} // Open dialog with the selected EmployeeProfile
-              >
-                <TableCell>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar alt={profile.name} src={profile.image} />
-                    <Typography variant="subtitle2">{profile.name}</Typography>
-                  </Stack>
+        {loading ? (  // If loading, show the skeleton
+          <Skeleton variant="rectangular" width="100%" height={400} />
+        ) : (
+          <Table sx={{ maxWidth: "full" }} aria-label="directory table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>Profile</TableCell>
+                <TableCell align="left" sx={{ fontWeight: "bold" }}>
+                  Status
                 </TableCell>
-                <TableCell align="left">
-                  <Chip
-                    label={profile.isApproved ? "Active" : "Pending"} // Show status based on isApproved
-                    color={profile.isApproved ? "success" : "warning"} // Color based on approval
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    sx={{
-                      textTransform: "none",
-                      color: "#0F2043",
-                      "&:hover": { backgroundColor: "#DCE5F6" },
-                    }}
-                    onClick={() => handleOpenDialog(profile)} // Open dialog with the selected profile
-                  >
-                    View
-                  </Button>
-                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {profilesData.map((profile) => (
+                <TableRow
+                  key={profile.user_id}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  onClick={() => handleOpenDialog(profile)} // Open dialog with the selected EmployeeProfile
+                >
+                  <TableCell>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Avatar alt={profile.name} src={profile.image} />
+                      <Typography variant="subtitle2">{profile.name}</Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Chip
+                      label={profile.isApproved ? "Active" : "Pending"} // Show status based on isApproved
+                      color={profile.isApproved ? "success" : "warning"} // Color based on approval
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="text"
+                      color="primary"
+                      size="small"
+                      sx={{
+                        textTransform: "none",
+                        color: "#0F2043",
+                        "&:hover": { backgroundColor: "#DCE5F6" },
+                      }}
+                      onClick={() => handleOpenDialog(profile)} // Open dialog with the selected profile
+                    >
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </TableContainer>
 
       {/* Dialog for Employee Profile Details */}
@@ -131,6 +144,7 @@ const DirectoryTable: React.FC = () => {
             <StaffPersonalDetails
               employee={selectedStaff} // Pass the selected profile to the component
               onClose={handleCloseDialog} // Pass the close function here
+              onStatusChange={handleStatusChange} // Pass the status change handler
             />
           )}
         </DialogContent>
