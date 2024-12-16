@@ -93,7 +93,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         caseTitle,
         partyFiler,
         caseType,
-        tags,
+        tags, // Already processed to remove duplicates and trim spaces
       };
 
       const response = await axios.post(
@@ -214,11 +214,36 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               freeSolo
               options={availableTags}
               value={tags}
-              onChange={(event, newValue) => setTags(newValue)}
+              onChange={(event, newValue) => {
+                // Filter out duplicates and trim spaces
+                const uniqueTags = Array.from(
+                  new Set(newValue.map((tag) => tag.trim()))
+                ).filter((tag) => tag);
+                setTags(uniqueTags);
+              }}
               renderInput={(params) => (
-                <TextField {...params} label="Tags" fullWidth sx={{ mb: 2 }} />
+                <TextField
+                  {...params}
+                  label="Tags"
+                  fullWidth
+                  sx={{ mb: 2 }}
+                  helperText="Add tags by typing and pressing Enter"
+                />
               )}
+              filterOptions={(options, { inputValue }) => {
+                const filtered = options.filter((option) =>
+                  option.toLowerCase().includes(inputValue.toLowerCase())
+                );
+
+                // Suggest the new tag if it doesn't already exist
+                if (inputValue.trim() && !options.includes(inputValue.trim())) {
+                  filtered.push(inputValue.trim());
+                }
+
+                return filtered;
+              }}
             />
+
             <Box display="flex" justifyContent="flex-end" gap={2}>
               <Button variant="outlined" onClick={onClose}>
                 Discard
