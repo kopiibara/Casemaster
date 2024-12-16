@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/login/SignIn";
 import DashboardPage from "./pages/dashboard/Dashboard";
@@ -30,6 +31,8 @@ function App() {
   return (
     <AppProvider>
       <Router>
+        {/* Network Status Backdrop */}
+
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<SignIn />} />
@@ -53,13 +56,11 @@ function App() {
             element={<ConfirmExistingProfile />}
           />
           <Route path="/forgot-pin-existing" element={<ForgotPINExisting />} />
-          <Route
-            path="/profile-selection"
-            element={<ProfileSelection />}
-          />{" "}
+          <Route path="/profile-selection" element={<ProfileSelection />} />
+
+          {/* Main Layout and Protected Routes */}
           <Route element={<MainLayout />}>
             <Route path="/dashboard/Dashboard" element={<DashboardPage />} />
-
             <Route path="/caselogs/FromEmail" element={<FromEmail />} />
             <Route path="/caselogs/ManualInput" element={<ManualInput />} />
             <Route path="/mails/Inbox" element={<InboxMails />} />
