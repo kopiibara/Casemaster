@@ -1,8 +1,12 @@
 import React from "react";
 import { Box, Stack, Button, Typography } from "@mui/material";
+import { useAppContext } from "../../../AppContext";
 
 const TransferRoleCard = () => {
+  const { profileData } = useAppContext();
   return (
+  <>
+  {profileData.role !== "Staff" && (
     <Box>
       <Stack spacing={3}>
         <Stack spacing={1}>
@@ -36,6 +40,8 @@ const TransferRoleCard = () => {
         </Stack>
       </Stack>
     </Box>
+    )}
+    </>
   );
 };
 

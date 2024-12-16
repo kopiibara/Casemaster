@@ -8,6 +8,7 @@ import {
 } from "@azure/msal-browser";
 import { config } from "../../../config";
 import { useAuth } from "./../../../context/AuthContext"; // Import useAuth hook
+import axios from "axios";
 
 const msalConfig: Configuration = {
   auth: {
@@ -27,6 +28,7 @@ const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
   const { setTokens } = useAuth(); // Access the function to set both tokens
+  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     const initializeMsal = async () => {
@@ -41,11 +43,36 @@ const SignIn: React.FC = () => {
     initializeMsal();
   }, []);
 
+  
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/get-profiles");
+  
+        if (response.data.length === 0) {
+          setIsEmpty(true);
+          console.log("The profiles table is empty.");
+         
+        } else {
+          setIsEmpty(false);
+          console.log("Profiles fetched successfully:", response.data);
+        }
+  
+      } catch (error) {
+        console.error("Failed to fetch profiles", error);
+      }
+    };
+  
+    fetchProfiles();
+  }, []);
+  
+
   const handleSignIn = async (): Promise<void> => {
     if (!isInitialized) {
       console.error("MSAL is not initialized yet.");
       return;
     }
+
 
     try {
       const loginResponse: AuthenticationResult = await msalInstance.loginPopup(
@@ -58,12 +85,21 @@ const SignIn: React.FC = () => {
       const accessToken = loginResponse.accessToken;
       const refreshToken = loginResponse.idToken; // Use idToken as a stand-in for refresh token
 
+      
+      
       console.log("Access Token:", accessToken);
       console.log("Refresh Token (ID Token):", refreshToken);
 
       setTokens(accessToken, refreshToken); // Store both the access and refresh tokens
 
-      navigate("/profile-setup");
+      if (isEmpty) {
+        
+        navigate("/profile-setup");
+      } else {
+        navigate("/profile-selection");
+      }
+     
+      
     } catch (error) {
       console.error("Sign-in failed:", error);
     }

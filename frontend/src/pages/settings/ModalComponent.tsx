@@ -18,6 +18,8 @@ import SystemLogsPage from "./modals/SystemLogs";
 
 // Icons
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import { useAppContext } from "../../AppContext";
+
 
 // Props interface for better reusability
 interface ModalComponentProps {
@@ -28,7 +30,7 @@ interface ModalComponentProps {
 const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
   // State to track the selected menu item
   const [selectedItem, setSelectedItem] = useState<string | null>("Profile");
-
+  const { profileData } = useAppContext();
   // State to track hover on the cancel button
 
   // Function to handle clicking a menu item
@@ -100,6 +102,8 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
                   <ListItemText primary="Profile" />
                 </ListItemButton>
               </ListItem>
+
+            {profileData.role !=="Staff" && (
               <ListItem disablePadding>
                 <ListItemButton
                   sx={{
@@ -120,6 +124,9 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
                   <ListItemText primary="Staff Management" />
                 </ListItemButton>
               </ListItem>
+            )}
+
+            {profileData.role !=="Staff" && (
               <ListItem disablePadding>
                 <ListItemButton
                   sx={{
@@ -132,12 +139,15 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
                       backgroundColor:
                         selectedItem === "System Logs" ? "#DBE7FF" : "#F3F7FF", // Hover effect
                     },
-                  }}
+                  }} 
                   onClick={() => handleListItemClick("System Logs")}
                 >
                   <ListItemText primary="System Logs" />
                 </ListItemButton>
               </ListItem>
+            )}
+
+
             </List>
           </Stack>
           <Divider orientation="vertical" flexItem />
