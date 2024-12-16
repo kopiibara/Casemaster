@@ -122,7 +122,9 @@ const ModalView: React.FC<ModalViewProps> = ({
             phone={selectedProfile.phone}
             role={selectedProfile.role}
             name={selectedProfile.name}
-            image={selectedProfile.image} // Pass phone
+            image={selectedProfile.image}
+            pin={selectedProfile.pin}
+            isApproved={selectedProfile.isApproved} // Pass phone
             handleCloseModal={handleCloseModal}
             isOpen={isModalOpen}
             onConfirm={() => {

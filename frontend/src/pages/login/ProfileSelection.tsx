@@ -10,10 +10,10 @@ import axios from "axios";
 interface Profile {
   user_id: number;
   name: string;
-  role: string;
-  image: string; 
   email: string;
   phone: string;
+  role: string;
+  image: string; 
   pin: string;
   isApproved: boolean;
 }

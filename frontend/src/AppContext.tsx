@@ -10,6 +10,7 @@ interface ProfileData {
   role: string;
   selectedProfileImage: string | null;
   isApproved?: boolean;
+  pin?: string;
 }
 
 // Define the context type, which includes the profile data and setter function
@@ -43,6 +44,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     role:"",
     selectedProfileImage: "",
     isApproved: false,
+    pin: "",
       // Initialize with null as a default
   });
 

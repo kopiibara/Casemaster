@@ -14,6 +14,8 @@ interface VerificationProps {
   method: "email" | "phone";
   role: string;
   image: string | null;
+  isApproved: boolean;
+  pin: string;
   handleCloseModal: () => void;
 }
 
@@ -25,6 +27,8 @@ const Verification: React.FC<VerificationProps> = ({
   phone,
   role,
   image,
+  isApproved,
+  pin,
   onConfirm,
 }) => {
   const [verificationMethod, setVerificationMethod] = useState(method);
@@ -51,6 +55,8 @@ const Verification: React.FC<VerificationProps> = ({
         image: null,
         selectedProfileImage: image,
         role: role,
+        isApproved: isApproved,
+        pin: pin,
       });
       handleCloseModal();
       navigate("/dashboard/Dashboard"); 
