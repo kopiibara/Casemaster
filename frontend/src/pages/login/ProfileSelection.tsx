@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, IconButton, Skeleton } from "@mui/material";
+import { Box, Button, IconButton, CircularProgress } from "@mui/material";
 import ModalView from "./ModalComponent";
 import axios from "axios";
 
@@ -20,7 +20,7 @@ interface Profile {
 const ProfileSelection = () => {
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true); // State to track loading
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
@@ -37,10 +37,11 @@ const ProfileSelection = () => {
           image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
         }));
         setProfiles(profilesWithValidImages);
+        console.log(profilesWithValidImages);
       } catch (error) {
         console.error("Failed to fetch profiles", error);
       } finally {
-        setLoading(false); // Set loading to false after fetching data
+        setIsLoading(false);
       }
     };
 
@@ -53,12 +54,13 @@ const ProfileSelection = () => {
   };
 
   const goToProfile = (profile: Profile) => {
-    setSelectedProfile(profile);
+    console.log(`Selected Profile ID: ${profile.user_id}`);
+    setSelectedProfile(profile); // Set the clicked profile as the selected profile
     setIsModalOpen(true);
   };
 
   const handleAddNewProfile = () => {
-    navigate("/add-existing-profile");
+    navigate("/add-existing-profile"); // Navigate to the "Add New Profile" page
   };
 
   return (
@@ -75,6 +77,7 @@ const ProfileSelection = () => {
         p: 4,
       }}
     >
+      {/* Back Button */}
       <Box
         sx={{
           position: "absolute",
@@ -103,6 +106,7 @@ const ProfileSelection = () => {
         <Box sx={{ fontSize: "0.875rem", color: "#0f2043" }}>Back</Box>
       </Box>
 
+      {/* Header */}
       <Box sx={{ mt: 6 }}>
         <h1
           style={{
@@ -125,6 +129,7 @@ const ProfileSelection = () => {
         </p>
       </Box>
 
+      {/* Profiles Section */}
       <Box
         sx={{
           display: "flex",
@@ -133,31 +138,55 @@ const ProfileSelection = () => {
           flexWrap: "wrap",
         }}
       >
-        {loading
-          ? Array.from(new Array(4)).map((_, index) => (
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                width: "16rem",
+                height: "14rem",
+                border: "1px solid rgba(15, 32, 67, 0.2)",
+                borderRadius: "0.75rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+                p: 4,
+                bgcolor: "white",
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+              }}
+            >
               <Box
-                key={index}
                 sx={{
-                  width: "16rem",
-                  height: "14rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  p: 4,
+                  width: "70px",
+                  height: "70px",
+                  borderRadius: "50%",
+                  bgcolor: "rgba(0, 0, 0, 0.1)",
+                  mb: "1rem",
                 }}
-              >
-                <Skeleton
-                  variant="circular"
-                  width={70}
-                  height={70}
-                  sx={{ mb: 2 }}
-                />
-                <Skeleton variant="text" width="60%" height={30} />
-                <Skeleton variant="text" width="40%" height={20} />
-              </Box>
-            ))
-          : profiles.map((profile) => (
+              ></Box>
+              <Box
+                sx={{
+                  width: "60%",
+                  height: "1rem",
+                  bgcolor: "rgba(0, 0, 0, 0.1)",
+                  mb: "0.5rem",
+                }}
+              ></Box>
+              <Box
+                sx={{
+                  width: "40%",
+                  height: "0.75rem",
+                  bgcolor: "rgba(0, 0, 0, 0.1)",
+                }}
+              ></Box>
+            </Box>
+          ))
+        ) : (
+          <>
+            {/* Existing Profiles */}
+            {profiles.map((profile) => (
               <Box
                 key={profile.user_id}
                 onClick={() => goToProfile(profile)}
@@ -175,9 +204,7 @@ const ProfileSelection = () => {
                   bgcolor: "white",
                   boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
                   cursor: "pointer",
-                  "&:hover": {
-                    boxShadow: "0px 6px 10px rgba(0, 0, 0, 0.15)",
-                  },
+                  "&:hover": { boxShadow: "0px 6px 10px rgba(0, 0, 0, 0.15)" },
                 }}
               >
                 <Box
@@ -189,8 +216,8 @@ const ProfileSelection = () => {
                     overflow: "hidden",
                   }}
                 >
-                  <img
-                    src={profile.image}
+                  <img 
+                    src={profile.image} // Use the profile image here
                     alt={`${profile.name}'s profile`}
                     style={{
                       width: "100%",
@@ -222,7 +249,58 @@ const ProfileSelection = () => {
                 </Box>
               </Box>
             ))}
+
+            {/* Add New Profile Card */}
+            <Box
+              onClick={handleAddNewProfile}
+              sx={{
+                width: "16rem",
+                height: "14rem",
+                border: "1px dashed rgba(15, 32, 67, 0.4)",
+                borderRadius: "0.75rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+                p: 4,
+                bgcolor: "#f9fafb",
+                boxShadow: "none",
+                cursor: "pointer",
+                "&:hover": {
+                  bgcolor: "#e3eaf6",
+                },
+              }}
+            >
+              <IconButton
+                sx={{
+                  width: "4rem",
+                  height: "4rem",
+                  bgcolor: "#517FD3",
+                  color: "#fff",
+                  mb: "1rem",
+                  "&:hover": { bgcolor: "#3D6FBF" },
+                }}
+              >
+                <AddIcon sx={{ fontSize: "2rem" }} />
+              </IconButton>
+              <Box
+                component="h4"
+                sx={{
+                  fontSize: "1.125rem",
+                  fontWeight: "600",
+                  color: "#0f2043",
+                  opacity: 0.8,
+                }}
+              >
+                Add New Profile
+              </Box>
+            </Box>
+          </>
+        )}
       </Box>
+
+      {/* Sign Out Button */}
 
       <Box sx={{ mt: 3 }}>
         <Button
@@ -239,12 +317,13 @@ const ProfileSelection = () => {
         </Button>
       </Box>
 
+      {/* Modal */}
       {selectedProfile && (
         <ModalView
           isModalOpen={isModalOpen}
           currentView="enter-pin"
           handleCloseModal={handleCloseModal}
-          selectedProfile={selectedProfile}
+          selectedProfile={selectedProfile} // Pass selected profile here
         />
       )}
     </Box>
