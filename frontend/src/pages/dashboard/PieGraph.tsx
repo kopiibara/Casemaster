@@ -1,5 +1,5 @@
 import * as React from "react";
-import { PieChart } from "@mui/x-charts/PieChart";
+import { PieChart } from "@mui/x-charts";
 import { Box, Stack, Button, Typography } from "@mui/material";
 
 interface PieGraphProps {

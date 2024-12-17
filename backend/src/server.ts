@@ -30,14 +30,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" })); // Replaces bodyParser.json()
 app.use(express.urlencoded({ limit: "50mb", extended: true })); // Replaces bodyParser.urlencoded()
-app.use(fileUpload());
+
 
 // Use routes
 app.use("/api", profileRoutes);
 app.use("/api", emailRoutes);
 app.use("/api", smsRoutes);
-app.use("/api", caselogsRoutes);
 
+
+app.use(fileUpload());
+app.use("/api", caselogsRoutes);
 // Email routes
 app.post("/api/send-email", async (req, res) => {
   try {
