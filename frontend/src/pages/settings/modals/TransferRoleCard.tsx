@@ -3,7 +3,7 @@ import { Box, Stack, Button, Typography, Dialog, DialogActions, DialogContent, D
 import { useAppContext } from "../../../AppContext";
 import { SelectChangeEvent } from '@mui/material/Select';
 import axios from "axios";
-import { AppProvider } from "../../../AppContext";
+import { useNavigate } from "react-router-dom";
 
 interface Profile {
   user_id: number;
@@ -18,11 +18,13 @@ interface Profile {
 
 const TransferRoleCard = () => {
   const { profileData } = useAppContext();
-  const [openDialog, setOpenDialog] = useState(false);
-  const [age, setAge] = React.useState('');
-  const { id } = profileData;
+  const [openDialog, setOpenDialog] = useState(false); // Dialog for role transfer
+  const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false); // Confirmation dialog
+  const [selectedUserId, setSelectedUserId] = useState<number | "">('');
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const navigate = useNavigate();
 
+  // Fetch profiles
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
@@ -32,30 +34,56 @@ const TransferRoleCard = () => {
           image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
         }));
         setProfiles(profilesWithValidImages);
-        console.log(profilesWithValidImages);
       } catch (error) {
         console.error("Failed to fetch profiles", error);
-      } finally {
-
       }
     };
 
     fetchProfiles();
   }, []);
 
-  // Handle dialog open and close
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
+  // Handle profile change selection
+  const handleProfileChange = (event: SelectChangeEvent<number>) => {
+    const userId = event.target.value as number;
+    setSelectedUserId(userId); // Store selected user_id in state
   };
 
-  const handleDialogClose = () => {
-    setOpenDialog(false);
+  // Trigger role transfer
+  const handleTransferRole = async () => {
+    if (selectedUserId) {
+      try {
+        // Role transfer logic
+        await axios.put("http://localhost:3000/api/transfer-role-clerk", { userId: selectedUserId });
+
+        console.log("Role transferred successfully!");
+        handleTransferRoleStaff();
+        handleDialogClose();
+        setOpenConfirmationDialog(false);
+        navigate('/profile-selection'); // Close confirmation dialog
+      } catch (error) {
+        console.error("Can't transfer role", error);
+      }
+    }
   };
 
+  const handleTransferRoleStaff = async () => {
 
-  const handleChange = (event: SelectChangeEvent) => {
-      setAge(event.target.value as string);
-    };
+      try {
+        // Role transfer logic
+        await axios.put("http://localhost:3000/api/transfer-role-staff", { userId: profileData.id });
+        console.log("Role transferred successfully!");
+      } catch (error) {
+        console.error("Can't transfer role", error);
+      }
+  };
+
+  // Handle opening and closing of the dialog
+  const handleDialogOpen = () => setOpenDialog(true);
+  const handleDialogClose = () => setOpenDialog(false);
+
+  // Handle opening and closing of the confirmation dialog
+  const handleConfirmationDialogOpen = () => setOpenConfirmationDialog(true);
+  const handleConfirmationDialogClose = () => setOpenConfirmationDialog(false);
 
   return (
     <>
@@ -98,68 +126,85 @@ const TransferRoleCard = () => {
 
       {/* Dialog for Admin Role Transfer */}
       <Dialog
-  open={openDialog}
-  onClose={handleDialogClose}
-  sx={{
-    '& .MuiDialog-paper': {
-      width: '500px', // Adjust width as needed
-      maxWidth: 'none', // Remove any maximum width limit
-      padding: '20px', // Optional: add some padding inside the dialog
-    },
-  }}
->
-  <DialogTitle>Transfer Admin Role</DialogTitle>
-  <DialogContent>
-    <Typography variant="body2" sx={{ marginBottom: 2 }}>
-      Are you sure you want to transfer the Admin role to another user? Once you confirm, the new admin will have full control.
-      </Typography>
-      <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
-  <InputLabel id="demo-simple-select-label">Staff Name</InputLabel>
-  <Select
-    labelId="demo-simple-select-label"
-    id="demo-simple-select"
-    value={age}
-    label="Staff Name"
-    onChange={handleChange}
-  >
-    {profiles
-      .filter(profile => profile.role === "Staff") // Filter for "Staff" role
-      .map(profile => (
-        <MenuItem key={profile.user_id} value={profile.user_id}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            {/* Image */}
-            <img
-              src={profile.image} 
-              alt={profile.name}
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%", // Circle shape
-                objectFit: "cover",
-              }}
-            />
-            {/* Name */}
-            <Typography variant="body2">{profile.name}</Typography>
-          </Stack>
-        </MenuItem>
-      ))}
-  </Select>
-</FormControl>
+        open={openDialog}
+        onClose={handleDialogClose}
+        sx={{
+          '& .MuiDialog-paper': {
+            width: '500px', // Adjust width as needed
+            maxWidth: 'none', // Remove any maximum width limit
+            padding: '20px', // Optional: add some padding inside the dialog
+          },
+        }}
+      >
+        <DialogTitle>Transfer Admin Role</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ marginBottom: 2 }}>
+            Are you sure you want to transfer the Admin role to another user? Once you confirm, the new admin will have full control.
+          </Typography>
+          <Box sx={{ minWidth: 120 }}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Staff Name </InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={selectedUserId}
+                label="Staff Name"
+                onChange={handleProfileChange}
+              >
+                {profiles
+                  .filter(profile => profile.role === "Staff") // Filter for "Staff" role
+                  .map(profile => (
+                    <MenuItem key={profile.user_id} value={profile.user_id}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        {/* Image */}
+                        <img
+                          src={profile.image}
+                          alt={profile.name}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: "50%", // Circle shape
+                            objectFit: "cover",
+                          }}
+                        />
+                        <Typography variant="body2">{profile.name}</Typography>
+                      </Stack>
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmationDialogOpen} color="primary" variant="contained">
+            Transfer
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-    </Box>
-    
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleDialogClose} color="primary">
-      Cancel
-    </Button>
-    <Button onClick={handleDialogClose} color="primary" variant="contained">
-      Transfer
-    </Button>
-  </DialogActions>
-</Dialog>
-
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={openConfirmationDialog}
+        onClose={handleConfirmationDialogClose}
+      >
+        <DialogTitle>Are you sure?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Are you sure you want to transfer the Admin role to this user? This action is irreversible.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmationDialogClose} color="primary">
+            No
+          </Button>
+          <Button onClick={handleTransferRole} color="primary" variant="contained">
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
