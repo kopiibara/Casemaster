@@ -131,8 +131,7 @@ const ConfirmExistingProfile = () => {
           height: "100vh",
         }}
       >
-        {verificationText}
-      </Typography>
+      {verificationText}
 
       {/* Input Field */}
       <Box>
@@ -237,6 +236,8 @@ const ConfirmExistingProfile = () => {
             >
               Confirm
             </Button>
+          </Box>
+        </Box>
           </Box>
         </Box>
       </Stack>
