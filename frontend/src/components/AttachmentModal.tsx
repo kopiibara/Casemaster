@@ -9,13 +9,14 @@ import {
   IconButton,
   MenuItem,
   Autocomplete,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import * as pdfjsLib from "pdfjs-dist";
 import axios from "axios";
-import AlertSnackbar from "./AlertComponent"; // Import the reusable AlertSnackbar component
 
 interface Attachment {
   name: string;
@@ -51,19 +52,13 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
-
   // Validation State
   const [errors, setErrors] = useState({
     caseNo: "",
     caseTitle: "",
     partyFiler: "",
     caseType: "",
+    tags: "", // Added tags to error state
   });
 
   useEffect(() => {
@@ -77,24 +72,61 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
       .catch((error) => console.error("Error fetching tags:", error));
   }, []);
 
-  const validateFields = () => {
-    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/;
+  // Function to check if the case number exists by making an API call
+  const checkCaseNoExists = async (caseNo: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/check-case-existence/${caseNo}`
+      );
+      return response.data.exists; // Assuming the response contains { exists: true } or { exists: false }
+    } catch (error) {
+      console.error("Error checking case existence:", error);
+      return false; // If the API fails, assume the case number doesn't exist
+    }
+  };
+
+  const validateFields = async () => {
+    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/; // Case No. can have numbers and hyphens
+    const nonNumbersRegex = /^(?!\d+$).+/; // Allows numbers but not numbers only
+
+    // Define the newErrors object and include the 'tags' field
     const newErrors = {
       caseNo: caseNoRegex.test(caseNo) ? "" : "Invalid Case No. format.",
-      caseTitle: caseTitle.trim() ? "" : "Case Title is required.",
-      partyFiler: partyFiler.trim() ? "" : "Party Filer is required.",
+      caseTitle: nonNumbersRegex.test(caseTitle.trim())
+        ? ""
+        : "Case Title cannot be numbers only.",
+      partyFiler: nonNumbersRegex.test(partyFiler.trim())
+        ? ""
+        : "Party Filer cannot be numbers only.",
       caseType: caseType ? "" : "Case Type is required.",
+      tags: tags.length > 0 ? "" : "Tags are required.", // Ensure tags are validated
     };
 
+    // Check if the Case No. already exists
+    const caseExists = await checkCaseNoExists(caseNo);
+    if (caseExists) {
+      newErrors.tags = "Case No. already exists. Please add tags to proceed.";
+      if (!tags.length) {
+        newErrors.tags = "Tags are required for an existing Case No."; // Handle case for missing tags
+      }
+    }
+
+    // Update the errors state
     setErrors(newErrors);
 
+    // Return whether all fields are valid
     return Object.values(newErrors).every((err) => err === "");
   };
 
   const handleSave = async () => {
-    if (!validateFields() || !currentAttachment) return;
+    // Perform validation first
+    if (!(await validateFields()) || !currentAttachment) {
+      setErrorMessage("Please correct the highlighted errors.");
+      return; // Exit early if validation fails
+    }
 
     try {
+      // Step 1: Upload the file to Google Drive
       const uploadResponse = await axios.post(
         "http://localhost:3000/api/upload-to-drive",
         {
@@ -104,22 +136,22 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         }
       );
 
-      if (uploadResponse.status !== 201) {
-        setSnackbarMessage("Failed to upload file to Google Drive.");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+      if (uploadResponse.status !== 200) {
+        setErrorMessage("Failed to upload file to Google Drive.");
         return;
       }
 
       const { webContentLink } = uploadResponse.data;
 
+      // Step 2: Save the case log with the file URL and file name
       const data = {
         caseNo,
         caseTitle,
         partyFiler,
         caseType,
-        tags,
-        file_url: webContentLink,
+        tags, // Now this is correctly typed
+        file_url: webContentLink, // Add the Google Drive file URL
+        file_name: currentAttachment.name, // Include file name
       };
 
       const saveResponse = await axios.post(
@@ -128,10 +160,12 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
       );
 
       if (saveResponse.status === 201) {
-        setSnackbarMessage("Case Details logged successfully!");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
+        setSuccessMessage(
+          `[${caseNo}] details imported to case logs successfully`
+        );
+        setErrorMessage(null);
 
+        // Clear the form fields
         setCaseNo("");
         setCaseTitle("");
         setPartyFiler("");
@@ -140,20 +174,12 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
 
         onClose();
       } else {
-        setSnackbarMessage("Failed to save case log. Please try again.");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+        setErrorMessage("Failed to save case log. Please try again.");
       }
     } catch (error) {
       console.error("Error during save process:", error);
-      setSnackbarMessage("An error occurred while saving the case log.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      setErrorMessage("An error occurred while saving the case log.");
     }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
   };
 
   const handleDiscard = () => {
@@ -175,199 +201,250 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
             flexDirection: "row",
             width: "80%",
             height: "80%",
+            maxHeight: "100vh",
             margin: "auto",
             marginTop: "5%",
             backgroundColor: "white",
             boxShadow: 24,
             borderRadius: 2,
             p: 4,
-            overflow: "hidden",
           }}
         >
-          {/* Modal Content Container */}
-          <React.Fragment>
-            {/* Left Side - Form */}
+          {/* Left Side - Form */}
+          <Box
+            sx={{
+              width: "30%",
+              borderRight: "1px solid #ddd",
+              paddingRight: 2,
+            }}
+          >
             <Box
-              sx={{
-                width: "30%",
-                borderRight: "1px solid #ddd",
-                paddingRight: 2,
-              }}
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Import to Case Logs
-                </Typography>
-                <IconButton onClick={onClose}>
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-              <Divider sx={{ my: 2 }} />
-              <Box
-                component="form"
-                noValidate
-                autoComplete="off"
-                sx={{ my: 4 }}
-              >
-                {/* Input Fields */}
-                <TextField
-                  label="Case No."
-                  required
-                  fullWidth
-                  value={caseNo}
-                  onChange={(e) => setCaseNo(e.target.value)}
-                  sx={{ mb: 2 }}
-                  error={!!errors.caseNo}
-                  helperText={errors.caseNo}
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  label="Case Title"
-                  required
-                  fullWidth
-                  value={caseTitle}
-                  onChange={(e) => setCaseTitle(e.target.value)}
-                  sx={{ mb: 2 }}
-                  error={!!errors.caseTitle}
-                  helperText={errors.caseTitle}
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  label="Party Filer"
-                  required
-                  fullWidth
-                  value={partyFiler}
-                  onChange={(e) => setPartyFiler(e.target.value)}
-                  sx={{ mb: 2 }}
-                  error={!!errors.partyFiler}
-                  helperText={errors.partyFiler}
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  label="Case Type"
-                  placeholder="Select a case type"
-                  required
-                  select
-                  fullWidth
-                  value={caseType || ""}
-                  onChange={(e) => setCaseType(e.target.value)}
-                  sx={{ mb: 2 }}
-                  error={!!errors.caseType}
-                  InputLabelProps={{ shrink: true }}
-                >
-                  <MenuItem disabled value="">
-                    Choose case type
-                  </MenuItem>
-                  <MenuItem value="Civil Case">Civil Case</MenuItem>
-                  <MenuItem value="Criminal Case">Criminal Case</MenuItem>
-                  <MenuItem value="Special Case">Special Case</MenuItem>
-                  <MenuItem value="Motions">Motions</MenuItem>
-                  <MenuItem value="Incidents">Incidents</MenuItem>
-                  <MenuItem value="Pleadings">Pleadings</MenuItem>
-                </TextField>
-                <Autocomplete
-                  multiple
-                  freeSolo
-                  options={availableTags}
-                  value={tags}
-                  onChange={(event, newValue) => {
-                    const uniqueTags = Array.from(
-                      new Set(newValue.map((tag) => tag.trim()))
-                    ).filter((tag) => tag);
-                    setTags(uniqueTags);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Tags"
-                      fullWidth
-                      sx={{ mb: 2 }}
-                      helperText="Add tags by typing and pressing Enter"
-                      InputLabelProps={{ shrink: true }} // Keeps the label on top
-                    />
-                  )}
-                  filterOptions={(options, { inputValue }) => {
-                    const filtered = options.filter((option) =>
-                      option.toLowerCase().includes(inputValue.toLowerCase())
-                    );
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Import to Case Logs
+              </Typography>
+              <IconButton onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box component="form" noValidate autoComplete="off" sx={{ my: 2 }}>
+              <TextField
+                label="Case No."
+                required
+                fullWidth
+                value={caseNo}
+                onChange={(e) => setCaseNo(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseNo}
+                helperText={errors.caseNo}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Case Title"
+                required
+                fullWidth
+                value={caseTitle}
+                onChange={(e) => setCaseTitle(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseTitle}
+                helperText={errors.caseTitle}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Party Filer"
+                required
+                fullWidth
+                value={partyFiler}
+                onChange={(e) => setPartyFiler(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.partyFiler}
+                helperText={errors.partyFiler}
+                InputLabelProps={{ shrink: true }}
+              />
 
-                    if (
-                      inputValue.trim() &&
-                      !options.includes(inputValue.trim())
-                    ) {
-                      filtered.push(inputValue.trim());
+              <TextField
+                label="Case Type"
+                placeholder="Select a case type"
+                required
+                select
+                fullWidth
+                value={caseType || ""}
+                onChange={(e) => setCaseType(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseType}
+                InputLabelProps={{ shrink: true }}
+              >
+                <MenuItem disabled value="">
+                  Choose case type
+                </MenuItem>
+                <MenuItem value="Civil Case">Civil Case</MenuItem>
+                <MenuItem value="Criminal Case">Criminal Case</MenuItem>
+                <MenuItem value="Special Case">Special Case</MenuItem>
+                <MenuItem value="Motions">Motions</MenuItem>
+                <MenuItem value="Incidents">Incidents</MenuItem>
+                <MenuItem value="Pleadings">Pleadings</MenuItem>
+              </TextField>
+
+              <Autocomplete
+                multiple
+                freeSolo
+                options={availableTags}
+                value={tags}
+                onChange={(event, newValue) => {
+                  const uniqueTags = Array.from(
+                    new Set(newValue.map((tag) => tag.trim()))
+                  ).filter((tag) => tag);
+                  setTags(uniqueTags);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Tags"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    helperText={
+                      errors.tags || "Add tags by typing and pressing Enter"
                     }
+                    error={!!errors.tags}
+                    InputLabelProps={{ shrink: true }} // Keeps the label on top
+                  />
+                )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.toLowerCase().includes(inputValue.toLowerCase())
+                  );
 
-                    return filtered;
+                  if (
+                    inputValue.trim() &&
+                    !options.includes(inputValue.trim())
+                  ) {
+                    filtered.push(inputValue.trim());
+                  }
+
+                  return filtered;
+                }}
+              />
+
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <Button
+                  variant="outlined"
+                  onClick={handleDiscard}
+                  sx={{
+                    color: "#0F2043",
+                    borderColor: "#0F2043",
+                    borderRadius: "0.3rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      borderColor: "#0B1730",
+                      backgroundColor: "rgba(15, 32, 67, 0.1)",
+                    },
                   }}
-                />
-
-                <Box display="flex" justifyContent="flex-end" gap={1}>
-                  <Button
-                    variant="outlined"
-                    onClick={handleDiscard}
-                    sx={{
-                      color: "#0F2043",
-                      borderColor: "#0F2043",
-                      borderRadius: "0.3rem",
-                      textTransform: "none",
-                      "&:hover": {
-                        borderColor: "#0B1730",
-                        backgroundColor: "rgba(15, 32, 67, 0.1)",
-                      },
-                    }}
-                  >
-                    Discard
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSave}
-                    sx={{
-                      textTransform: "none",
-                      borderRadius: "0.3rem",
-                      "&:hover": {
-                        backgroundColor: "#003366",
-                      },
-                    }}
-                  >
-                    Save
-                  </Button>
-                </Box>
+                >
+                  Discard
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSave}
+                  sx={{
+                    backgroundColor: "#0F2043",
+                    color: "#FFFFFF",
+                    borderRadius: "0.3rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      backgroundColor: "#0B1730",
+                    },
+                  }}
+                >
+                  Save
+                </Button>
               </Box>
             </Box>
+          </Box>
+          {/* Right Side - Viewer */}
+          <Box
+            sx={{
+              width: "70%",
+              paddingLeft: 2,
 
-            {/* Right Side - PDF Viewer */}
-            <Box sx={{ width: "70%", paddingLeft: 2 }}>
-              {currentAttachment &&
-              currentAttachment.type === "application/pdf" ? (
-                <Worker
-                  workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
-                >
-                  <Viewer fileUrl={currentAttachment.url} />
-                </Worker>
-              ) : (
-                <Typography
-                  variant="body1"
-                  sx={{ textAlign: "center", marginTop: 4 }}
-                >
-                  No PDF file selected.
-                </Typography>
-              )}
-            </Box>
-          </React.Fragment>
+              height: "100%",
+            }}
+          >
+            {currentAttachment ? (
+              <>
+                <Box sx={{ paddingLeft: 3, marginTop: 4, marginBottom: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    {currentAttachment.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.disabled"
+                    sx={{ mb: 2 }}
+                  >
+                    Type: {currentAttachment.type}, Size:{" "}
+                    {currentAttachment.size}
+                  </Typography>
+                </Box>
+                {currentAttachment.type === "application/pdf" ? (
+                  <div style={{ height: "500px" }}>
+                    <Worker
+                      workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
+                    >
+                      <Viewer fileUrl={currentAttachment.url} />
+                    </Worker>
+                  </div>
+                ) : (
+                  <img
+                    src={currentAttachment.url}
+                    alt={currentAttachment.name}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              </>
+            ) : (
+              <Typography variant="body1" color="text.secondary">
+                Select an attachment to view its content.
+              </Typography>
+            )}
+          </Box>
         </Box>
       </Modal>
-      <AlertSnackbar
-        open={snackbarOpen}
-        message={snackbarMessage}
-        severity={snackbarSeverity}
-        onClose={handleSnackbarClose}
-      />
+
+      {/* Error and Success Alerts */}
+      {errorMessage && (
+        <Snackbar
+          open={!!errorMessage}
+          autoHideDuration={6000}
+          onClose={() => setErrorMessage(null)}
+        >
+          <Alert
+            severity="error"
+            onClose={() => setErrorMessage(null)}
+            sx={{ width: "100%" }}
+          >
+            {errorMessage}
+          </Alert>
+        </Snackbar>
+      )}
+      {successMessage && (
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={6000}
+          onClose={() => setSuccessMessage(null)}
+        >
+          <Alert
+            severity="success"
+            onClose={() => setSuccessMessage(null)}
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+      )}
     </>
   );
 };
