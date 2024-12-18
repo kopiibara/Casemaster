@@ -8,7 +8,7 @@ interface Profile {
   role: string;
   image: string; // Change this to string, as it will store the base64 encoded string
   pin: string;
-  isApproved: boolean;
+  isApproved: number;
 }
 
 // Function to create a new user
@@ -53,6 +53,29 @@ export const getProfiles = (req: Request) => {
   });
 };
 
+export const getProfilesUser = (req: Request) => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT * FROM users where isRemoved = 0'; // Query to fetch all profiles
+    db.query(query, (err, results: any[]) => { // results is the rows array
+      if (err) {
+        console.error('Database Error:', err);
+        return reject(err);
+      }
+
+      // Map through results to include image base64
+      const profiles = results.map((profile: any) => {
+        if (profile.image) {
+          profile.image = `data:image/jpeg;base64,${profile.image}`;
+        }
+        return profile;
+      });
+
+      resolve(profiles); // Return profiles with base64 image data
+    });
+  });
+};
+
+
 export const approveAccount = (userId: number, isApproved: boolean) => {
   return new Promise((resolve, reject) => {
     const query = `UPDATE users SET isApproved = ? WHERE user_id = ?`;
@@ -71,7 +94,25 @@ export const approveAccount = (userId: number, isApproved: boolean) => {
   });
 };
 
-export const removeProfileCard = (userId: number, isRemoved: boolean) => {
+export const removeProfileCard = (userId: number, isRemoved: number) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE users SET isRemoved = ?  WHERE user_id = ?`;
+
+    db.query(query, [isRemoved, userId], (err, result: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); // Profile card removal was successful
+        } else {
+          resolve(false); // No user found with the provided ID
+        }
+      }
+    });
+  });
+};
+
+export const addProfileCard = (userId: number, isRemoved: number) => {
   return new Promise((resolve, reject) => {
     const query = `UPDATE users SET isRemoved = ? WHERE user_id = ?`;
 
@@ -88,7 +129,6 @@ export const removeProfileCard = (userId: number, isRemoved: boolean) => {
     });
   });
 };
-
 
 
 // Function to update the role of a user to 'Branch Clerk'

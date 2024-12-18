@@ -32,19 +32,15 @@ const ProfileSelection = () => {
     navigate("/");
   };
 
+
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/get-profiles');
-        
-        // Filter out profiles where isRemoved is true (or 1)
-        const profilesWithValidImages = response.data
-          .filter((profile: Profile) => profile.isRemoved === false) // Only include profiles with isRemoved = false
-          .map((profile: Profile) => ({
-            ...profile,
-            image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
-          }));
-  
+        const response = await axios.get('http://localhost:3000/api/get-profiles-user');
+        const profilesWithValidImages = response.data.map((profile: Profile) => ({
+          ...profile,
+          image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
+        }));
         setProfiles(profilesWithValidImages);
         console.log(profilesWithValidImages);
       } catch (error) {
@@ -53,10 +49,9 @@ const ProfileSelection = () => {
         setIsLoading(false);
       }
     };
-  
+
     fetchProfiles();
   }, []);
-  
 
   const handleRemoveProfileCard = async (userId: number) => {
     try {
@@ -69,7 +64,6 @@ const ProfileSelection = () => {
       console.error("Can't remove profile", error);
     }
   };
-  
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -400,4 +394,3 @@ const ProfileSelection = () => {
 };
 
 export default ProfileSelection;
-

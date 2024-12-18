@@ -3,41 +3,35 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Button from "@mui/material/Button";
 import { Box, Typography, TextField, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { useAppContext } from "../../../AppContext";
+import axios from "axios";
 
 const ConfirmExistingProfile = () => {
   const [verificationMethod, setVerificationMethod] = useState("email");
   const navigate = useNavigate();
+  const { profileData } = useAppContext();
   const [code, setCode] = useState("");
-  const {profileData} = useAppContext();
+ const [id, setId] = useState<number>(0);
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
   };
 
+  useEffect(() => {
+    setId(profileData.id || 0);
+    console.log(profileData.id);
+  });
 
 
-  const concealEmail = (email:string) => {
-    const [username, domain] = email.split('@');
-    const maskedUsername = username.slice(0, 3) + '*****'; // Mask part of the username
-    return `${maskedUsername}@${domain}`;
-  };
-  
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCode(event.target.value);
-    console.log("Input value:", event.target.value);
-  };
   const handleVerifyEmail = async () => {
     try {
       const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
         to: profileData.email,
         code: code,
       });
+      handleAddProfileCard(id);
       console.log(response.data.message || "Email verified successfully!");
-
-      navigate("/dashboard/Dashboard"); 
+      navigate("/profile-selection"); 
 
     } catch (err: any) {
       if (err.response) {
@@ -51,6 +45,17 @@ const ConfirmExistingProfile = () => {
     }
   };
 
+  const handleAddProfileCard = async (userId : number) => {
+    try {
+      await axios.put("http://localhost:3000/api/add-profile-card", { userId });
+      console.log("Profile added successfully!");
+      
+    } catch (error) {
+      console.error("Can't remove profile", error);
+    }
+  };
+
+
   const verificationText =
     verificationMethod === "email" ? (
       <>
@@ -58,7 +63,7 @@ const ConfirmExistingProfile = () => {
           An email with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>({concealEmail(profileData.email)}).</strong>
+          was just sent to <strong>(t*****@gmail.com).</strong>
         </Typography>
       </>
     ) : (
@@ -67,7 +72,7 @@ const ConfirmExistingProfile = () => {
           An SMS with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>({profileData.phoneNo}).</strong>
+          was just sent to <strong>(+123 ** 5678).</strong>
         </Typography>
       </>
     );
@@ -131,29 +136,6 @@ const ConfirmExistingProfile = () => {
           height: "100vh",
         }}
       >
-      {verificationText}
-
-      {/* Input Field */}
-      <Box>
-        <TextField
-          label="Enter Code"
-          variant="outlined"
-          inputProps={{ maxLength: 6 }}
-          sx={{
-            width: "24rem",
-            backgroundColor: "transparent",
-            borderRadius: "8px",
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-          }}
-          value={code}
-          onChange={handleInputChange}
-
-        />
-
-        {/* Actions */}
-        <Box
         <Typography
           variant="h4"
           sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
@@ -186,7 +168,7 @@ const ConfirmExistingProfile = () => {
                 borderRadius: "8px",
               },
             }}
-            onClick={handleVerifyEmail}
+            onChange={(e) => setCode(e.target.value)}
           />
 
           {/* Actions */}
@@ -233,11 +215,10 @@ const ConfirmExistingProfile = () => {
                   boxShadow: "none",
                 },
               }}
+              onClick={handleVerifyEmail}
             >
               Confirm
             </Button>
-          </Box>
-        </Box>
           </Box>
         </Box>
       </Stack>

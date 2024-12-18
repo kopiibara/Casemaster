@@ -29,20 +29,21 @@ const TransferRoleCard = () => {
     const fetchProfiles = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/get-profiles');
-        const profilesWithValidImages = response.data.map((profile: Profile) => ({
-          ...profile,
-          image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
-          
-        }));
+        const profilesWithValidImages = response.data
+          .filter((profile: Profile) => profile.isApproved === true) // Filter by isApproved
+          .map((profile: Profile) => ({
+            ...profile,
+            image: profile.image || 'path/to/default/image.jpg', // Replace with your default image path
+          }));
         setProfiles(profilesWithValidImages);
-        console.log()
       } catch (error) {
         console.error("Failed to fetch profiles", error);
       }
     };
-
+  
     fetchProfiles();
   }, []);
+  
 
   // Handle profile change selection
   const handleProfileChange = (event: SelectChangeEvent<number>) => {

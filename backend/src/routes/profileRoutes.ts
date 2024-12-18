@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';  // Import fs to read the file
-import { getProfiles, approveAccount, transferRole, saveActionLog, getAuditLogs, checkUsernameExists, removeProfileCard } from '../services/profileService';
+import { getProfiles, approveAccount, transferRole, saveActionLog, getAuditLogs, checkUsernameExists, removeProfileCard, addProfileCard , getProfilesUser} from '../services/profileService';
 import multer from 'multer';
 import db from '../config/db'; // Import the DB connection
 
@@ -61,6 +61,16 @@ router.get('/get-profiles', async (req: Request, res: Response, next: NextFuncti
 });
 
 
+router.get('/get-profiles-user', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const profiles = await getProfilesUser(req);  // Get profiles from the database
+    res.status(200).json(profiles);  // Return profiles as JSON response
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 router.put('/approve-account', async (req: Request, res: Response) => {
   const { userId, isApproved } = req.body;
 
@@ -83,9 +93,24 @@ router.put('/approve-account', async (req: Request, res: Response) => {
 router.put('/remove-profile-card', async (req: Request, res: Response) => {
   const { userId} = req.body;
   try {
-    const result = await removeProfileCard(userId, true);
+    const result = await removeProfileCard(userId, 1);
     if (result) {
       res.status(200).json({ message: 'Account removed successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error approving account:', error);
+    res.status(500).json({ message: 'Error approving account' });
+  }
+});
+
+router.put('/add-profile-card', async (req: Request, res: Response) => {
+  const { userId} = req.body;
+  try {
+    const result = await addProfileCard(userId, 0);
+    if (result) {
+      res.status(200).json({ message: 'Account added successfully' });
     } else {
       res.status(404).json({ message: 'User not found' });
     }

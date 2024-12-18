@@ -36,8 +36,7 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
   }, []); 
 
   const columns = [
-    { id: "action_date", label: "Date", mWidth: 50 },  // Map to 'action_date'
-    { id: "audit_id", label: "Log ID", minWidth: 50 },  // Map to 'audit_id'
+    { id: "action_date", label: "Date", mWidth: 50 },  // Map to 'action_date' // Map to 'audit_id'
     { id: "action", label: "Action", minWidth: 100 },   // Map to 'action'
   ];
 

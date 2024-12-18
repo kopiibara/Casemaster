@@ -34,4 +34,3 @@ export const sendVerificationEmail = async (to: string, code: string): Promise<v
     throw new Error('Failed to send verification email');
   }
 };
-
