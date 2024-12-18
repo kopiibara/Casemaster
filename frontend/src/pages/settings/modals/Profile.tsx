@@ -132,9 +132,9 @@ const Profile = () => {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
                 fontSize: "0.9rem",
-                color: "#2E49D5",
+                color: "#0F2043",
                 "& input": {
-                  color: "#2E49D5",
+                  color: "#0F2043",
                   padding: "0.5rem",
                 },
                 "& fieldset": {
@@ -148,11 +148,11 @@ const Profile = () => {
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#868FA0",
+                color: "#0F2043",
                 fontSize: "0.9rem",
               },
               "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E49D5",
+                color: "#0F2043",
               },
             }}
           >
@@ -172,9 +172,9 @@ const Profile = () => {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
                 fontSize: "0.9rem",
-                color: "#2E49D5",
+                color: "#0F2043",
                 "& input": {
-                  color: "#2E49D5",
+                  color: "#0F2043",
                   padding: "0.5rem",
                 },
                 "& fieldset": {
@@ -188,7 +188,7 @@ const Profile = () => {
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#868FA0",
+                color: "#0F2043",
                 fontSize: "0.9rem",
               },
               "& .MuiInputLabel-root.Mui-focused": {
@@ -215,9 +215,7 @@ const Profile = () => {
                         color: "#2E49D5",
                       },
                     }}
-                  >
-                    Verify
-                  </Button>
+                  ></Button>
                 </InputAdornment>
               }
             />
@@ -231,9 +229,9 @@ const Profile = () => {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
                 fontSize: "0.9rem",
-                color: "#2E49D5",
+                color: "#0F2043",
                 "& input": {
-                  color: "#2E49D5",
+                  color: "#0F2043",
                   padding: "0.5rem",
                 },
                 "& fieldset": {
@@ -247,11 +245,11 @@ const Profile = () => {
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#868FA0",
+                color: "#0F2043",
                 fontSize: "0.9rem",
               },
               "& .MuiInputLabel-root.Mui-focused": {
-                color: "#2E49D5",
+                color: "#0F2043",
               },
             }}
           >
@@ -375,28 +373,27 @@ const Profile = () => {
           <FormControl
             variant="outlined"
             size="small"
-            disabled={!isPinValid}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
                 fontSize: "0.9rem",
-                color: "#E0E0E0", // Very light text color
+                color: isPinValid ? "#2E49D5" : "#E0E0E0", // Change color based on pin validity
                 "& input": {
-                  color: "#E0E0E0", // Very light input text color
+                  color: isPinValid ? "#2E49D5" : "#E0E0E0", // Change input text color based on pin validity
                   padding: "0.5rem",
                 },
                 "& fieldset": {
-                  borderColor: "#F2F2F2", // Very light border color
+                  borderColor: isPinValid ? "#868FA0" : "#868FA0", // Change border color based on pin validity
                 },
                 "&:hover fieldset": {
-                  borderColor: "#F2F2F2", // Maintain light hover effect
+                  borderColor: isPinValid ? "#2E49D5" : "#2E49D5", // Change hover effect based on pin validity
                 },
                 "&.Mui-disabled": {
-                  backgroundColor: "#FCFCFC", // Almost white background
+                  backgroundColor: "#FCFCFC", // Light background when disabled
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#E8E8E8", // Very light label color
+                color: isPinValid ? "#2E49D5" : "#868FA0", // Change label color based on pin validity
                 fontSize: "0.9rem",
               },
             }}
@@ -407,35 +404,35 @@ const Profile = () => {
               label="New Pin"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
+              disabled={!isPinValid} // This makes the field disabled when pin is not valid
             />
           </FormControl>
 
-          {/* Confirm Pin */}
+          {/* Confirm New Pin */}
           <FormControl
             variant="outlined"
             size="small"
-            disabled={!isPinValid}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
                 fontSize: "0.9rem",
-                color: "#E0E0E0", // Very light text color
+                color: isPinValid ? "#2E49D5" : "#868FA0", // Change color based on pin validity
                 "& input": {
-                  color: "#E0E0E0", // Very light input text color
+                  color: isPinValid ? "#2E49D5" : "#868FA0", // Change input text color based on pin validity
                   padding: "0.5rem",
                 },
                 "& fieldset": {
-                  borderColor: "#F2F2F2", // Very light border color
+                  borderColor: isPinValid ? "#868FA0" : "#868FA0", // Change border color based on pin validity
                 },
                 "&:hover fieldset": {
-                  borderColor: "#F2F2F2", // Maintain light hover effect
+                  borderColor: isPinValid ? "#2E49D5" : "#F2F2F2", // Change hover effect based on pin validity
                 },
                 "&.Mui-disabled": {
-                  backgroundColor: "#FCFCFC", // Almost white background
+                  backgroundColor: "#FCFCFC", // Light background when disabled
                 },
               },
               "& .MuiInputLabel-root": {
-                color: "#E8E8E8", // Very light label color
+                color: isPinValid ? "#2E49D5" : "#868FA0", // Change label color based on pin validity
                 fontSize: "0.9rem",
               },
             }}
@@ -446,6 +443,7 @@ const Profile = () => {
               label="Confirm New Pin"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
+              disabled={!isPinValid} // This makes the field disabled when pin is not valid
             />
           </FormControl>
 

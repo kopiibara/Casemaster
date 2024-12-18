@@ -370,7 +370,6 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
             sx={{
               width: "70%",
               paddingLeft: 2,
-
               height: "100%",
             }}
           >
@@ -390,13 +389,29 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                   </Typography>
                 </Box>
                 {currentAttachment.type === "application/pdf" ? (
-                  <div style={{ height: "500px" }}>
+                  <Box
+                    sx={{
+                      height: "500px",
+                      "&::-webkit-scrollbar": {
+                        width: 4,
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        backgroundColor: "#f0f0f0",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "#D9D9D9",
+                        "&:hover": {
+                          backgroundColor: "#909090",
+                        },
+                      },
+                    }}
+                  >
                     <Worker
                       workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
                     >
                       <Viewer fileUrl={currentAttachment.url} />
                     </Worker>
-                  </div>
+                  </Box>
                 ) : (
                   <img
                     src={currentAttachment.url}

@@ -64,9 +64,6 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
       <Box className="flex justify-start items-start">
         <SystemLogsTable columns={columns} rows={rows} />
       </Box>
-
-      {/* Button to add a new row (for testing purposes) */}
-      <button onClick={addRow}>Add Log</button>
     </Stack>
   );
 }

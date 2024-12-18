@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Box, Stack, Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Button,
+  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import { useAppContext } from "../../../AppContext";
-import { SelectChangeEvent } from '@mui/material/Select';
+import { SelectChangeEvent } from "@mui/material/Select";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -11,7 +24,7 @@ interface Profile {
   email: string;
   phone: string;
   role: string;
-  image: string; 
+  image: string;
   pin: string;
   isApproved: boolean;
 }
@@ -20,7 +33,7 @@ const TransferRoleCard = () => {
   const { profileData } = useAppContext();
   const [openDialog, setOpenDialog] = useState(false); // Dialog for role transfer
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false); // Confirmation dialog
-  const [selectedUserId, setSelectedUserId] = useState<number | "">('');
+  const [selectedUserId, setSelectedUserId] = useState<number | "">("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const navigate = useNavigate();
 
@@ -28,14 +41,17 @@ const TransferRoleCard = () => {
   useEffect(() => {
     const fetchProfiles = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/get-profiles');
-        const profilesWithValidImages = response.data.map((profile: Profile) => ({
-          ...profile,
-          image: profile.image || 'path/to/default/image.jpg' // Replace with your default image path
-          
-        }));
+        const response = await axios.get(
+          "http://localhost:3000/api/get-profiles"
+        );
+        const profilesWithValidImages = response.data.map(
+          (profile: Profile) => ({
+            ...profile,
+            image: profile.image || "path/to/default/image.jpg", // Replace with your default image path
+          })
+        );
         setProfiles(profilesWithValidImages);
-        console.log()
+        console.log();
       } catch (error) {
         console.error("Failed to fetch profiles", error);
       }
@@ -55,13 +71,15 @@ const TransferRoleCard = () => {
     if (selectedUserId) {
       try {
         // Role transfer logic
-        await axios.put("http://localhost:3000/api/transfer-role-clerk", { userId: selectedUserId });
+        await axios.put("http://localhost:3000/api/transfer-role-clerk", {
+          userId: selectedUserId,
+        });
 
         console.log("Role transferred successfully!");
         handleTransferRoleStaff();
         handleDialogClose();
         setOpenConfirmationDialog(false);
-        navigate('/profile-selection'); // Close confirmation dialog
+        navigate("/profile-selection"); // Close confirmation dialog
       } catch (error) {
         console.error("Can't transfer role", error);
       }
@@ -69,14 +87,15 @@ const TransferRoleCard = () => {
   };
 
   const handleTransferRoleStaff = async () => {
-
-      try {
-        // Role transfer logic
-        await axios.put("http://localhost:3000/api/transfer-role-staff", { userId: profileData.id });
-        console.log("Role transferred successfully!");
-      } catch (error) {
-        console.error("Can't transfer role", error);
-      }
+    try {
+      // Role transfer logic
+      await axios.put("http://localhost:3000/api/transfer-role-staff", {
+        userId: profileData.id,
+      });
+      console.log("Role transferred successfully!");
+    } catch (error) {
+      console.error("Can't transfer role", error);
+    }
   };
 
   // Handle opening and closing of the dialog
@@ -97,9 +116,9 @@ const TransferRoleCard = () => {
                 Transfer Admin Role
               </Typography>
               <Typography variant="body2">
-                Transfer admin responsibilities to another user. Once assigned, the
-                new admin will have full control, and you will no longer have admin
-                access unless reassigned.
+                Transfer admin responsibilities to another user. Once assigned,
+                the new admin will have full control, and you will no longer
+                have admin access unless reassigned.
               </Typography>
             </Stack>
             <Stack direction={"row"}>
@@ -116,7 +135,7 @@ const TransferRoleCard = () => {
                   fontSize: "0.7rem",
                   textTransform: "none",
                 }}
-                onClick={handleDialogOpen}  // Open the dialog when button is clicked
+                onClick={handleDialogOpen} // Open the dialog when button is clicked
               >
                 Transfer Role Admin
               </Button>
@@ -131,17 +150,18 @@ const TransferRoleCard = () => {
         open={openDialog}
         onClose={handleDialogClose}
         sx={{
-          '& .MuiDialog-paper': {
-            width: '500px', // Adjust width as needed
-            maxWidth: 'none', // Remove any maximum width limit
-            padding: '20px', // Optional: add some padding inside the dialog
+          "& .MuiDialog-paper": {
+            width: "500px", // Adjust width as needed
+            maxWidth: "none", // Remove any maximum width limit
+            padding: "20px", // Optional: add some padding inside the dialog
           },
         }}
       >
         <DialogTitle>Transfer Admin Role</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ marginBottom: 2 }}>
-            Are you sure you want to transfer the Admin role to another user? Once you confirm, the new admin will have full control.
+            Are you sure you want to transfer the Admin role to another user?
+            Once you confirm, the new admin will have full control.
           </Typography>
           <Box sx={{ minWidth: 120 }}>
             <FormControl fullWidth>
@@ -152,10 +172,11 @@ const TransferRoleCard = () => {
                 value={selectedUserId}
                 label="Staff Name"
                 onChange={handleProfileChange}
+                size="medium"
               >
                 {profiles
-                  .filter(profile => profile.role === "Staff") // Filter for "Staff" role
-                  .map(profile => (
+                  .filter((profile) => profile.role === "Staff") // Filter for "Staff" role
+                  .map((profile) => (
                     <MenuItem key={profile.user_id} value={profile.user_id}>
                       <Stack direction="row" spacing={2} alignItems="center">
                         {/* Image */}
@@ -178,12 +199,47 @@ const TransferRoleCard = () => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmationDialogOpen} color="primary" variant="contained">
-            Transfer
-          </Button>
+          <Stack direction={"row"} spacing={1}>
+            <Box flexGrow={1} />
+            <Button
+              variant="outlined"
+              disableElevation
+              onClick={handleDialogClose}
+              sx={{
+                color: "#2E49D5",
+                borderColor: "#2E49D5",
+                borderRadius: "0.5rem",
+                height: "2rem",
+                width: "6rem",
+                marginBottom: "0.5rem",
+                fontSize: "0.7rem",
+                textTransform: "none",
+
+                "&:hover": {
+                  backgroundColor: "rgba(46,73,213,0.1)",
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={handleConfirmationDialogOpen}
+              sx={{
+                color: "white",
+                borderColor: "#2E49D5",
+                borderRadius: "0.5rem",
+                height: "2rem",
+                width: "6rem",
+                marginBottom: "0.5rem",
+                fontSize: "0.7rem",
+                textTransform: "none",
+              }}
+            >
+              Transfer
+            </Button>
+          </Stack>
         </DialogActions>
       </Dialog>
 
@@ -195,14 +251,19 @@ const TransferRoleCard = () => {
         <DialogTitle>Are you sure?</DialogTitle>
         <DialogContent>
           <Typography variant="body2">
-            Are you sure you want to transfer the Admin role to this user? This action is irreversible.
+            Are you sure you want to transfer the Admin role to this user? This
+            action is irreversible.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleConfirmationDialogClose} color="primary">
             No
           </Button>
-          <Button onClick={handleTransferRole} color="primary" variant="contained">
+          <Button
+            onClick={handleTransferRole}
+            color="primary"
+            variant="contained"
+          >
             Yes
           </Button>
         </DialogActions>
