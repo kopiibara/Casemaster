@@ -3,8 +3,6 @@ import { Box } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
 import TextField from "@mui/material/TextField";
-import { useAppContext } from "../../../AppContext";
-import axios from "axios";
 
 const ExistingProfilePin = () => {
   const navigate = useNavigate();
@@ -18,11 +16,12 @@ const ExistingProfilePin = () => {
   const [showPin, setShowPin] = useState(true);
   const [pinValues, setPinValues] = useState(["", "", "", ""]);
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
- 
+  const selectedProfile = {
+    image: "https://via.placeholder.com/150", // Replace with the actual image URL
+    name: "John Doe", // Replace with the actual profile name
+  };
 
-  const { profileData } = useAppContext();
-
-  const pin = `${profileData.pin}`; 
+  const tempPin = "1234"; // Temporary PIN for validation
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -46,38 +45,12 @@ const ExistingProfilePin = () => {
     }
     setPinValues(newPinValues);
     if (
-      newPinValues.join("") === pin &&
+      newPinValues.join("") === tempPin &&
       newPinValues.every((val) => val !== "")
     ) {
-      handleSendEmail();
       navigate("/confirm-existing-profile");
     }
-  }; 
-
-
-  const handleSendEmail = async () => {
-    if (!profileData.email) {
-      console.log("No Profile Email found.");
-      return;
-    }
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/send-verification-email",
-        { to: profileData.email }
-      );
-      console.log(response.data.message || "Email sent successfully!");
-    } catch (err: any) {
-      if (err.response) {
-        console.log(err.response.data.error || "Failed to send email.");
-      } else if (err.request) {
-        console.log("No response from the server. Please try again.");
-      } else {
-        console.log("Error: " + err.message);
-      }
-    } finally {
-    }
   };
-
 
   return (
     <Box
@@ -125,7 +98,7 @@ const ExistingProfilePin = () => {
       <Box
         className="h-12 w-12 rounded-full mb-3"
         sx={{
-          backgroundImage: `url(${profileData?.image})`,
+          backgroundImage: `url(${selectedProfile?.image})`,
           backgroundSize: "cover",
           width: 48,
           height: 48,
@@ -133,7 +106,7 @@ const ExistingProfilePin = () => {
         }}
       ></Box>
       <p style={{ fontSize: "0.9rem", color: "#0f2043", marginBottom: "1rem" }}>
-        {profileData?.fullName}
+        {selectedProfile?.name}
       </p>
 
       {/* Centered Content */}

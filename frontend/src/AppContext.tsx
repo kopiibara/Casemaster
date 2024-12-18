@@ -9,7 +9,7 @@ interface ProfileData {
   phoneNo: string;
   image: Blob | null;
   role: string;
-  selectedProfileImage: string | null | Blob;
+  selectedProfileImage: string | null;
   isApproved?: boolean;
   pin?: string;
 }

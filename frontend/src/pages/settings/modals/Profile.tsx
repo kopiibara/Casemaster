@@ -210,13 +210,13 @@ const Profile = () => {
                     sx={{
                       fontSize: "0.7rem",
                       textTransform: "none",
-                      color: "green",
+                      color: "gray",
                       "&:hover": {
                         color: "#2E49D5",
                       },
                     }}
                   >
-                    Verified
+                    Verify
                   </Button>
                 </InputAdornment>
               }
