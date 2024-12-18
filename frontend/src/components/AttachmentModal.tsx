@@ -9,14 +9,13 @@ import {
   IconButton,
   MenuItem,
   Autocomplete,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import * as pdfjsLib from "pdfjs-dist";
 import axios from "axios";
+import AlertSnackbar from "./AlertComponent"; // Import the reusable AlertSnackbar component
 
 interface Attachment {
   name: string;
@@ -41,7 +40,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   const [currentAttachment, setCurrentAttachment] = useState<Attachment | null>(
     selectedAttachment
   );
-  const [caseNo, setCaseNo] = useState<number | null>(null);
+  const [caseNo, setCaseNo] = useState<string>("");
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [partyFiler, setPartyFiler] = useState<string>("");
   const [caseType, setCaseType] = useState<string | null>(null);
@@ -72,8 +71,9 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   }, []);
 
   const validateFields = () => {
+    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/;
     const newErrors = {
-      caseNo: caseNo ? "" : "Case No. is required.",
+      caseNo: caseNoRegex.test(caseNo) ? "" : "Invalid Case No. format.",
       caseTitle: caseTitle.trim() ? "" : "Case Title is required.",
       partyFiler: partyFiler.trim() ? "" : "Party Filer is required.",
       caseType: caseType ? "" : "Case Type is required.",
@@ -121,11 +121,11 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
       );
 
       if (saveResponse.status === 201) {
-        setSuccessMessage("Case log saved successfully!");
+        setSuccessMessage("Case Details logged successfully!");
         setErrorMessage(null);
 
         // Clear the form fields
-        setCaseNo(null);
+        setCaseNo("");
         setCaseTitle("");
         setPartyFiler("");
         setCaseType(null);
@@ -141,34 +141,14 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
     }
   };
 
-  const uploadToGoogleDrive = async () => {
-    if (!currentAttachment) {
-      setErrorMessage("No attachment selected.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/upload-to-drive",
-        {
-          fileName: currentAttachment.name,
-          fileType: currentAttachment.type,
-          fileUrl: currentAttachment.url,
-        }
-      );
-
-      if (response.status === 200) {
-        setSuccessMessage("Attachment uploaded to Google Drive successfully!");
-        setErrorMessage(null);
-      } else {
-        setErrorMessage("Failed to upload attachment to Google Drive.");
-        setSuccessMessage(null);
-      }
-    } catch (error) {
-      console.error("Error uploading to Google Drive:", error);
-      setErrorMessage("An error occurred while uploading to Google Drive.");
-      setSuccessMessage(null);
-    }
+  const handleDiscard = () => {
+    // Clear all form fields and close the modal
+    setCaseNo("");
+    setCaseTitle("");
+    setPartyFiler("");
+    setCaseType(null);
+    setTags([]);
+    onClose();
   };
 
   return (
@@ -188,166 +168,177 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
           overflow: "hidden",
         }}
       >
-        {/* Left Side - Form */}
-        <Box
-          sx={{ width: "30%", borderRight: "1px solid #ddd", paddingRight: 2 }}
-        >
+        {/* Modal Content Container */}
+        <React.Fragment>
+          {/* Left Side - Form */}
           <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{
+              width: "30%",
+              borderRight: "1px solid #ddd",
+              paddingRight: 2,
+            }}
           >
-            <Typography variant="h6">Import to Case Logs</Typography>
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ my: 2 }} />
-          <Box component="form" noValidate autoComplete="off">
-            <TextField
-              label="Case No."
-              type="number"
-              required
-              fullWidth
-              value={caseNo || ""}
-              onChange={(e) => setCaseNo(Number(e.target.value))}
-              sx={{ mb: 2 }}
-              error={!!errors.caseNo}
-              helperText={errors.caseNo}
-            />
-            <TextField
-              label="Case Title"
-              required
-              fullWidth
-              value={caseTitle}
-              onChange={(e) => setCaseTitle(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.caseTitle}
-              helperText={errors.caseTitle}
-            />
-            <TextField
-              label="Party Filer"
-              required
-              fullWidth
-              value={partyFiler}
-              onChange={(e) => setPartyFiler(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.partyFiler}
-              helperText={errors.partyFiler}
-            />
-            <TextField
-              label="Case Type"
-              required
-              select
-              fullWidth
-              value={caseType || ""}
-              onChange={(e) => setCaseType(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.caseType}
-              helperText={errors.caseType}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              <MenuItem disabled value="">
-                Choose case type
-              </MenuItem>
-              <MenuItem value="Civil Case">Civil Case</MenuItem>
-              <MenuItem value="Criminal Case">Criminal Case</MenuItem>
-              <MenuItem value="Special Case">Special Case</MenuItem>
-              <MenuItem value="Motions">Motions</MenuItem>
-              <MenuItem value="Incidents">Incidents</MenuItem>
-              <MenuItem value="Pleadings">Pleadings</MenuItem>
-            </TextField>
-            <Autocomplete
-              multiple
-              freeSolo
-              options={availableTags}
-              value={tags}
-              onChange={(event, newValue) => {
-                // Filter out duplicates and trim spaces
-                const uniqueTags = Array.from(
-                  new Set(newValue.map((tag) => tag.trim()))
-                ).filter((tag) => tag);
-                setTags(uniqueTags);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Tags"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  helperText="Add tags by typing and pressing Enter"
-                />
-              )}
-              filterOptions={(options, { inputValue }) => {
-                const filtered = options.filter((option) =>
-                  option.toLowerCase().includes(inputValue.toLowerCase())
-                );
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Import to Case Logs
+              </Typography>
+              <IconButton onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box component="form" noValidate autoComplete="off" sx={{ my: 4 }}>
+              {/* Input Fields */}
+              <TextField
+                label="Case No."
+                required
+                fullWidth
+                value={caseNo}
+                onChange={(e) => setCaseNo(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseNo}
+                helperText={errors.caseNo}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Case Title"
+                required
+                fullWidth
+                value={caseTitle}
+                onChange={(e) => setCaseTitle(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseTitle}
+                helperText={errors.caseTitle}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Party Filer"
+                required
+                fullWidth
+                value={partyFiler}
+                onChange={(e) => setPartyFiler(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.partyFiler}
+                helperText={errors.partyFiler}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Case Type"
+                placeholder="Select a case type"
+                required
+                select
+                fullWidth
+                value={caseType || ""}
+                onChange={(e) => setCaseType(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseType}
+                InputLabelProps={{ shrink: true }}
+              >
+                <MenuItem disabled value="">
+                  Choose case type
+                </MenuItem>
+                <MenuItem value="Civil Case">Civil Case</MenuItem>
+                <MenuItem value="Criminal Case">Criminal Case</MenuItem>
+                <MenuItem value="Special Case">Special Case</MenuItem>
+                <MenuItem value="Motions">Motions</MenuItem>
+                <MenuItem value="Incidents">Incidents</MenuItem>
+                <MenuItem value="Pleadings">Pleadings</MenuItem>
+              </TextField>
+              <Autocomplete
+                multiple
+                freeSolo
+                options={availableTags}
+                value={tags}
+                onChange={(event, newValue) => {
+                  const uniqueTags = Array.from(
+                    new Set(newValue.map((tag) => tag.trim()))
+                  ).filter((tag) => tag);
+                  setTags(uniqueTags);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Tags"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    helperText="Add tags by typing and pressing Enter"
+                    InputLabelProps={{ shrink: true }} // Keeps the label on top
+                  />
+                )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.toLowerCase().includes(inputValue.toLowerCase())
+                  );
 
-                // Suggest the new tag if it doesn't already exist
-                if (inputValue.trim() && !options.includes(inputValue.trim())) {
-                  filtered.push(inputValue.trim());
-                }
+                  if (
+                    inputValue.trim() &&
+                    !options.includes(inputValue.trim())
+                  ) {
+                    filtered.push(inputValue.trim());
+                  }
 
-                return filtered;
-              }}
-            />
+                  return filtered;
+                }}
+              />
 
-            <Box display="flex" justifyContent="flex-end" gap={2}>
-              <Button variant="outlined" onClick={onClose}>
-                Discard
-              </Button>
-              <Button variant="contained" color="primary" onClick={handleSave}>
-                Save
-              </Button>
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <Button
+                  variant="outlined"
+                  onClick={handleDiscard}
+                  sx={{
+                    color: "#0F2043",
+                    borderColor: "#0F2043",
+                    borderRadius: "0.3rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      borderColor: "#0B1730",
+                      backgroundColor: "rgba(15, 32, 67, 0.1)",
+                    },
+                  }}
+                >
+                  Discard
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSave}
+                  sx={{
+                    textTransform: "none",
+                    borderRadius: "0.3rem",
+                    "&:hover": {
+                      backgroundColor: "#003366",
+                    },
+                  }}
+                >
+                  Save
+                </Button>
+              </Box>
             </Box>
           </Box>
-        </Box>
-        {/* Right Side - Viewer */}
-        <Box sx={{ width: "70%", paddingLeft: 2, overflowY: "auto" }}>
-          {currentAttachment ? (
-            <>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                {currentAttachment.name}
+
+          {/* Right Side - PDF Viewer */}
+          <Box sx={{ width: "70%", paddingLeft: 2 }}>
+            {currentAttachment &&
+            currentAttachment.type === "application/pdf" ? (
+              <Worker
+                workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
+              >
+                <Viewer fileUrl={currentAttachment.url} />
+              </Worker>
+            ) : (
+              <Typography
+                variant="body1"
+                sx={{ textAlign: "center", marginTop: 4 }}
+              >
+                No PDF file selected.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Type: {currentAttachment.type}, Size: {currentAttachment.size}
-              </Typography>
-              {currentAttachment.type === "application/pdf" ? (
-                <div style={{ height: "600px" }}>
-                  <Worker
-                    workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
-                  >
-                    <Viewer fileUrl={currentAttachment.url} />
-                  </Worker>
-                </div>
-              ) : (
-                <img
-                  src={currentAttachment.url}
-                  alt={currentAttachment.name}
-                  style={{ width: "100%" }}
-                />
-              )}
-            </>
-          ) : (
-            <Typography variant="body1" color="text.secondary">
-              Select an attachment to view its content.
-            </Typography>
-          )}
-        </Box>
-        {/* Snackbar for Notifications */}
-        <Snackbar
-          open={!!successMessage}
-          autoHideDuration={6000}
-          onClose={() => setSuccessMessage(null)}
-        >
-          <Alert severity="success">{successMessage}</Alert>
-        </Snackbar>
-        <Snackbar
-          open={!!errorMessage}
-          autoHideDuration={6000}
-          onClose={() => setErrorMessage(null)}
-        >
-          <Alert severity="error">{errorMessage}</Alert>
-        </Snackbar>
+            )}
+          </Box>
+        </React.Fragment>
       </Box>
     </Modal>
   );
