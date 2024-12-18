@@ -26,6 +26,7 @@ const PINSetUp = () => {
   const { profileData } = useAppContext();
   const { fullName, email, phoneNo, image, role, isApproved } = profileData;
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); 
+   const [isRemoved, setIsRemoved] = useState(false);
 
   const userEmail = localStorage.getItem("userEmail");
 if (userEmail) {
@@ -116,6 +117,7 @@ if (userEmail) {
     formData.append("role", role);
     formData.append("pin", pinValues.join(""));
     formData.append("isApproved", String(isApproved));
+    formData.append("isRemoved", String(isRemoved));
   
     try {
       const response = await axios.post("http://localhost:3000/api/users", formData, {
