@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import db from "../config/db";
 import { google } from "googleapis";
 import axios from "axios";
-import dotenv from "dotenv";
+import dotenv from "dotenv"; // Import dotenv module
 
 dotenv.config(); // Load .env file
 
@@ -19,16 +19,24 @@ const drive = google.drive({ version: "v3", auth });
 
 // Endpoint to insert a new case log
 router.post("/caselogs", (req: Request, res: Response) => {
-  const { caseNo, caseTitle, partyFiler, caseType, tags, file_url } = req.body;
+  const { caseNo, caseTitle, partyFiler, caseType, tags, file_url, file_name } =
+    req.body;
 
-  if (!caseNo || !caseTitle || !partyFiler || !caseType || !file_url) {
+  if (
+    !caseNo ||
+    !caseTitle ||
+    !partyFiler ||
+    !caseType ||
+    !file_url ||
+    !file_name
+  ) {
     res.status(400).json({ error: "All fields are required" });
     return;
   }
 
   const sql = `
-        INSERT INTO caselogs (case_no, title, party_filer, case_type, tag, status, file_url)
-        VALUES (?, ?, ?, ?, ?, 'New', ?)
+        INSERT INTO caselogs (case_no, title, party_filer, case_type, tag, status, file_url, file_name)
+        VALUES (?, ?, ?, ?, ?, 'New', ?, ?)
       `;
   const values = [
     caseNo,
@@ -37,6 +45,7 @@ router.post("/caselogs", (req: Request, res: Response) => {
     caseType,
     tags.join(", "),
     file_url,
+    file_name,
   ];
 
   db.query(sql, values, (err, results) => {

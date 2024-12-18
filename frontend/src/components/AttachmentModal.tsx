@@ -41,7 +41,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   const [currentAttachment, setCurrentAttachment] = useState<Attachment | null>(
     selectedAttachment
   );
-  const [caseNo, setCaseNo] = useState<number | null>(null);
+  const [caseNo, setCaseNo] = useState<string>("");
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [partyFiler, setPartyFiler] = useState<string>("");
   const [caseType, setCaseType] = useState<string | null>(null);
@@ -72,8 +72,9 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   }, []);
 
   const validateFields = () => {
+    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/;
     const newErrors = {
-      caseNo: caseNo ? "" : "Case No. is required.",
+      caseNo: caseNoRegex.test(caseNo) ? "" : "Invalid Case No. format.",
       caseTitle: caseTitle.trim() ? "" : "Case Title is required.",
       partyFiler: partyFiler.trim() ? "" : "Party Filer is required.",
       caseType: caseType ? "" : "Case Type is required.",
@@ -105,7 +106,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
 
       const { webContentLink } = uploadResponse.data;
 
-      // Step 2: Save the case log with the file URL
+      // Step 2: Save the case log with the file URL and file name
       const data = {
         caseNo,
         caseTitle,
@@ -113,6 +114,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         caseType,
         tags,
         file_url: webContentLink, // Add the Google Drive file URL
+        file_name: currentAttachment.name, // Include file name
       };
 
       const saveResponse = await axios.post(
@@ -121,11 +123,13 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
       );
 
       if (saveResponse.status === 201) {
-        setSuccessMessage("Case log saved successfully!");
+        setSuccessMessage(
+          `[${caseNo}] details imported to case logs successfully`
+        );
         setErrorMessage(null);
 
         // Clear the form fields
-        setCaseNo(null);
+        setCaseNo("");
         setCaseTitle("");
         setPartyFiler("");
         setCaseType(null);
@@ -141,34 +145,14 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
     }
   };
 
-  const uploadToGoogleDrive = async () => {
-    if (!currentAttachment) {
-      setErrorMessage("No attachment selected.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/upload-to-drive",
-        {
-          fileName: currentAttachment.name,
-          fileType: currentAttachment.type,
-          fileUrl: currentAttachment.url,
-        }
-      );
-
-      if (response.status === 200) {
-        setSuccessMessage("Attachment uploaded to Google Drive successfully!");
-        setErrorMessage(null);
-      } else {
-        setErrorMessage("Failed to upload attachment to Google Drive.");
-        setSuccessMessage(null);
-      }
-    } catch (error) {
-      console.error("Error uploading to Google Drive:", error);
-      setErrorMessage("An error occurred while uploading to Google Drive.");
-      setSuccessMessage(null);
-    }
+  const handleDiscard = () => {
+    // Clear all form fields and close the modal
+    setCaseNo("");
+    setCaseTitle("");
+    setPartyFiler("");
+    setCaseType(null);
+    setTags([]);
+    onClose();
   };
 
   return (
@@ -197,23 +181,25 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography variant="h6">Import to Case Logs</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Import to Case Logs
+            </Typography>
             <IconButton onClick={onClose}>
               <CloseIcon />
             </IconButton>
           </Box>
           <Divider sx={{ my: 2 }} />
-          <Box component="form" noValidate autoComplete="off">
+          <Box component="form" noValidate autoComplete="off" sx={{ my: 2 }}>
             <TextField
               label="Case No."
-              type="number"
               required
               fullWidth
-              value={caseNo || ""}
-              onChange={(e) => setCaseNo(Number(e.target.value))}
+              value={caseNo}
+              onChange={(e) => setCaseNo(e.target.value)}
               sx={{ mb: 2 }}
               error={!!errors.caseNo}
               helperText={errors.caseNo}
+              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="Case Title"
@@ -224,6 +210,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               sx={{ mb: 2 }}
               error={!!errors.caseTitle}
               helperText={errors.caseTitle}
+              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="Party Filer"
@@ -234,9 +221,11 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               sx={{ mb: 2 }}
               error={!!errors.partyFiler}
               helperText={errors.partyFiler}
+              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="Case Type"
+              placeholder="Select a case type"
               required
               select
               fullWidth
@@ -244,7 +233,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               onChange={(e) => setCaseType(e.target.value)}
               sx={{ mb: 2 }}
               error={!!errors.caseType}
-              helperText={errors.caseType}
+              InputLabelProps={{ shrink: true }}
             >
               <MenuItem disabled value="">
                 Choose case type
@@ -262,7 +251,6 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               options={availableTags}
               value={tags}
               onChange={(event, newValue) => {
-                // Filter out duplicates and trim spaces
                 const uniqueTags = Array.from(
                   new Set(newValue.map((tag) => tag.trim()))
                 ).filter((tag) => tag);
@@ -275,6 +263,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                   fullWidth
                   sx={{ mb: 2 }}
                   helperText="Add tags by typing and pressing Enter"
+                  InputLabelProps={{ shrink: true }} // Keeps the label on top
                 />
               )}
               filterOptions={(options, { inputValue }) => {
@@ -282,7 +271,6 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
                   option.toLowerCase().includes(inputValue.toLowerCase())
                 );
 
-                // Suggest the new tag if it doesn't already exist
                 if (inputValue.trim() && !options.includes(inputValue.trim())) {
                   filtered.push(inputValue.trim());
                 }
@@ -291,11 +279,37 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
               }}
             />
 
-            <Box display="flex" justifyContent="flex-end" gap={2}>
-              <Button variant="outlined" onClick={onClose}>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Button
+                variant="outlined"
+                onClick={handleDiscard}
+                sx={{
+                  color: "#0F2043",
+                  borderColor: "#0F2043",
+                  borderRadius: "0.3rem",
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#0B1730",
+                    backgroundColor: "rgba(15, 32, 67, 0.1)",
+                  },
+                }}
+              >
                 Discard
               </Button>
-              <Button variant="contained" color="primary" onClick={handleSave}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSave}
+                sx={{
+                  backgroundColor: "#0F2043",
+                  color: "#FFFFFF",
+                  borderRadius: "0.3rem",
+                  textTransform: "none",
+                  "&:hover": {
+                    backgroundColor: "#0B1730",
+                  },
+                }}
+              >
                 Save
               </Button>
             </Box>
@@ -305,12 +319,18 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         <Box sx={{ width: "70%", paddingLeft: 2, overflowY: "auto" }}>
           {currentAttachment ? (
             <>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                {currentAttachment.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Type: {currentAttachment.type}, Size: {currentAttachment.size}
-              </Typography>
+              <Box sx={{ paddingLeft: 3, marginTop: 4, marginBottom: 4 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  {currentAttachment.name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.disabled"
+                  sx={{ mb: 2 }}
+                >
+                  Type: {currentAttachment.type}, Size: {currentAttachment.size}
+                </Typography>
+              </Box>
               {currentAttachment.type === "application/pdf" ? (
                 <div style={{ height: "600px" }}>
                   <Worker
@@ -338,6 +358,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
           open={!!successMessage}
           autoHideDuration={6000}
           onClose={() => setSuccessMessage(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert severity="success">{successMessage}</Alert>
         </Snackbar>
@@ -345,6 +366,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
           open={!!errorMessage}
           autoHideDuration={6000}
           onClose={() => setErrorMessage(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
           <Alert severity="error">{errorMessage}</Alert>
         </Snackbar>

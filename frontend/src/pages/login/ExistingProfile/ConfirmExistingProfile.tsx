@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Button from "@mui/material/Button";
-import { Box, Typography, TextField } from "@mui/material";
+import { Box, Typography, TextField, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAppContext } from "../../../AppContext";
@@ -122,19 +122,13 @@ const ConfirmExistingProfile = () => {
       </Box>
 
       {/* Verification Content */}
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
-      >
-        2-step Verification
-      </Typography>
-      <Typography
+      <Stack
+        spacing={2}
         sx={{
-          fontSize: "1rem",
-          color: "#0f2043",
-          opacity: 0.6,
-          mb: 3,
-          textAlign: "center",
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+          height: "100vh",
         }}
       >
         {verificationText}
@@ -161,54 +155,91 @@ const ConfirmExistingProfile = () => {
 
         {/* Actions */}
         <Box
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
+        >
+          2-step Verification
+        </Typography>
+        <Typography
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "24rem",
-            mt: 3,
+            fontSize: "1rem",
+            color: "#0f2043",
+            opacity: 0.6,
+            mb: 3,
+            textAlign: "center",
           }}
         >
-          <Box sx={{ textAlign: "left" }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#517FD3",
-                cursor: "pointer",
-                mb: 1,
-              }}
-            >
-              Resend Code
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#517FD3",
-                cursor: "pointer",
-              }}
-              onClick={handleSwitchMethod}
-            >
-              {switchMethodText}
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
+          {verificationText}
+        </Typography>
+
+        {/* Input Field */}
+        <Box>
+          <TextField
+            label="Enter Code"
+            variant="outlined"
+            inputProps={{ maxLength: 6 }}
             sx={{
-              textTransform: "none",
-              borderRadius: "0.5rem",
-              height: "2.5rem",
-              backgroundColor: "#517FD3",
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "#3D6FBF",
-                boxShadow: "none",
+              width: "24rem",
+              backgroundColor: "transparent",
+              borderRadius: "8px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
               },
             }}
             onClick={handleVerifyEmail}
+          />
+
+          {/* Actions */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "24rem",
+              mt: 3,
+            }}
           >
-            Confirm
-          </Button>
+            <Box sx={{ textAlign: "left" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#517FD3",
+                  cursor: "pointer",
+                  mb: 1,
+                }}
+              >
+                Resend Code
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#517FD3",
+                  cursor: "pointer",
+                }}
+                onClick={handleSwitchMethod}
+              >
+                {switchMethodText}
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                borderRadius: "0.5rem",
+                height: "2.5rem",
+                backgroundColor: "#517FD3",
+                boxShadow: "none",
+                "&:hover": {
+                  backgroundColor: "#3D6FBF",
+                  boxShadow: "none",
+                },
+              }}
+            >
+              Confirm
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </Stack>
     </Box>
   );
 };
