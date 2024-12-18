@@ -5,21 +5,16 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import ChipComponent from "./ChipComponent";
+import ChipComponent from "./ChipComponent"; // Make sure this component exists
 import MoreIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
-
 import { Popover, TableSortLabel, Button, Paper } from "@mui/material";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 
 // Helper function to sort data
 const descendingComparator = (a: any, b: any, orderBy: string) => {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
+  if (b[orderBy] < a[orderBy]) return -1;
+  if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 };
 
@@ -54,78 +49,73 @@ const TableComponent: React.FC<TableComponentProps> = ({
     null
   );
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = React.useState<string>("");
-  const [maxRows, setMaxRows] = React.useState<number>(7);
+  const [orderBy, setOrderBy] = React.useState<string>(""); // Store column to sort by
+  const [maxRows, setMaxRows] = React.useState<number>(7); // Rows that fit the screen
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+    setAnchorEl(event.currentTarget); // Show popover
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setAnchorEl(null); // Close popover
   };
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+    setOrderBy(property); // Set column to sort by
   };
 
   const handleResetSort = () => {
     setOrder("asc");
-    setOrderBy("");
+    setOrderBy(""); // Reset sorting
   };
 
   const calculateMaxRows = () => {
-    // Adjust the row height and padding for an accurate calculation
-    const rowHeight = 48; // Approximate height of a table row in pixels
-    const containerPadding = 150; // Adjust for headers, paddings, etc.
+    const rowHeight = 48; // Height of each row in pixels
+    const containerPadding = 150; // Padding for header, footer, etc.
     const availableHeight = window.innerHeight - containerPadding;
-    setMaxRows(Math.floor(availableHeight / rowHeight));
+    setMaxRows(Math.floor(availableHeight / rowHeight)); // Calculate rows that fit
   };
 
   React.useEffect(() => {
     calculateMaxRows(); // Initial calculation
     window.addEventListener("resize", calculateMaxRows);
     return () => {
-      window.removeEventListener("resize", calculateMaxRows);
+      window.removeEventListener("resize", calculateMaxRows); // Clean up on unmount
     };
   }, []);
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  // Sort the table body data based on the current sorting state
   const sortedData = stableSort(tableBodyData, getComparator(order, orderBy));
-  const displayedData = sortedData.slice(0, maxRows);
+  const displayedData = sortedData.slice(0, maxRows); // Display rows within the limit
+
+  const handleRowClick = (row: { [key: string]: string | number }) => {
+    console.log("Row clicked:", row); // Handle row click logic
+  };
 
   return (
     <TableContainer
       sx={{
         "&::-webkit-scrollbar": {
-          width: 4, // Width of the scrollbar
+          width: 4,
         },
         "&::-webkit-scrollbar-track": {
-          backgroundColor: "#f0f0f0", // Scrollbar track color
-          borderRadius: 4,
+          backgroundColor: "#f0f0f0",
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#D9D9D9", // Scrollbar thumb color
-          borderRadius: 4,
+          backgroundColor: "#D9D9D9",
           "&:hover": {
-            backgroundColor: "#909090", // Thumb color on hover
+            backgroundColor: "#909090",
           },
         },
       }}
       className="bg-white rounded-lg max-h-[78vh]"
     >
-      <Table
-        className="h-full"
-        size={orderBy ? "small" : "medium"}
-        stickyHeader
-        aria-label="dynamic table"
-      >
-        <TableHead className="bg-[#DCE5F6] [&_.MuiTableCell-head]:font-bold [&_.MuiTableCell-head]:text-[#0F2043] [&_.MuiTableCell-head]:text-sm">
+      <Table stickyHeader aria-label="dynamic table">
+        <TableHead className="bg-[#DCE5F6]">
           <TableRow>
             {tableHeadData.map((header, index) => (
               <TableCell
@@ -148,7 +138,6 @@ const TableComponent: React.FC<TableComponentProps> = ({
                 </TableSortLabel>
               </TableCell>
             ))}
-            {/* Add the MoreIcon to the table header */}
             <TableCell
               align="center"
               sx={{
@@ -166,15 +155,13 @@ const TableComponent: React.FC<TableComponentProps> = ({
             </TableCell>
           </TableRow>
         </TableHead>
-        <TableBody
-          sx={{
-            "& .MuiTableCell-body": { color: "#0F2043", fontSize: "0.875rem" },
-          }}
-        >
+        <TableBody>
           {displayedData.map((row, rowIndex) => (
             <TableRow
               key={rowIndex}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              hover
+              onClick={() => handleRowClick(row)}
+              style={{ cursor: "pointer" }}
             >
               {tableHeadData.map((header, cellIndex) => (
                 <TableCell
@@ -195,11 +182,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
               ))}
 
               <TableCell align="right" width={5}>
-                <IconButton
-                  aria-label="more-options"
-                  aria-describedby={id}
-                  onClick={handleClick}
-                >
+                <IconButton aria-label="more-options" onClick={handleClick}>
                   <MoreIcon />
                 </IconButton>
                 <Popover
@@ -214,18 +197,6 @@ const TableComponent: React.FC<TableComponentProps> = ({
                   transformOrigin={{
                     vertical: "top",
                     horizontal: "right",
-                  }}
-                  slotProps={{
-                    paper: {},
-                  }}
-                  sx={{
-                    ".MuiPaper-root": {
-                      maxWidth: "100%",
-                      boxShadow: "none",
-                      border: "1px solid",
-                      borderColor: "#DBDEE3",
-                      borderRadius: 3,
-                    },
                   }}
                 >
                   {popoverContent}

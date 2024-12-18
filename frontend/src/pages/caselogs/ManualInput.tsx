@@ -2,13 +2,7 @@ import { Box } from "@mui/system";
 import FilterButtons from "../../components/FilterButtons";
 import Stack from "@mui/material/Stack";
 import TableComponent from "../../components/TableComponent";
-import {
-  IconButton,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
+import { IconButton, Button, Dialog, DialogContent } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import InfoFilledIcon from "@mui/icons-material/Info";
 import React, { useState } from "react";
@@ -18,6 +12,9 @@ import Zoom from "@mui/material/Zoom";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
 import AddNewCase from "../../components/AddNewCase";
+
+// Import TableData directly
+import TableData from "./TableData.json";
 
 const ManualInput: React.FC = () => {
   const DocumentType = [
@@ -35,6 +32,14 @@ const ManualInput: React.FC = () => {
 
   const Dates = ["Date", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
 
+  const buttonData = [
+    "View Details",
+    "Edit Details",
+    "View Email",
+    "Import to Case Tracker",
+    "Archive",
+  ];
+
   const tableHeadData = ["Case No.", "Title", "Date Added", "Status"];
   const tableBodyData = [
     {
@@ -49,56 +54,6 @@ const ManualInput: React.FC = () => {
       "Date Added": "2024-11-30",
       Status: "Closed",
     },
-    {
-      "Case No.": 24680,
-      Title: "GOVERNMENT VS CITIZEN",
-      "Date Added": "2024-11-29",
-      Status: "New",
-    },
-    {
-      "Case No.": 13579,
-      Title: "VP LENI ROBREDO VS SENATOR PACQUIAO",
-      "Date Added": "2024-11-28",
-      Status: "Appealed",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      "Date Added": "2024-11-27",
-      Status: "Archived",
-    },
-  ];
-
-  const buttonData = [
-    "View Details",
-    "Edit Details",
-    "View Email",
-    "Import to Case Tracker",
-    "Archive",
   ];
 
   const popoverContent = (
@@ -137,6 +92,8 @@ const ManualInput: React.FC = () => {
   // State to manage whether the card should be shown and whether details are open
   const [showCard, setShowCard] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  // State to hold table data from imported JSON
 
   // Handle mouse hover and click events to change icon
   const handleMouseEnter = () => setIcon("filled");
@@ -221,11 +178,9 @@ const ManualInput: React.FC = () => {
           </Box>
         </Stack>
 
-        {/* Box container to adjust only the table and card layout */}
         <Box
           sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}
         >
-          {/* Box containing the table */}
           <Box
             sx={{
               display: "flex",
@@ -235,6 +190,7 @@ const ManualInput: React.FC = () => {
               overflow: "hidden",
             }}
           >
+            {/* Render TableComponent only if tableData is available */}
             <TableComponent
               tableHeadData={tableHeadData}
               tableBodyData={tableBodyData}
@@ -262,6 +218,8 @@ const ManualInput: React.FC = () => {
             </DialogContent>
           </Dialog>
         </Box>
+
+        {/* Box container to adjust only the table and card layout */}
       </Stack>
     </Box>
   );

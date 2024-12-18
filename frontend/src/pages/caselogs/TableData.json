@@ -1,0 +1,60 @@
+{
+  "columns": [
+    { "header": "Case No.", "key": "case-no" },
+    { "header": "Title", "key": "title" },
+    { "header": "Date Added", "key": "date-added" },
+    { "header": "Status", "key": "status" }
+  ],
+  "datas": [
+    {
+      "case-no": "11-11111",
+      "title": "IDA v. QUE BOK KUN",
+      "party-filer": "IDA",
+      "date-added": "November 14, 2024",
+      "document-type": "Motion",
+      "attachment": "123.pdf",
+      "tag": "None",
+      "status": "New"
+    },
+    {
+      "case-no": "12-22222",
+      "title": "IDA v. QUE BOK KUN",
+      "party-filer": "IDA",
+      "date-added": "November 14, 2024",
+      "document-type": "Motion",
+      "attachment": "123.pdf",
+      "tag": "None",
+      "status": "New"
+    },
+    {
+      "case-no": "13-33333",
+      "title": "IDA v. QUE BOK KUN",
+      "party-filer": "IDA",
+      "date-added": "November 14, 2024",
+      "document-type": "Motion",
+      "attachment": "123.pdf",
+      "tag": "None",
+      "status": "New"
+    },
+    {
+      "case-no": "14-44444",
+      "title": "IDA v. QUE BOK KUN",
+      "party-filer": "IDA",
+      "date-added": "November 14, 2024",
+      "document-type": "Motion",
+      "attachment": "123.pdf",
+      "tag": "None",
+      "status": "New"
+    },
+    {
+      "case-no": "15-55555",
+      "title": "IDA v. QUE BOK KUN",
+      "party-filer": "IDA",
+      "date-added": "November 14, 2024",
+      "document-type": "Motion",
+      "attachment": "123.pdf",
+      "tag": "None",
+      "status": "New"
+    }
+  ]
+}

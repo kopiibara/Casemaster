@@ -10,6 +10,8 @@ import {
   Tooltip,
   CardContent,
   Card,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
 import ImportOutlinedIcon from "@mui/icons-material/PublishOutlined";
 import ImportFilledIcon from "@mui/icons-material/Publish";
@@ -24,6 +26,7 @@ import LabelOutlinedIcon from "@mui/icons-material/LabelOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import EditFilledIcon from "@mui/icons-material/Edit";
+import EditCase from "./EditCase";
 
 export default function DetailsComponent() {
   type IconState = {
@@ -96,152 +99,181 @@ export default function DetailsComponent() {
     }));
   };
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Functions to handle dialog open/close
+  const handleDialogOpen = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
-    <Card
-      className="min-w-[400px] p-6 max-w-[400px] min-h-[590px] max-h-[590px] shadow-none border border-[#DBDEE3]"
-      sx={{ borderRadius: "0.5rem" }}
-    >
-      <CardContent className="p-4">
-        <Box className="text-[#0F2043]">
-          <Stack spacing={1}>
-            <Stack direction={"row"}>
-              <Typography variant="h6" className="font-bold">
-                Details
-              </Typography>
-              <Box className="flex-grow" />
+    <>
+      <Card
+        className="min-w-[400px] p-6 max-w-[400px] min-h-[590px] max-h-[590px] shadow-none border border-[#DBDEE3]"
+        sx={{ borderRadius: "0.5rem" }}
+      >
+        <CardContent className="p-4">
+          <Box className="text-[#0F2043]">
+            <Stack spacing={1}>
+              <Stack direction={"row"}>
+                <Typography variant="h6" className="font-bold">
+                  Details
+                </Typography>
+                <Box className="flex-grow" />
 
-              <Stack direction={"row"} alignItems="center">
-                <Tooltip
-                  title="Import to Case Tracker"
-                  slots={{ transition: Zoom }}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    popper: {
-                      modifiers: [
-                        {
-                          name: "offset",
-                          options: {
-                            offset: [0, -5],
+                <Stack direction={"row"} alignItems="center">
+                  <Tooltip
+                    title="Import to Case Tracker"
+                    slots={{ transition: Zoom }}
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, -5],
+                            },
                           },
-                        },
-                      ],
-                    },
-                  }}
-                >
-                  <IconButton
-                    aria-label="import"
-                    onClick={() => handleIconChange("click", "import")}
-                    onMouseEnter={() => handleIconChange("enter", "import")}
-                    onMouseLeave={() => handleIconChange("leave", "import")}
-                    className="rounded-full min-w-auto min-h-auto"
+                        ],
+                      },
+                    }}
                   >
-                    {icons.import === "outlined" ? (
-                      <ImportOutlinedIcon className="text-[#0F2043]" />
-                    ) : (
-                      <ImportFilledIcon className="text-[#0F2043]" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip
-                  title="Check Email"
-                  slots={{ transition: Zoom }}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    popper: {
-                      modifiers: [
-                        {
-                          name: "offset",
-                          options: {
-                            offset: [0, -5],
-                          },
-                        },
-                      ],
-                    },
-                  }}
-                >
-                  <IconButton
-                    aria-label="Email"
-                    onClick={() => handleIconChange("click", "email")}
-                    onMouseEnter={() => handleIconChange("enter", "email")}
-                    onMouseLeave={() => handleIconChange("leave", "email")}
-                    className="rounded-full min-w-auto min-h-auto"
-                  >
-                    {icons.email === "outlined" ? (
-                      <EmailOutlinedIcon className="text-[#0F2043]" />
-                    ) : (
-                      <EmailFilledIcon className="text-[#0F2043]" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip
-                  title="Edit Details"
-                  slots={{ transition: Zoom }}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    popper: {
-                      modifiers: [
-                        {
-                          name: "offset",
-                          options: {
-                            offset: [0, -5],
-                          },
-                        },
-                      ],
-                    },
-                  }}
-                >
-                  <IconButton
-                    aria-label="Edit"
-                    onClick={() => handleIconChange("click", "edit")}
-                    onMouseEnter={() => handleIconChange("enter", "edit")}
-                    onMouseLeave={() => handleIconChange("leave", "edit")}
-                    className="rounded-full min-w-auto min-h-auto"
-                  >
-                    {icons.edit === "outlined" ? (
-                      <EditOutlinedIcon className="text-[#0F2043]" />
-                    ) : (
-                      <EditFilledIcon className="text-[#0F2043]" />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-            </Stack>
-            <Divider className="w-[calc(100%-0.75rem)]" />
-
-            <Box className="max-h-[480px] overflow-auto scrollbar-thin scrollbar-thumb-[#D9D9D9] scrollbar-track-[#f0f0f0] scrollbar-thumb-rounded hover:scrollbar-thumb-[#909090]">
-              <Stack spacing={2} mt={2}>
-                {detailsData.map((detail, index) => (
-                  <Stack
-                    key={index}
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    className="min-h-[40px] text-[#8992A3]"
-                  >
-                    <Box className="flex items-center w-[40%] gap-3   ">
-                      {detail.icon}
-                      <Typography variant="body2" className=" text-[#8992A3]">
-                        {detail.label}
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      className="w-[60%] break-words text-[#0F2043]"
+                    <IconButton
+                      aria-label="import"
+                      onClick={() => handleIconChange("click", "import")}
+                      onMouseEnter={() => handleIconChange("enter", "import")}
+                      onMouseLeave={() => handleIconChange("leave", "import")}
+                      className="rounded-full min-w-auto min-h-auto"
                     >
-                      {detail.value}
-                    </Typography>
-                  </Stack>
-                ))}
+                      {icons.import === "outlined" ? (
+                        <ImportOutlinedIcon className="text-[#0F2043]" />
+                      ) : (
+                        <ImportFilledIcon className="text-[#0F2043]" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip
+                    title="Check Email"
+                    slots={{ transition: Zoom }}
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, -5],
+                            },
+                          },
+                        ],
+                      },
+                    }}
+                  >
+                    <IconButton
+                      aria-label="Email"
+                      onClick={() => handleIconChange("click", "email")}
+                      onMouseEnter={() => handleIconChange("enter", "email")}
+                      onMouseLeave={() => handleIconChange("leave", "email")}
+                      className="rounded-full min-w-auto min-h-auto"
+                    >
+                      {icons.email === "outlined" ? (
+                        <EmailOutlinedIcon className="text-[#0F2043]" />
+                      ) : (
+                        <EmailFilledIcon className="text-[#0F2043]" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip
+                    title="Edit Details"
+                    slots={{ transition: Zoom }}
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, -5],
+                            },
+                          },
+                        ],
+                      },
+                    }}
+                  >
+                    <IconButton
+                      aria-label="Edit"
+                      onClick={handleDialogOpen}
+                      onMouseEnter={() => handleIconChange("enter", "edit")}
+                      onMouseLeave={() => handleIconChange("leave", "edit")}
+                      className="rounded-full min-w-auto min-h-auto"
+                    >
+                      {icons.edit === "outlined" ? (
+                        <EditOutlinedIcon className="text-[#0F2043]" />
+                      ) : (
+                        <EditFilledIcon className="text-[#0F2043]" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
               </Stack>
-            </Box>
-          </Stack>
-        </Box>
-      </CardContent>
-    </Card>
+              <Divider className="w-[calc(100%-0.75rem)]" />
+
+              <Box className="max-h-[480px] overflow-auto scrollbar-thin scrollbar-thumb-[#D9D9D9] scrollbar-track-[#f0f0f0] scrollbar-thumb-rounded hover:scrollbar-thumb-[#909090]">
+                <Stack spacing={2} mt={2}>
+                  {detailsData.map((detail, index) => (
+                    <Stack
+                      key={index}
+                      direction="row"
+                      spacing={2}
+                      alignItems="center"
+                      className="min-h-[40px] text-[#8992A3]"
+                    >
+                      <Box className="flex items-center w-[40%] gap-3   ">
+                        {detail.icon}
+                        <Typography variant="body2" className=" text-[#8992A3]">
+                          {detail.label}
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        className="w-[60%] break-words text-[#0F2043]"
+                      >
+                        {detail.value}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Box>
+            </Stack>
+          </Box>
+        </CardContent>
+      </Card>
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3, // Set your desired border radius
+          },
+        }}
+      >
+        <DialogContent>
+          {/* Pass handleDialogClose to AddNewCase */}
+          <EditCase onClose={handleDialogClose} />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
