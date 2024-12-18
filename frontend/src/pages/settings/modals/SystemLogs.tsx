@@ -5,10 +5,14 @@ import axios from "axios"; // Import axios
 import { format } from "date-fns"; // Import date-fns for date formatting
 
 interface SystemLogsProps {
-  showHeader?: boolean; // Optional prop to conditionally render the header
+  showHeader?: boolean;
+  userId?: number; // Make userId optional
 }
 
-export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
+export default function SystemLogs({
+  showHeader = true,
+  userId,
+}: SystemLogsProps) {
   // State to hold rows data
   const [rows, setRows] = React.useState<any[]>([]); // We use 'any' type to allow flexibility
   const [loading, setLoading] = React.useState<boolean>(true); // Loading state
@@ -17,12 +21,19 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
   React.useEffect(() => {
     const fetchSystemLogs = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/auditlogs");
+        // Check if userId is provided to fetch either global or user-specific logs
+        const url = userId
+          ? `http://localhost:3000/api/auditlogs/${userId}` // For user-specific logs
+          : `http://localhost:3000/api/auditlogs`; // For global logs
+
+        const response = await axios.get(url);
+
         // Format the action_date before setting the rows
         const formattedData = response.data.map((log: any) => ({
           ...log,
-          action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"), // Format the date
+          action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"),
         }));
+
         setRows(formattedData);
       } catch (err) {
         setError("Failed to fetch system logs");
@@ -33,10 +44,10 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
     };
 
     fetchSystemLogs();
-  }, []);
+  }, [userId]); // Make the effect dependent on userId
 
   const columns = [
-    { id: "action_date", label: "Date", mWidth: 50 }, // Map to 'action_date' // Map to 'audit_id'
+    { id: "action_date", label: "Date", mWidth: 50 }, // Map to 'action_date'
     { id: "action", label: "Action", minWidth: 100 }, // Map to 'action'
   ];
 

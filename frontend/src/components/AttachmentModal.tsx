@@ -105,7 +105,6 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
     // Check if the Case No. already exists
     const caseExists = await checkCaseNoExists(caseNo);
     if (caseExists) {
-      newErrors.tags = "Case No. already exists. Please add tags to proceed.";
       if (!tags.length) {
         newErrors.tags = "Tags are required for an existing Case No."; // Handle case for missing tags
       }
