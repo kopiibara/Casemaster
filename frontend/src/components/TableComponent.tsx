@@ -8,12 +8,14 @@ import TableRow from "@mui/material/TableRow";
 import ChipComponent from "./ChipComponent";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
-
-import { Popover, TableSortLabel, Button, Paper } from "@mui/material";
+import { Popover, TableSortLabel, Paper } from "@mui/material";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
 
 // Helper function to sort data
 const descendingComparator = (a: any, b: any, orderBy: string) => {
+  if (!orderBy || !a[orderBy] || !b[orderBy]) {
+    return 0; // Skip sorting if no valid orderBy field
+  }
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -54,8 +56,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
     null
   );
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = React.useState<string>("");
-  const [maxRows, setMaxRows] = React.useState<number>(7);
+  const [orderBy, setOrderBy] = React.useState<string>(tableHeadData[0] || "");
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -76,44 +77,29 @@ const TableComponent: React.FC<TableComponentProps> = ({
     setOrderBy("");
   };
 
-  const calculateMaxRows = () => {
-    // Adjust the row height and padding for an accurate calculation
-    const rowHeight = 48; // Approximate height of a table row in pixels
-    const containerPadding = 150; // Adjust for headers, paddings, etc.
-    const availableHeight = window.innerHeight - containerPadding;
-    setMaxRows(Math.floor(availableHeight / rowHeight));
-  };
-
-  React.useEffect(() => {
-    calculateMaxRows(); // Initial calculation
-    window.addEventListener("resize", calculateMaxRows);
-    return () => {
-      window.removeEventListener("resize", calculateMaxRows);
-    };
-  }, []);
-
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
   // Sort the table body data based on the current sorting state
-  const sortedData = stableSort(tableBodyData, getComparator(order, orderBy));
-  const displayedData = sortedData.slice(0, maxRows);
+  const sortedData = orderBy
+    ? stableSort(tableBodyData, getComparator(order, orderBy))
+    : tableBodyData;
 
   return (
     <TableContainer
       sx={{
         "&::-webkit-scrollbar": {
-          width: 4, // Width of the scrollbar
+          width: 4,
         },
         "&::-webkit-scrollbar-track": {
-          backgroundColor: "#f0f0f0", // Scrollbar track color
+          backgroundColor: "#f0f0f0",
           borderRadius: 4,
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#D9D9D9", // Scrollbar thumb color
+          backgroundColor: "#D9D9D9",
           borderRadius: 4,
           "&:hover": {
-            backgroundColor: "#909090", // Thumb color on hover
+            backgroundColor: "#909090",
           },
         },
       }}
@@ -148,7 +134,6 @@ const TableComponent: React.FC<TableComponentProps> = ({
                 </TableSortLabel>
               </TableCell>
             ))}
-            {/* Add the MoreIcon to the table header */}
             <TableCell
               align="center"
               sx={{
@@ -171,7 +156,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
             "& .MuiTableCell-body": { color: "#0F2043", fontSize: "0.875rem" },
           }}
         >
-          {displayedData.map((row, rowIndex) => (
+          {sortedData.map((row, rowIndex) => (
             <TableRow
               key={rowIndex}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}

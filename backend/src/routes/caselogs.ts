@@ -17,45 +17,22 @@ const auth = new google.auth.GoogleAuth({
 
 const drive = google.drive({ version: "v3", auth });
 
-// Endpoint to insert a new case log
-router.post("/caselogs", (req: Request, res: Response) => {
-  const { caseNo, caseTitle, partyFiler, caseType, tags, file_url, file_name } =
-    req.body;
-
-  if (
-    !caseNo ||
-    !caseTitle ||
-    !partyFiler ||
-    !caseType ||
-    !file_url ||
-    !file_name
-  ) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
+// Endpoint to get all case logs with source = 'Email'
+router.get("/caselogs", (req: Request, res: Response) => {
   const sql = `
-        INSERT INTO caselogs (case_no, title, party_filer, case_type, tag, status, file_url, file_name)
-        VALUES (?, ?, ?, ?, ?, 'New', ?, ?)
-      `;
-  const values = [
-    caseNo,
-    caseTitle,
-    partyFiler,
-    caseType,
-    tags.join(", "),
-    file_url,
-    file_name,
-  ];
+    SELECT id, case_no, title, date_added, status, source
+    FROM caselogs
+    WHERE source = 'Email'
+  `;
 
-  db.query(sql, values, (err, results) => {
+  db.query(sql, (err, results) => {
     if (err) {
-      console.error(err);
-      res.status(500).json({ error: "Database error" });
+      console.error("Database query error:", err);
+      res.status(500).json({ error: "Failed to fetch case logs" });
       return;
     }
 
-    res.status(201).json({ message: "Case log added successfully" });
+    res.status(200).json(results);
   });
 });
 
