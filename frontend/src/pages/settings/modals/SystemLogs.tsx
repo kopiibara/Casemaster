@@ -1,8 +1,6 @@
 import * as React from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import SystemLogsTable from "./SystemLogsTable"; // Import the SystemLogsTable component
-import axios from "axios"; // Import axios
-import { format } from "date-fns"; // Import date-fns for date formatting
 
 interface SystemLogsProps {
   showHeader?: boolean; // Optional prop to conditionally render the header
@@ -10,64 +8,49 @@ interface SystemLogsProps {
 
 export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
   // State to hold rows data
-  const [rows, setRows] = React.useState<any[]>([]); // We use 'any' type to allow flexibility
-  const [loading, setLoading] = React.useState<boolean>(true); // Loading state
-  const [error, setError] = React.useState<string | null>(null); // Error state
+  const [rows, setRows] = React.useState([
+    { date: "2023-10-01", user: "admin", action: "Logged in" },
+    {
+      date: "2023-10-02",
+      user: "user1",
+      action: "Created new case with ID: 12345 and assigned to user2",
+    },
+    { date: "2023-10-03", user: "admin", action: "Deleted user2" },
+  ]);
 
-  React.useEffect(() => {
-    const fetchSystemLogs = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/auditlogs'); 
-        // Format the action_date before setting the rows
-        const formattedData = response.data.map((log: any) => ({
-          ...log,
-          action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"), // Format the date
-        }));
-        setRows(formattedData); 
-      } catch (err) {
-        setError("Failed to fetch system logs");
-        console.error(err);
-      } finally {
-        setLoading(false); 
-      }
-    };
-
-    fetchSystemLogs(); 
-  }, []); 
-
+  // Sample columns data
   const columns = [
-    { id: "action_date", label: "Date", mWidth: 50 },  // Map to 'action_date'
-    { id: "audit_id", label: "Log ID", minWidth: 50 },  // Map to 'audit_id'
-    { id: "action", label: "Action", minWidth: 100 },   // Map to 'action'
+    { id: "date", label: "Date", mWidth: 50 },
+    { id: "user", label: "User", minWidth: 50 },
+    { id: "action", label: "Action", minWidth: 100 },
   ];
 
-  if (loading) {
-    return (
-      <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
-        <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
-          Loading system logs...
-        </Typography>
-      </Stack>
-    );
-  }
-
-  if (error) {
-    return (
-      <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
-        <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
-          {error}
-        </Typography>
-      </Stack>
-    );
-  }
+  // Example of updating rows (you can replace this with your own logic to modify rows)
+  const addRow = () => {
+    setRows([
+      ...rows,
+      { date: "2023-12-12", user: "admin", action: "Added new log" },
+    ]);
+  };
 
   return (
-    <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
+    <Stack
+      spacing={3}
+      className="px-6"
+      sx={{
+        maxWidth: "500px",
+        maxHeight: "600px",
+      }}
+    >
       {showHeader && (
         <Box>
           {/* Header */}
           <Stack>
-            <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
+            <Typography
+              variant="h6"
+              fontWeight={"bold"}
+              sx={{ color: "#0F2043" }}
+            >
               System Logs
             </Typography>
             <Typography variant="subtitle2" sx={{ color: "#0F2043" }}>
@@ -81,6 +64,9 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
       <Box className="flex justify-start items-start">
         <SystemLogsTable columns={columns} rows={rows} />
       </Box>
+
+      {/* Button to add a new row (for testing purposes) */}
+      <button onClick={addRow}>Add Log</button>
     </Stack>
   );
 }

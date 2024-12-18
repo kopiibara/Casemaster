@@ -13,14 +13,14 @@ interface Profile {
 
 // Function to create a new user
 export const createUser = (data: any) => {
-  const { name, email, phone, role, pin, image, isApproved , isRemoved} = data;
+  const { name, email, phone, role, pin, image, isApproved } = data;
 
   // Insert the base64 image string into the database
-  const query = `INSERT INTO users (name, email, phone, role, pin, image, isApproved, isRemoved) 
-                 VALUES (?, ?, ?, ?, ?, ?,?,?)`; 
+  const query = `INSERT INTO users (name, email, phone, role, pin, image, isApproved) 
+                 VALUES (?, ?, ?, ?, ?, ?,?)`; 
 
   return new Promise((resolve, reject) => {
-    db.query(query, [name, email, phone, role, pin, image, isApproved, isRemoved], (err, result) => {
+    db.query(query, [name, email, phone, role, pin, image, isApproved], (err, result) => {
       if (err) {
         reject(err);
       } else {
@@ -33,7 +33,7 @@ export const createUser = (data: any) => {
 // Modify the getProfiles function to return profiles with base64 image data
 export const getProfiles = (req: Request) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users'; // Query to fetch all profiles
+    const query = 'SELECT * FROM users';
     db.query(query, (err, results: any[]) => { // results is the rows array
       if (err) {
         console.error('Database Error:', err);
@@ -53,6 +53,7 @@ export const getProfiles = (req: Request) => {
   });
 };
 
+
 export const approveAccount = (userId: number, isApproved: boolean) => {
   return new Promise((resolve, reject) => {
     const query = `UPDATE users SET isApproved = ? WHERE user_id = ?`;
@@ -70,26 +71,6 @@ export const approveAccount = (userId: number, isApproved: boolean) => {
     });
   });
 };
-
-export const removeProfileCard = (userId: number, isRemoved: boolean) => {
-  return new Promise((resolve, reject) => {
-    const query = `UPDATE users SET isRemoved = ? WHERE user_id = ?`;
-
-    db.query(query, [isRemoved, userId], (err, result: any) => {
-      if (err) {
-        reject(err);
-      } else {
-        if (result.affectedRows > 0) {
-          resolve(true); // Profile card removal was successful
-        } else {
-          resolve(false); // No user found with the provided ID
-        }
-      }
-    });
-  });
-};
-
-
 
 // Function to update the role of a user to 'Branch Clerk'
 export const transferRole = (userId: number, newRole: string) => {
@@ -110,49 +91,3 @@ export const transferRole = (userId: number, newRole: string) => {
   });
 };
 
-export const saveActionLog = (user_Id: number, message: string, action_date_time: string) => {
-  return new Promise((resolve, reject) => {
-    const query = `INSERT INTO auditlogs (user_id, action, action_date) VALUES (?, ?, ?)`;
-
-    db.query(query, [user_Id, message, action_date_time], (err, result: any) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result.affectedRows > 0); // Return true if the row was inserted successfully
-      }
-    });
-  });
-};
-
-
-// Function to get all audit logs
-export const getAuditLogs = () => {
-  return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM auditlogs';  // Query to fetch all audit logs
-
-    db.query(query, (err, results: any[]) => {
-      if (err) {
-        console.error('Database Error:', err);
-        return reject(err);  // Reject if there's an error
-      }
-
-      resolve(results);  // Resolve with the audit logs data
-    });
-  });
-};
-
-
-//checkusername in database
-export const checkUsernameExists = (email: string): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-      const query = 'SELECT COUNT(*) AS count FROM users WHERE email = ?';
-      db.query(query, [email], (err, results: any) => {
-          if (err) {
-              reject(err); 
-          } else {
-              const count = results[0]?.count || 0;
-              resolve(count > 0); 
-          }
-      });
-  });
-};

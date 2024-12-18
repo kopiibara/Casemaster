@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -37,21 +37,11 @@ const Verification: React.FC<VerificationProps> = ({
   const [code, setCode] = useState("");
   const { setProfileData } = useAppContext();
   const navigate = useNavigate();
-  const [message, setMessage] = useState('');
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
   };
 
-  const concealEmail = (email: string) => {
-    const [username, domain] = email.split('@');
-    const maskedUsername = username.slice(0, 3) + '*****'; // Mask part of the username
-    return `${maskedUsername}@${domain}`;
-  };
-
-  useEffect(() => {
-    setMessage(`${name} logged in successfully`);
-  }, [name]);
   
   const handleVerifyEmail = async () => {
     try {
@@ -71,8 +61,6 @@ const Verification: React.FC<VerificationProps> = ({
         isApproved: isApproved,
         pin: pin,
       });
-      saveActionLog(user_id, getCurrentDateTime());
-      
       handleCloseModal();
       navigate("/dashboard/Dashboard"); 
 
@@ -88,38 +76,6 @@ const Verification: React.FC<VerificationProps> = ({
     }
   };
 
-  const getCurrentDateTime = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-  
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
-
-const saveActionLog = async (userId: number, actionDateTime: string) => {
-  const payload = {
-    user_Id: userId,
-    message: message,
-    action_date_time: actionDateTime,
-  };
-
-  try {
-    const response = await axios.post('http://localhost:3000/api/action-log', payload);
-    console.log('Action log saved successfully:', response.data);
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error saving action log:', error.response?.data || error.message);
-    } else {
-      console.error('Unexpected error:', error);
-    }
-  }
-};
-
-
   const verificationText =
     verificationMethod === "email" ? (
       <>
@@ -127,7 +83,7 @@ const saveActionLog = async (userId: number, actionDateTime: string) => {
           An email with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>({concealEmail(email)}).</strong>
+          was just sent to <strong>(t*****@gmail.com).</strong>
         </Typography>
       </>
     ) : (
@@ -136,7 +92,7 @@ const saveActionLog = async (userId: number, actionDateTime: string) => {
           An SMS with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>({phone}).</strong>
+          was just sent to <strong>(+123 **** 5678).</strong>
         </Typography>
       </>
     );
