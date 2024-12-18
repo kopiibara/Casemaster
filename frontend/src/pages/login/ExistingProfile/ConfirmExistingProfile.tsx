@@ -1,16 +1,60 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Button from "@mui/material/Button";
 import { Box, Typography, TextField, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../../../AppContext";
+import axios from "axios";
 
 const ConfirmExistingProfile = () => {
   const [verificationMethod, setVerificationMethod] = useState("email");
   const navigate = useNavigate();
+  const { profileData } = useAppContext();
+  const [code, setCode] = useState("");
+ const [id, setId] = useState<number>(0);
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
   };
+
+  useEffect(() => {
+    setId(profileData.id || 0);
+    console.log(profileData.id);
+  });
+
+
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
+        to: profileData.email,
+        code: code,
+      });
+      handleAddProfileCard(id);
+      console.log(response.data.message || "Email verified successfully!");
+      navigate("/profile-selection"); 
+
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Invalid verification code.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
+  };
+
+  const handleAddProfileCard = async (userId : number) => {
+    try {
+      await axios.put("http://localhost:3000/api/add-profile-card", { userId });
+      console.log("Profile added successfully!");
+      
+    } catch (error) {
+      console.error("Can't remove profile", error);
+    }
+  };
+
 
   const verificationText =
     verificationMethod === "email" ? (
@@ -28,7 +72,7 @@ const ConfirmExistingProfile = () => {
           An SMS with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>(+123 **** 5678).</strong>
+          was just sent to <strong>(+123 ** 5678).</strong>
         </Typography>
       </>
     );
@@ -124,6 +168,7 @@ const ConfirmExistingProfile = () => {
                 borderRadius: "8px",
               },
             }}
+            onChange={(e) => setCode(e.target.value)}
           />
 
           {/* Actions */}
@@ -170,6 +215,7 @@ const ConfirmExistingProfile = () => {
                   boxShadow: "none",
                 },
               }}
+              onClick={handleVerifyEmail}
             >
               Confirm
             </Button>

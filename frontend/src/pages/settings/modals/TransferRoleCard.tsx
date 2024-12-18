@@ -154,7 +154,7 @@ const TransferRoleCard = () => {
                 onChange={handleProfileChange}
               >
                 {profiles
-                  .filter(profile => profile.role === "Staff") // Filter for "Staff" role
+                  .filter(profile => profile.role === "Staff" && profile.isApproved == true) // Filter for "Staff" role
                   .map(profile => (
                     <MenuItem key={profile.user_id} value={profile.user_id}>
                       <Stack direction="row" spacing={2} alignItems="center">
