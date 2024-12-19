@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress, Snackbar } from "@mui/material";
 import EmailPreview from "./EmailPreview";
 import EmailView from "./MailContent";
 import { useAuth } from "../../context/AuthContext";
@@ -17,14 +17,31 @@ interface Email {
   receivedDateTime: string;
   hasAttachments: boolean;
   bodyPreview: string;
+  isRead: boolean;
+  importance: string;
+  attachments?: { name: string; size: string; type: string; url: string }[]; // Updated to include URL for attachments
+  replies?: Reply[];
 }
 
-const MailContainer: React.FC = () => {
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
+}
+
+interface MailContainerProps {
+  selectedFilter: string;
+  refreshKey: number; // Add refreshKey prop
+}
+
+const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter, refreshKey }) => {
   const { accessToken } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -32,6 +49,8 @@ const MailContainer: React.FC = () => {
 
       setLoading(true);
       setError(null);
+      setSnackbarMessage("Refreshing emails...");
+      setShowSnackbar(true);
 
       try {
         const client = Client.init({
@@ -41,36 +60,110 @@ const MailContainer: React.FC = () => {
         const response = await client
           .api("/me/messages")
           .select(
-            "id,subject,sender,receivedDateTime,hasAttachments,bodyPreview"
+            "id,subject,sender,receivedDateTime,hasAttachments,bodyPreview,isRead,importance"
           )
+          .expand("attachments")
           .get();
 
-        setEmails(response.value);
+        // Map through the emails and attachments to get the correct URL
+        const emailsWithAttachments = response.value.map((email: any) => ({
+          ...email,
+          attachments: email.attachments?.map((attachment: any) => {
+            let url =
+              attachment.contentUrl || attachment["@odata.mediaContentUrl"];
+
+            if (!url && attachment.contentBytes) {
+              url = `data:${attachment.contentType};base64,${attachment.contentBytes}`;
+            }
+
+            return {
+              name: attachment.name,
+              size: attachment.size,
+              type: attachment.contentType,
+              url,
+            };
+          }),
+        }));
+
+        setEmails(emailsWithAttachments);
+        setSnackbarMessage("Emails successfully refreshed");
       } catch (err) {
         console.error("Error fetching emails:", err);
         setError("Failed to load emails.");
+        setSnackbarMessage("Refresh failed - try again");
       } finally {
         setLoading(false);
+        setShowSnackbar(true);
       }
     };
 
     fetchEmails();
-  }, [accessToken]);
+  }, [accessToken, refreshKey]);
 
+  // Filter emails based on selected filter
+  const filteredEmails = emails.filter((email) => {
+    if (selectedFilter === "Unread") {
+      return !email.isRead;
+    }
+    if (selectedFilter === "Important") {
+      return email.importance === "high";
+    }
+    return true;
+  });
+
+  // Handle reply submission
+  const handleReply = (replyContent: string) => {
+    if (selectedEmail) {
+      const updatedReplies = [
+        ...(selectedEmail.replies || []),
+        {
+          id: Date.now(),
+          content: replyContent,
+          time: new Date().toLocaleString(),
+        },
+      ];
+      setSelectedEmail({ ...selectedEmail, replies: updatedReplies });
+      setShowSnackbar(true);
+      setSnackbarMessage("Reply sent successfully!");
+    }
+  };
+
+  // Render loading state
   if (loading) {
-    return <Typography>Loading emails...</Typography>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100%"
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
+  // Render error state
   if (error) {
-    return <Typography color="error">{error}</Typography>;
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        height="100%"
+      >
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
   }
 
+  // Render the email list and details
   return (
-    <Box display="flex" height="77vh" overflow="hidden">
+    <Box display="flex" height="100%" overflow="hidden">
       {/* Email List */}
       <Box
         sx={{
-          width: "35%",
+          width: { xs: "100%", md: "35%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           borderRight: "1px solid #ddd",
           bgcolor: "#f7f7f7",
@@ -86,7 +179,7 @@ const MailContainer: React.FC = () => {
           },
         }}
       >
-        {emails.map((email) => (
+        {filteredEmails.map((email) => (
           <EmailPreview
             key={email.id}
             sender={email.sender.emailAddress.name}
@@ -103,10 +196,12 @@ const MailContainer: React.FC = () => {
       {/* Email Details */}
       <Box
         sx={{
-          width: "65%",
+          width: { xs: "100%", md: "65%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           padding: 3,
           bgcolor: "#fff",
+          transition: "all 0.3s ease-in-out",
           "&::-webkit-scrollbar": {
             width: 6,
           },
@@ -128,7 +223,9 @@ const MailContainer: React.FC = () => {
             ).toLocaleString()}
             subject={selectedEmail.subject}
             content={selectedEmail.bodyPreview}
-            attachment={selectedEmail.hasAttachments ? "Yes" : "No"}
+            attachments={selectedEmail.attachments}
+            replies={selectedEmail.replies}
+            onReply={handleReply}
           />
         ) : (
           <Box
@@ -143,6 +240,14 @@ const MailContainer: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      {/* Snackbar for Notifications */}
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={3000}
+        message={snackbarMessage}
+        onClose={() => setShowSnackbar(false)}
+      />
     </Box>
   );
 };

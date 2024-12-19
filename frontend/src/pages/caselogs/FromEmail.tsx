@@ -5,17 +5,18 @@ import TableComponent from "../../components/TableComponent";
 import { IconButton, Button } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import InfoFilledIcon from "@mui/icons-material/Info";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DetailsComponent from "../../components/DetailsComponent";
 import Tooltip from "@mui/material/Tooltip";
 import Zoom from "@mui/material/Zoom";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SubMenuIcon from "@mui/icons-material/FiberManualRecord";
+import axios from "axios";
 
 const FromEmail: React.FC = () => {
   const DocumentType = [
-    "Document Type", // Title or Default
-    "All", // Default
+    "Document Type",
+    "All",
     "Motion",
     "Pleadings",
     "Incident",
@@ -29,24 +30,40 @@ const FromEmail: React.FC = () => {
   const Dates = ["Date", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
 
   const tableHeadData = ["Case No.", "Title", "Date Added", "Status"];
-  const tableBodyData = [
-    {
-      "Case No.": 12345,
-      Title: "PRESIDENT MARCOS VS VP SARAH DUTERTE",
-      "Date Added": "2024-12-01",
-      Status: "Active",
-    },
-    {
-      "Case No.": 67890,
-      Title: "CITIZEN VS GOVERNMENT",
-      "Date Added": "2024-11-30",
-      Status: "Closed",
-    },
-  ];
+
+  // State to store case logs fetched from the backend
+  const [tableBodyData, setTableBodyData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch case logs from the backend
+  useEffect(() => {
+    const fetchCaseLogs = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get("http://localhost:3000/api/caselogs");
+        setTableBodyData(
+          response.data.map((log: any) => ({
+            "Case No.": log.case_no,
+            Title: log.title,
+            "Date Added": new Date(log.date_added).toLocaleDateString(),
+            Status: log.status,
+          }))
+        );
+      } catch (err) {
+        setError("Failed to load case logs.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCaseLogs();
+  }, []);
 
   const popoverContent = (
     <Box style={{ padding: "1rem" }}>
-      <Stack direction={"column"} spacing={2}>
+      <Stack direction={"column"} spacing={1}>
         <Button
           variant="contained"
           color="primary"
@@ -57,7 +74,7 @@ const FromEmail: React.FC = () => {
             color: "#0F2043",
             justifyContent: "flex-start",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
+              backgroundColor: "#DCE5F6",
             },
           }}
         >
@@ -77,7 +94,7 @@ const FromEmail: React.FC = () => {
             color: "#0F2043",
             justifyContent: "flex-start",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
+              backgroundColor: "#DCE5F6",
             },
           }}
         >
@@ -97,7 +114,7 @@ const FromEmail: React.FC = () => {
             color: "#0F2043",
             justifyContent: "flex-start",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
+              backgroundColor: "#DCE5F6",
             },
           }}
         >
@@ -117,7 +134,7 @@ const FromEmail: React.FC = () => {
             color: "#0F2043",
             justifyContent: "flex-start",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
+              backgroundColor: "#DCE5F6",
             },
           }}
         >
@@ -137,7 +154,7 @@ const FromEmail: React.FC = () => {
             color: "#0F2043",
             justifyContent: "flex-start",
             "&:hover": {
-              backgroundColor: "#DCE5F6", // Add hover effect
+              backgroundColor: "#DCE5F6",
             },
           }}
         >
@@ -151,22 +168,17 @@ const FromEmail: React.FC = () => {
     </Box>
   );
 
-  // State to manage which icon to show
   const [icon, setIcon] = useState("outlined");
-
-  // State to manage whether the card should be shown and whether details are open
   const [showCard, setShowCard] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  // Handle mouse hover and click events to change icon
   const handleMouseEnter = () => setIcon("filled");
   const handleMouseLeave = () => setIcon("outlined");
 
-  // Handle the icon button click to toggle the card visibility and the icon
   const handleClick = () => {
-    setIsDetailsOpen((prev) => !prev); // Toggle the details open/close state
-    setIcon(isDetailsOpen ? "outlined" : "filled"); // Toggle icon between info and cancel
-    setShowCard((prev) => !prev); // Toggle showing the card
+    setIsDetailsOpen((prev) => !prev);
+    setIcon(isDetailsOpen ? "outlined" : "filled");
+    setShowCard((prev) => !prev);
   };
 
   return (
@@ -179,7 +191,7 @@ const FromEmail: React.FC = () => {
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ marginLeft: "auto" }}>
             <Tooltip
-              title={isDetailsOpen ? "Close Details" : "Details"} // Change tooltip title based on isDetailsOpen state
+              title={isDetailsOpen ? "Close Details" : "Details"}
               TransitionComponent={Zoom}
               placement="top"
               arrow
@@ -198,12 +210,12 @@ const FromEmail: React.FC = () => {
             >
               <IconButton
                 aria-label="Details"
-                onClick={handleClick} // Toggle showCard and icon on click
+                onClick={handleClick}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
                 {isDetailsOpen ? (
-                  <CancelIcon className="text-[#0F2043]" /> // Show Cancel icon if details are open
+                  <CancelIcon className="text-[#0F2043]" />
                 ) : icon === "outlined" ? (
                   <InfoOutlinedIcon className="text-[#0F2043]" />
                 ) : (
@@ -214,11 +226,9 @@ const FromEmail: React.FC = () => {
           </Box>
         </Stack>
 
-        {/* Box container to adjust only the table and card layout */}
         <Box
           sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}
         >
-          {/* Box containing the table */}
           <Box
             sx={{
               display: "flex",
@@ -228,14 +238,19 @@ const FromEmail: React.FC = () => {
               overflow: "hidden",
             }}
           >
-            <TableComponent
-              tableHeadData={tableHeadData}
-              tableBodyData={tableBodyData}
-              popoverContent={popoverContent}
-            />
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : error ? (
+              <p>{error}</p>
+            ) : (
+              <TableComponent
+                tableHeadData={tableHeadData}
+                tableBodyData={tableBodyData}
+                popoverContent={popoverContent}
+              />
+            )}
           </Box>
 
-          {/* Conditionally render the Card beside the Table */}
           {showCard && <DetailsComponent />}
         </Box>
       </Stack>

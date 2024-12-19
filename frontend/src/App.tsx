@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/login/SignIn";
 import DashboardPage from "./pages/dashboard/Dashboard";
@@ -12,6 +13,7 @@ import MyAttachments from "./pages/attachments/MyAttachments";
 import SharedWithMe from "./pages/attachments/SharedWithMe";
 import StarredAttachments from "./pages/attachments/Starred";
 import ArchiveAttachments from "./pages/attachments/Archive";
+import FolderPage from "./pages/attachments/FolderPage";
 import CaseTracker from "./pages/casetracker/CaseTracker";
 import MainLayout from "./MainLayout";
 import ProfileSetup from "./pages/login/ProfileSetup";
@@ -29,6 +31,8 @@ function App() {
   return (
     <AppProvider>
       <Router>
+        {/* Network Status Backdrop */}
+
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<SignIn />} />
@@ -52,13 +56,11 @@ function App() {
             element={<ConfirmExistingProfile />}
           />
           <Route path="/forgot-pin-existing" element={<ForgotPINExisting />} />
-          <Route
-            path="/profile-selection"
-            element={<ProfileSelection />}
-          />{" "}
+          <Route path="/profile-selection" element={<ProfileSelection />} />
+
+          {/* Main Layout and Protected Routes */}
           <Route element={<MainLayout />}>
             <Route path="/dashboard/Dashboard" element={<DashboardPage />} />
-
             <Route path="/caselogs/FromEmail" element={<FromEmail />} />
             <Route path="/caselogs/ManualInput" element={<ManualInput />} />
             <Route path="/mails/Inbox" element={<InboxMails />} />
@@ -85,6 +87,7 @@ function App() {
               path="/attachments/Archive"
               element={<ArchiveAttachments />}
             />
+            <Route path="/attachments/FolderPage" element={<FolderPage />} />
             <Route path="/casetracker/CaseTracker" element={<CaseTracker />} />
           </Route>
         </Routes>

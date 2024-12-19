@@ -1,4 +1,3 @@
-// SignIn.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Box } from "@mui/material";
@@ -9,6 +8,7 @@ import {
 } from "@azure/msal-browser";
 import { config } from "../../../config";
 import { useAuth } from "./../../../context/AuthContext"; // Import useAuth hook
+import axios from "axios";
 
 const msalConfig: Configuration = {
   auth: {
@@ -22,12 +22,14 @@ const msalConfig: Configuration = {
   },
 };
 
+
 const msalInstance = new PublicClientApplication(msalConfig);
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const [isInitialized, setIsInitialized] = useState(false);
-  const { setAccessToken } = useAuth(); // Access the function to set the token
+  const { setTokens } = useAuth(); // Access the function to set both tokens
+  const [isEmpty, setIsEmpty] = useState(false);
 
   useEffect(() => {
     const initializeMsal = async () => {
@@ -42,6 +44,28 @@ const SignIn: React.FC = () => {
     initializeMsal();
   }, []);
 
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/get-profiles"
+        );
+
+        if (response.data.length === 0) {
+          setIsEmpty(true);
+          console.log("The profiles table is empty.");
+        } else {
+          setIsEmpty(false);
+          console.log("Profiles fetched successfully:", response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profiles", error);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
+
   const handleSignIn = async (): Promise<void> => {
     if (!isInitialized) {
       console.error("MSAL is not initialized yet.");
@@ -51,17 +75,24 @@ const SignIn: React.FC = () => {
     try {
       const loginResponse: AuthenticationResult = await msalInstance.loginPopup(
         {
-          scopes: ["User.Read", "Mail.Read"],
+          scopes: ["User.Read", "Mail.Read", "offline_access"], // Add offline_access for refresh token
           prompt: "select_account",
         }
       );
 
       const accessToken = loginResponse.accessToken;
+      const refreshToken = loginResponse.idToken; // Use idToken as a stand-in for refresh token
+
       console.log("Access Token:", accessToken);
+      console.log("Refresh Token (ID Token):", refreshToken);
 
-      setAccessToken(accessToken); // Store the token in context
+      setTokens(accessToken, refreshToken); // Store both the access and refresh tokens
 
-      navigate("/dashboard/Dashboard");
+      if (isEmpty) {
+        navigate("/profile-setup");
+      } else {
+        navigate("/profile-selection");
+      }
     } catch (error) {
       console.error("Sign-in failed:", error);
     }

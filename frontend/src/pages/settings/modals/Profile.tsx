@@ -11,10 +11,27 @@ import {
   InputAdornment,
 } from "@mui/material";
 import TransferRoleCard from "./TransferRoleCard";
+import { useAppContext } from "../../../AppContext";
 
 const Profile = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [pin, setPin] = useState("");
+  const [currentPinInput, setCurrentPinInput] = useState("");
+  const [isPinValid, setIsPinValid] = useState(false); // Tracks if the current pin is valid
+  const { profileData } = useAppContext();
+
+  const handleCurrentPinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    setCurrentPinInput(input);
+
+    // Check if the input matches the current pin from profileData
+    if (input === profileData.pin) {
+      setIsPinValid(true); // Enable the new pin fields
+    } else {
+      setIsPinValid(false); // Disable the new pin fields
+    }
+  };
 
   return (
     <Box
@@ -45,7 +62,7 @@ const Profile = () => {
         <Stack direction={"row"} spacing={4}>
           <Box>
             <Avatar
-              src="/broken-image.jpg"
+              src={profileData.selectedProfileImage || undefined}
               sx={{ width: 104, height: 104 }}
             ></Avatar>
           </Box>
@@ -140,7 +157,11 @@ const Profile = () => {
             }}
           >
             <InputLabel htmlFor="full-name">Full Name</InputLabel>
-            <OutlinedInput id="full-name" label="Full Name" />
+            <OutlinedInput
+              id="full-name"
+              label="Full Name"
+              value={profileData.fullName}
+            />
           </FormControl>
 
           {/* Personal Email */}
@@ -178,7 +199,7 @@ const Profile = () => {
             <InputLabel htmlFor="personal-email">Personal Email</InputLabel>
             <OutlinedInput
               id="personal-email"
-              value={email}
+              value={profileData.email}
               onChange={(e) => setEmail(e.target.value)}
               label="Personal Email"
               endAdornment={
@@ -189,13 +210,13 @@ const Profile = () => {
                     sx={{
                       fontSize: "0.7rem",
                       textTransform: "none",
-                      color: "gray",
+                      color: "green",
                       "&:hover": {
                         color: "#2E49D5",
                       },
                     }}
                   >
-                    Verify
+                    Verified
                   </Button>
                 </InputAdornment>
               }
@@ -237,7 +258,7 @@ const Profile = () => {
             <InputLabel htmlFor="phone-number">Phone Number</InputLabel>
             <OutlinedInput
               id="phone-number"
-              value={phone}
+              value={profileData.phoneNo}
               onChange={(e) => setPhone(e.target.value)}
               label="Phone Number"
               endAdornment={
@@ -342,14 +363,19 @@ const Profile = () => {
             }}
           >
             <InputLabel htmlFor="full-name">Current Pin</InputLabel>
-            <OutlinedInput id="full-name" label="Current Pin" />
+            <OutlinedInput
+              id="full-name"
+              label="Current Pin"
+              value={currentPinInput}
+              onChange={handleCurrentPinChange}
+            />
           </FormControl>
 
           {/* New Pin */}
           <FormControl
             variant="outlined"
             size="small"
-            disabled
+            disabled={!isPinValid}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
@@ -376,14 +402,19 @@ const Profile = () => {
             }}
           >
             <InputLabel htmlFor="new-pin">New Pin</InputLabel>
-            <OutlinedInput id="new-pin" label="New Pin" />
+            <OutlinedInput
+              id="new-pin"
+              label="New Pin"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+            />
           </FormControl>
 
           {/* Confirm Pin */}
           <FormControl
             variant="outlined"
             size="small"
-            disabled
+            disabled={!isPinValid}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "0.5rem",
@@ -410,7 +441,12 @@ const Profile = () => {
             }}
           >
             <InputLabel htmlFor="confirm-new-pin">Confirm New Pin</InputLabel>
-            <OutlinedInput id="confirm-new-pin" label="Confirm New Pin" />
+            <OutlinedInput
+              id="confirm-new-pin"
+              label="Confirm New Pin"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+            />
           </FormControl>
 
           {/* Buttons */}
@@ -431,7 +467,7 @@ const Profile = () => {
                 textTransform: "none",
               }}
             >
-              Change Password
+              Change Pin
             </Button>
           </Stack>
         </Stack>

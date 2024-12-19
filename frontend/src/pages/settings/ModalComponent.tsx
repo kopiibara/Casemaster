@@ -10,6 +10,7 @@ import {
   ListItemButton,
   ListItemText,
   ListSubheader,
+  ListItemIcon,
   IconButton,
 } from "@mui/material";
 import ProfilePage from "./modals/Profile";
@@ -18,6 +19,9 @@ import SystemLogsPage from "./modals/SystemLogs";
 
 // Icons
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useAppContext } from "../../AppContext";
 
 // Props interface for better reusability
 interface ModalComponentProps {
@@ -28,12 +32,18 @@ interface ModalComponentProps {
 const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
   // State to track the selected menu item
   const [selectedItem, setSelectedItem] = useState<string | null>("Profile");
-
-  // State to track hover on the cancel button
+  const { profileData } = useAppContext(); // Assume you can update context
+  const navigate = useNavigate(); // Hook for navigation
 
   // Function to handle clicking a menu item
   const handleListItemClick = (item: string) => {
     setSelectedItem(item);
+  };
+
+  // Function to handle logout
+  const handleLogout = () => {
+    // Navigate to profile selection screen
+    navigate("/profile-selection");
   };
 
   // Reset to Profile page when modal opens
@@ -42,8 +52,6 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
       setSelectedItem("Profile");
     }
   }, [open]);
-
-  // Reset hover state when modal is closed
 
   return (
     <Dialog
@@ -71,75 +79,116 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
               overflowY: "auto", // Make it scrollable if content overflows
             }}
           >
-            <List
-              subheader={
-                <ListSubheader
-                  component="div"
-                  id="nested-list-subheader"
-                  sx={{ marginBottom: 2, padding: 1, color: "#0F2043" }}
-                >
-                  <Typography variant="h5" fontWeight={"bold"}>
-                    Settings
-                  </Typography>
-                </ListSubheader>
-              }
+            <Stack
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%", // Ensure it stretches to the full height of its container
+              }}
             >
-              <ListItem disablePadding sx={{ color: "#0F2043" }}>
-                <ListItemButton
-                  sx={{
-                    borderRadius: 2,
-                    backgroundColor:
-                      selectedItem === "Profile" ? "#DBE7FF" : "transparent", // Active state style
-                    "&:hover": {
+              <List
+                subheader={
+                  <ListSubheader
+                    component="div"
+                    id="nested-list-subheader"
+                    sx={{ marginBottom: 2, padding: 1, color: "#0F2043" }}
+                  >
+                    <Typography variant="h5" fontWeight={"bold"}>
+                      Settings
+                    </Typography>
+                  </ListSubheader>
+                }
+              >
+                <ListItem disablePadding sx={{ color: "#0F2043" }}>
+                  <ListItemButton
+                    sx={{
+                      borderRadius: 2,
                       backgroundColor:
-                        selectedItem === "Profile" ? "#DBE7FF" : "#F3F7FF", // Hover effect
-                    },
-                  }}
-                  onClick={() => handleListItemClick("Profile")}
-                >
-                  <ListItemText primary="Profile" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton
-                  sx={{
-                    borderRadius: 2,
-                    backgroundColor:
-                      selectedItem === "Staff Management"
-                        ? "#DBE7FF"
-                        : "transparent", // Active state style
-                    "&:hover": {
+                        selectedItem === "Profile" ? "#DBE7FF" : "transparent", // Active state style
+                      "&:hover": {
+                        backgroundColor:
+                          selectedItem === "Profile" ? "#DBE7FF" : "#F3F7FF", // Hover effect
+                      },
+                    }}
+                    onClick={() => handleListItemClick("Profile")}
+                  >
+                    <ListItemText primary="Profile" />
+                  </ListItemButton>
+                </ListItem>
+
+                {profileData.role !== "Staff" && (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      sx={{
+                        borderRadius: 2,
+                        backgroundColor:
+                          selectedItem === "Staff Management"
+                            ? "#DBE7FF"
+                            : "transparent", // Active state style
+                        "&:hover": {
+                          backgroundColor:
+                            selectedItem === "Staff Management"
+                              ? "#DBE7FF"
+                              : "#F3F7FF", // Hover effect
+                        },
+                      }}
+                      onClick={() => handleListItemClick("Staff Management")}
+                    >
+                      <ListItemText primary="Staff Management" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
+
+                {profileData.role !== "Staff" && (
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      sx={{
+                        borderRadius: 2,
+                        backgroundColor:
+                          selectedItem === "System Logs"
+                            ? "#DBE7FF"
+                            : "transparent", // Active state style
+                        "&:hover": {
+                          backgroundColor:
+                            selectedItem === "System Logs"
+                              ? "#DBE7FF"
+                              : "#F3F7FF", // Hover effect
+                        },
+                      }}
+                      onClick={() => handleListItemClick("System Logs")}
+                    >
+                      <ListItemText primary="System Logs" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
+              </List>
+
+              {/* Logout button placed at the bottom */}
+              <List sx={{ marginTop: "auto" }}>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    sx={{
+                      borderRadius: 2,
                       backgroundColor:
-                        selectedItem === "Staff Management"
-                          ? "#DBE7FF"
-                          : "#F3F7FF", // Hover effect
-                    },
-                  }}
-                  onClick={() => handleListItemClick("Staff Management")}
-                >
-                  <ListItemText primary="Staff Management" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton
-                  sx={{
-                    borderRadius: 2,
-                    backgroundColor:
-                      selectedItem === "System Logs"
-                        ? "#DBE7FF"
-                        : "transparent", // Active state style
-                    "&:hover": {
-                      backgroundColor:
-                        selectedItem === "System Logs" ? "#DBE7FF" : "#F3F7FF", // Hover effect
-                    },
-                  }}
-                  onClick={() => handleListItemClick("System Logs")}
-                >
-                  <ListItemText primary="System Logs" />
-                </ListItemButton>
-              </ListItem>
-            </List>
+                        selectedItem === "Logout" ? "#DBE7FF" : "transparent", // Active state style
+                      "&:hover": {
+                        backgroundColor:
+                          selectedItem === "Logout" ? "#DBE7FF" : "#F3F7FF", // Hover effect
+                      },
+                    }}
+                    onClick={handleLogout} // Attach the logout handler
+                  >
+                    <ListItemIcon>
+                      <LogoutOutlinedIcon className="text-[#D52E2E]" />
+                    </ListItemIcon>
+                    <ListItemText primary="Logout" className="text-[#D52E2E]" />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </Stack>
           </Stack>
+
           <Divider orientation="vertical" flexItem />
           {/* Content - scrollable */}
           <Stack

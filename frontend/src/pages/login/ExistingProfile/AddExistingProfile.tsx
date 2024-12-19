@@ -8,7 +8,7 @@ const AddExistingProfile = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/profile-selection");
   };
 
   const loginExistingProfile = () => {
@@ -73,6 +73,7 @@ const AddExistingProfile = () => {
       {/* Buttons */}
       <Box>
         <Button
+          onClick={() => navigate("/profile-setup")}
           variant="contained"
           sx={{
             marginTop: "1rem",

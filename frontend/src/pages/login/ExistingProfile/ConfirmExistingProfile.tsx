@@ -1,16 +1,78 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Button from "@mui/material/Button";
-import { Box, Typography, TextField } from "@mui/material";
+import { Box, Typography, TextField, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../../../AppContext";
+import axios from "axios";
+import AlertSnackbar from "../../../components/AlertComponent";
+
 
 const ConfirmExistingProfile = () => {
   const [verificationMethod, setVerificationMethod] = useState("email");
   const navigate = useNavigate();
+  const { profileData } = useAppContext();
+  const [code, setCode] = useState("");
+ const [id, setId] = useState<number>(0);
+ const [open, setOpen] = useState(false);
+ const [message, setMessage] = useState("");
+ const [severity, setSeverity] = useState<"success" | "error">("success");
+
+const showAlert = (message: string, severity: "success" | "error") => {
+ setMessage(message);
+ setSeverity(severity);
+ setOpen(true);
+};
+const handleClose = () => {
+  setOpen(false);
+  console.log("Closed");
+};
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
   };
+
+  useEffect(() => {
+    setId(profileData.id || 0);
+    console.log(profileData.id);
+
+    showAlert("Email Verification sent", "success");
+
+  });
+
+
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
+        to: profileData.email,
+        code: code,
+      });
+      handleAddProfileCard(id);
+      console.log(response.data.message || "Email verified successfully!");
+      navigate("/profile-selection"); 
+
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Invalid verification code.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
+  };
+
+  const handleAddProfileCard = async (userId : number) => {
+    try {
+      await axios.put("http://localhost:3000/api/add-profile-card", { userId });
+      console.log("Profile added successfully!");
+      
+    } catch (error) {
+      console.error("Can't remove profile", error);
+    }
+  };
+
 
   const verificationText =
     verificationMethod === "email" ? (
@@ -19,7 +81,7 @@ const ConfirmExistingProfile = () => {
           An email with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>(t*****@gmail.com).</strong>
+          was just sent to <strong>({profileData.email}).</strong>
         </Typography>
       </>
     ) : (
@@ -28,7 +90,7 @@ const ConfirmExistingProfile = () => {
           An SMS with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>(+123 **** 5678).</strong>
+          was just sent to <strong>(+{profileData.phoneNo}).</strong>
         </Typography>
       </>
     );
@@ -83,89 +145,107 @@ const ConfirmExistingProfile = () => {
       </Box>
 
       {/* Verification Content */}
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
-      >
-        2-step Verification
-      </Typography>
-      <Typography
+      <Stack
+        spacing={2}
         sx={{
-          fontSize: "1rem",
-          color: "#0f2043",
-          opacity: 0.6,
-          mb: 3,
-          textAlign: "center",
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+          height: "100vh",
         }}
       >
-        {verificationText}
-      </Typography>
-
-      {/* Input Field */}
-      <Box>
-        <TextField
-          label="Enter Code"
-          variant="outlined"
-          inputProps={{ maxLength: 6 }}
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: "semi-bold", color: "#0f2043", mb: 2 }}
+        >
+          2-step Verification
+        </Typography>
+        <Typography
           sx={{
-            width: "24rem",
-            backgroundColor: "transparent",
-            borderRadius: "8px",
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-            },
-          }}
-        />
-
-        {/* Actions */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "24rem",
-            mt: 3,
+            fontSize: "1rem",
+            color: "#0f2043",
+            opacity: 0.6,
+            mb: 3,
+            textAlign: "center",
           }}
         >
-          <Box sx={{ textAlign: "left" }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#517FD3",
-                cursor: "pointer",
-                mb: 1,
-              }}
-            >
-              Resend Code
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "#517FD3",
-                cursor: "pointer",
-              }}
-              onClick={handleSwitchMethod}
-            >
-              {switchMethodText}
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
+          {verificationText}
+        </Typography>
+
+        {/* Input Field */}
+        <Box>
+          <TextField
+            label="Enter Code"
+            variant="outlined"
+            inputProps={{ maxLength: 6 }}
             sx={{
-              textTransform: "none",
-              borderRadius: "0.5rem",
-              height: "2.5rem",
-              backgroundColor: "#517FD3",
-              boxShadow: "none",
-              "&:hover": {
-                backgroundColor: "#3D6FBF",
-                boxShadow: "none",
+              width: "24rem",
+              backgroundColor: "transparent",
+              borderRadius: "8px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
               },
             }}
+            onChange={(e) => setCode(e.target.value)}
+          />
+
+          {/* Actions */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "24rem",
+              mt: 3,
+            }}
           >
-            Confirm
-          </Button>
+            <Box sx={{ textAlign: "left" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#517FD3",
+                  cursor: "pointer",
+                  mb: 1,
+                }}
+              >
+                Resend Code
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#517FD3",
+                  cursor: "pointer",
+                }}
+                onClick={handleSwitchMethod}
+              >
+                {switchMethodText}
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                borderRadius: "0.5rem",
+                height: "2.5rem",
+                backgroundColor: "#517FD3",
+                boxShadow: "none",
+                "&:hover": {
+                  backgroundColor: "#3D6FBF",
+                  boxShadow: "none",
+                },
+              }}
+              onClick={handleVerifyEmail}
+            >
+              Confirm
+            </Button>
+          </Box>
         </Box>
-      </Box>
+      </Stack>
+      <AlertSnackbar
+  open={open}
+  message={message}
+  severity={severity}
+  onClose={handleClose}
+/>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Radio,
   RadioGroup,
@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import Profile from "../Profiles";
 import Icon from "../icon.png";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface ForgotPasswordProps {
   selectedProfile: Profile;
@@ -24,6 +26,95 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
   const [selectedMethod, setSelectedMethod] = useState<string>("email");
   const [currentStep, setCurrentStep] = useState<string>("method-selection");
   const [code, setCode] = useState<string>("");
+  const newPinRef = useRef<HTMLInputElement>(null);
+  const verifyPinRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
+
+
+  const handleChangePin = () => {
+    const newPin = newPinRef.current?.value;
+    const verifyPin = verifyPinRef.current?.value;
+    if (newPin && verifyPin) {
+      if (newPin === verifyPin) {
+        console.log("PINs match!");
+        handleNewPin();
+        setError("");
+      } else {
+        setError(newPin);
+      }
+    } else {
+      setError("Please fill in both fields.");
+    }
+  };
+
+
+  const handleNewPin= async () => {
+    try {
+      const response = await axios.put(
+        "http://localhost:3000/api/change-pin",
+        { pin: newPinRef.current?.value ,
+          userId: selectedProfile.user_id
+         }
+      );
+      setCurrentStep("success");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+
+      }
+    } finally {
+    }
+  };
+
+
+  const handleSendEmail = async () => {
+   
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/send-verification-email",
+        { to: selectedProfile.email }
+      );
+      setCurrentStep("email-verification");
+      console.log(response.data.message || "Email sent successfully!");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally { 
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    try {
+      const response = await axios.post("http://localhost:3000/api/validate-verification-code", {
+        to: selectedProfile.email,
+        code: code,
+      });
+      setCurrentStep("reset-pin");
+      console.log(response.data.message || "Email verified successfully!");
+
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Invalid verification code.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
+    }
+  };
+
+
 
   const handleMethodChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedMethod(event.target.value);
@@ -42,8 +133,9 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
     setCurrentStep("reset-pin");
   };
 
-  const handleResetPin = () => {
-    setCurrentStep("success");
+  const handleSuccess = () => {
+    handleCloseModal();
+    window.location.reload();
   };
 
   const VerificationView = ({ type }: { type: string }) => {
@@ -85,7 +177,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         <Box className="flex justify-between items-center w-full mt-3">
           <Box className="mt-4">
             <p className="flex justify-center items-start flex-col">
-              <span className="tracking-tight text-[#517FD3] cursor-pointer text-xs">
+              <span className="tracking-tight text-[#517FD3] cursor-pointer text-xs" onClick={handleSendEmail}>
                 Resend Code
               </span>
               <span
@@ -99,7 +191,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
           <Button
             variant="contained"
             color="primary"
-            onClick={handleSubmitCode}
+            onClick={handleVerifyEmail}
             className="mt-4"
             sx={{
               boxShadow: "none",
@@ -118,8 +210,8 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
     );
   };
 
-  const ResetPinView = () => (
-    <Box className="flex items-center justify-center flex-col mt-2">
+    const ResetPinView = () => (
+      <Box className="flex items-center justify-center flex-col mt-2">
       <h3 className="font-semibold text-3xl text-[#0f2043] mt-2">
         Set New PIN
       </h3>
@@ -127,29 +219,36 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         Avoid using easy to guess PINs like
       </p>
       <p className="text-sm text-[#0f2043] text-opacity-40 text-center">
-        1234 or 0000 or your birthdate.
+        1234 or {selectedProfile.user_id} or your birthdate.
       </p>
       <Box className="flex flex-col items-center w-full mt-6 gap-5">
         <TextField
           label="New PIN"
           type="password"
           variant="outlined"
-          inputProps={{ maxLength: 6 }}
+          inputProps={{ maxLength: 4 }}
           className="mb-4"
           sx={{ width: "120%" }}
+          inputRef={newPinRef}
         />
         <TextField
           label="Verify New PIN"
           type="password"
           variant="outlined"
-          inputProps={{ maxLength: 6 }}
+          inputProps={{ maxLength: 4 }}
           sx={{ width: "120%" }}
+          inputRef={verifyPinRef}
         />
       </Box>
+      {error && (
+        <Box sx={{ color: "red", marginTop: "10px" }}>
+          <p>{error}</p>
+        </Box>
+      )}
       <Button
         variant="contained"
         color="primary"
-        onClick={handleResetPin}
+        onClick={handleChangePin}
         className="mt-6"
         sx={{
           textTransform: "none",
@@ -164,6 +263,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         Submit
       </Button>
     </Box>
+
   );
 
   const SuccessView = () => (
@@ -184,7 +284,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
       <Button
         variant="contained"
         color="primary"
-        onClick={handleCloseModal}
+        onClick={handleSuccess}
         className="mt-4"
         sx={{
           textTransform: "none",
@@ -246,7 +346,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
           <Button
             variant="contained"
             color="primary"
-            onClick={handleSubmitMethod}
+            onClick={handleSendEmail}
             className="mt-4"
             sx={{
               boxShadow: "none",

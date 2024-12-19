@@ -33,7 +33,7 @@ const { screen } = require("electron");
 function createWindow() {
   const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
   win = new BrowserWindow({
-    width: 1400, // Set the width to 1600
+    width: 1500, // Set the width to 1600
     height: 900, // Set the height to 1000
     center: true, // Center the window on the screen
 
@@ -49,7 +49,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.mjs"),
     },
 
-    minWidth: 1400,
+    minWidth: 1500,
     minHeight: 800,
     maxWidth: screenWidth,
   });

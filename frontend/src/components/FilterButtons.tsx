@@ -1,135 +1,46 @@
-import * as React from "react";
-import {
-  Button,
-  ButtonGroup,
-  ClickAwayListener,
-  Grow,
-  Paper,
-  Popper,
-  MenuItem,
-  MenuList,
-} from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import React from 'react';
+import { Button, Menu, MenuItem } from '@mui/material';
 
 interface FilterButtonsProps {
   options: string[];
   defaultIndex?: number; // Optional prop for the default selected index
+  disabledOptions?: number[]; // Optional prop for disabled button indices
 }
 
 const FilterButtons: React.FC<FilterButtonsProps> = ({
   options,
   defaultIndex = 0, // Default to the first option if not provided
+  disabledOptions = [], // Default to no disabled options
 }) => {
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(defaultIndex);
 
-  const handleClick = () =>
-    console.info(`You clicked ${options[selectedIndex]}`);
-
-  const handleMenuItemClick = (
-    event: React.MouseEvent<HTMLLIElement>,
-    index: number
-  ) => {
-    setSelectedIndex(index);
-    setOpen(false);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleToggle = () => setOpen((prevOpen) => !prevOpen);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-  const handleClose = (event: Event) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    )
-      return;
-    setOpen(false);
+  const handleMenuItemClick = (index: number) => {
+    setSelectedIndex(index);
+    setAnchorEl(null);
   };
 
   return (
-    <>
-      <ButtonGroup
-        variant="outlined"
-        ref={anchorRef}
-        aria-label="Button group with a nested menu"
-        size="small"
-        disableElevation
-        sx={{
-          color: "#0F2043",
-          "& .MuiButton-root": {
-            color: "#0F2043",
-            borderColor: "#0F2043",
-            "&:hover": {
-              backgroundColor: "#DCE5F6",
-              // Change this to your desired hover color
-            },
-          },
-        }}
-        className="text-[#0F2043] [&_.MuiButton-root]:text-[#0F2043] [&_.MuiButton-root]:border-[#0F2043] [&_.MuiButton-root]:hover:bg-[#DCE5F6]"
-      >
-        <Button
-          onClick={handleClick}
-          sx={{ textTransform: "none" }}
-          className="normal-case"
-        >
-          {options[selectedIndex]}
-        </Button>
-        <Button
-          size="small"
-          aria-controls={open ? "split-button-menu" : undefined}
-          aria-expanded={open ? "true" : undefined}
-          aria-label="select merge strategy"
-          aria-haspopup="menu"
-          onClick={handleToggle}
-        >
-          <ArrowDropDownIcon />
-        </Button>
-      </ButtonGroup>
-      <Popper
-        sx={{ zIndex: 1300 }} // Ensure this value is higher than the table header
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-        className="z-[1300]"
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === "bottom" ? "center top" : "center bottom",
-            }}
-          >
-            <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="split-button-menu" autoFocusItem>
-                  {options.map((option, index) => (
-                    <MenuItem
-                      key={option}
-                      disabled={index === 0}
-                      selected={index === selectedIndex}
-                      onClick={(event) => handleMenuItemClick(event, index)}
-                      sx={{
-                        color: "#0F2043",
-                        "&:hover": {
-                          backgroundColor: "#DCE5F6",
-                          textTransform: "none",
-                        },
-                      }}
-                      className="text-[#0F2043] hover:bg-[#DCE5F6] normal-case"
-                    >
-                      {option}
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
-    </>
+    <div>
+      <Button variant="contained" onClick={handleClick}>
+        {options[selectedIndex]}
+      </Button>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+        {options.map((option, index) => (
+          <MenuItem key={option} selected={index === selectedIndex} onClick={() => handleMenuItemClick(index)}>
+            {option}
+          </MenuItem>
+        ))}
+      </Menu>
+    </div>
   );
 };
 

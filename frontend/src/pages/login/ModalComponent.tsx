@@ -6,18 +6,23 @@ import ForgotPIN from "./modals/ForgotPIN";
 import Verification from "./modals/Verification";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import axios from "axios";
+import AlertSnackbar from "../../components/AlertComponent";
 
 interface ModalViewProps {
   isModalOpen: boolean;
   currentView: string;
   handleCloseModal: () => void;
+
   selectedProfile: {
-    id: number;
+    user_id: number;
     name: string;
     role: string;
     image: string;
     email: string;
     phone: string;
+    pin: string;
+    isApproved: boolean;
   };
 }
 
@@ -34,7 +39,18 @@ const ModalView: React.FC<ModalViewProps> = ({
   );
   const navigate = useNavigate();
   const [currentViewState, setCurrentViewState] = useState<string>(currentView);
-  const correctPin = "1234";
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [severity, setSeverity] = useState<"success" | "error">("success");
+
+  const showAlert = (message: string, severity: "success" | "error") => {
+    setMessage(message);
+    setSeverity(severity);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -53,13 +69,38 @@ const ModalView: React.FC<ModalViewProps> = ({
         inputRefs[index - 1].current?.focus();
       }
 
-      if (updatedPinValues.join("") === correctPin) {
+      if (updatedPinValues.join("") === selectedProfile.pin) {
+        handleSendEmail();
         setCurrentViewState("verification"); // Show verification modal
       } else if (updatedPinValues.every((v) => v)) {
         setErrorIndexes([0, 1, 2, 3]);
       } else {
         setErrorIndexes([]);
       }
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!selectedProfile.email) {
+      console.log("Please enter your email address.");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/send-verification-email",
+        { to: selectedProfile.email }
+      );
+      console.log(response.data.message || "Email sent successfully!");
+      showAlert("Email sent successfully!", "success");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally {
     }
   };
 
@@ -91,8 +132,14 @@ const ModalView: React.FC<ModalViewProps> = ({
         return (
           <Verification
             method="email" // Optionally use method dynamically
+            user_id={selectedProfile.user_id} // Pass user_id
             email={selectedProfile.email} // Pass email
-            phone={selectedProfile.phone} // Pass phone
+            phone={selectedProfile.phone}
+            role={selectedProfile.role}
+            name={selectedProfile.name}
+            image={selectedProfile.image}
+            pin={selectedProfile.pin}
+            isApproved={selectedProfile.isApproved} // Pass phone
             handleCloseModal={handleCloseModal}
             isOpen={isModalOpen}
             onConfirm={() => {
@@ -153,8 +200,18 @@ const ModalView: React.FC<ModalViewProps> = ({
           </Box>
         </Box>
         {renderView()}
+        <AlertSnackbar
+  open={open}
+  message={message}
+  severity={severity}
+  onClose={handleClose}
+/>
+
+
       </Box>
+     
     </Modal>
+    
   );
 };
 

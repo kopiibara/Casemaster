@@ -9,10 +9,38 @@ import {
   Divider,
   Typography,
   Tooltip,
-  IconButton,
   TextField,
+  Snackbar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
-import { Reply, AttachFile, MailOutline, Cancel } from "@mui/icons-material";
+import {
+  Reply,
+  AttachFile,
+  MailOutline,
+  Cancel,
+  Description,
+  Download,
+  Visibility,
+} from "@mui/icons-material";
+import AttachmentModal from "./AttachmentModal";
+
+interface Reply {
+  id: number;
+  content: string;
+  time: string;
+}
+
+interface Attachment {
+  name: string;
+  size: string;
+  type: string;
+  url: string;
+  "@odata.mediaContentUrl"?: string; // Optional field for mediaContentUrl
+}
 
 interface EmailViewProps {
   sender: string;
@@ -20,18 +48,9 @@ interface EmailViewProps {
   timestamp: string;
   subject: string;
   content: string;
-  attachment?: {
-    name: string;
-    size: string;
-  };
-  replies?: Reply[]; // Add replies prop
-  onReply: (replyContent: string) => void; // Add onReply prop
-}
-
-interface Reply {
-  id: number;
-  content: string;
-  time: string;
+  attachments?: Attachment[]; // Updated to include the Attachment interface
+  replies?: Reply[];
+  onReply: (replyContent: string) => void;
 }
 
 const EmailView: React.FC<EmailViewProps> = ({
@@ -40,17 +59,72 @@ const EmailView: React.FC<EmailViewProps> = ({
   timestamp,
   subject,
   content,
-  attachment,
+  attachments,
   replies,
   onReply,
 }) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyContent, setReplyContent] = useState<string>("");
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAttachment, setSelectedAttachment] =
+    useState<Attachment | null>(null);
 
   const handleSendReply = () => {
     onReply(replyContent); // Call the parent handler
+    setShowSnackbar(true);
     setIsReplying(false);
     setReplyContent(""); // Reset reply editor
+  };
+
+  const handleDownload = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading attachment:", error);
+    }
+  };
+
+  const handleDownloadAll = () => {
+    if (attachments) {
+      attachments.forEach((attachment) => {
+        handleDownload(attachment.url, attachment.name);
+      });
+    }
+  };
+
+  const handleViewAttachment = (attachment: Attachment) => {
+    // Log the original URL (this is the URL you fetched for the attachment)
+    console.log("Original Attachment URL:", attachment.url);
+
+    // Check if the attachment has a URL and log accordingly
+    let validUrl = attachment.url;
+    if (!validUrl && attachment["@odata.mediaContentUrl"]) {
+      // Fallback to the mediaContentUrl if the regular URL is invalid
+      validUrl = attachment["@odata.mediaContentUrl"];
+      console.log("Using mediaContentUrl as fallback:", validUrl);
+    }
+
+    // Log the final URL that is being used
+    if (validUrl) {
+      console.log("Final Attachment URL:", validUrl);
+    } else {
+      console.error(
+        "Error: No valid URL found for attachment",
+        attachment.name
+      );
+    }
+
+    // Open the modal with the selected attachment
+    setSelectedAttachment(attachment);
+    setIsModalOpen(true);
   };
 
   return (
@@ -117,52 +191,64 @@ const EmailView: React.FC<EmailViewProps> = ({
           {subject || "No Subject"}
         </Typography>
 
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          paragraph
-          sx={{ lineHeight: 1.8 }}
-        >
+        <Box sx={{ lineHeight: 1.8 }}>
           {content
             ? content.split("\n\n").map((paragraph, index) => (
-                <Box key={index} mb={2}>
+                <Typography
+                  key={index}
+                  variant="body1"
+                  color="text.secondary"
+                  paragraph
+                >
                   {paragraph}
-                </Box>
+                </Typography>
               ))
             : "No content available for this email."}
-        </Typography>
+        </Box>
 
-        {/* Attachment Section */}
-        {attachment && (
-          <Box
-            mt={3}
-            p={2}
-            bgcolor="#f7f7f7"
-            borderRadius={2}
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Box display="flex" alignItems="center">
-              <AttachFile sx={{ mr: 2, color: "primary.main" }} />
-              <Box>
-                <Typography
-                  variant="body2"
-                  fontWeight={500}
-                  sx={{ wordBreak: "break-word" }}
-                >
-                  {attachment.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {attachment.size}
-                </Typography>
-              </Box>
-            </Box>
-            <Tooltip title="Download Attachment">
-              <IconButton color="primary">
-                <AttachFile />
-              </IconButton>
-            </Tooltip>
+        {/* Attachments Section */}
+        {attachments && attachments.length > 0 && (
+          <Box mt={3}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Attachments
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Download />}
+              onClick={handleDownloadAll}
+              sx={{ mb: 2 }}
+            >
+              Download All
+            </Button>
+            <List>
+              {attachments.map((attachment, index) => (
+                <ListItem key={index}>
+                  <ListItemIcon>
+                    <Description />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={attachment.name}
+                    secondary={`Size: ${attachment.size}, Type: ${attachment.type}`}
+                  />
+                  <IconButton
+                    edge="end"
+                    aria-label="view"
+                    onClick={() => handleViewAttachment(attachment)}
+                  >
+                    <Visibility />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="download"
+                    onClick={() =>
+                      handleDownload(attachment.url, attachment.name)
+                    }
+                  >
+                    <Download />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
           </Box>
         )}
 
@@ -173,8 +259,18 @@ const EmailView: React.FC<EmailViewProps> = ({
               Replies
             </Typography>
             {replies.map((reply) => (
-              <Box key={reply.id} mb={2} p={2} bgcolor="#f9f9f9" borderRadius={2}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Box
+                key={reply.id}
+                mb={2}
+                p={2}
+                bgcolor="#f9f9f9"
+                borderRadius={2}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
                   {reply.time}
                 </Typography>
                 <Typography variant="body1">{reply.content}</Typography>
@@ -248,6 +344,22 @@ const EmailView: React.FC<EmailViewProps> = ({
           </Box>
         </Box>
       )}
+
+      {/* Snackbar for Confirmation */}
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={3000}
+        message="Reply sent successfully!"
+        onClose={() => setShowSnackbar(false)}
+      />
+
+      {/* Modal for Attachment View */}
+      <AttachmentModal
+        open={isModalOpen}
+        attachments={selectedAttachment ? [selectedAttachment] : []}
+        selectedAttachment={selectedAttachment}
+        onClose={() => setIsModalOpen(false)}
+      />
     </Card>
   );
 };

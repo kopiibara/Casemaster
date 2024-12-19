@@ -1,8 +1,15 @@
 import { Box } from "@mui/system";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import FilterButtons from "../../components/FilterButtons";
-import TableComponent from "../../components/TableComponent";
-import { Button } from "@mui/material";
+import { Button, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material";
+
+interface Case {
+  case_no: string;
+  title: string;
+  deadline?: string; // Optional field
+  status?: string;   // Optional field
+}
 
 const CaseTracker: React.FC = () => {
   const CaseType = ["Case Type", "Civil Case", "Special Case", "Criminal Case"];
@@ -10,49 +17,52 @@ const CaseTracker: React.FC = () => {
   const Dates = ["Date", "Today", "Yesterday", "Last 7 days", "Last 30 days"];
 
   const tableHeadData = ["Case No.", "Title", "Deadline", "Status"];
-  const tableBodyData = [
-    {
-      "Case No.": 12345,
-      Title: "PRESIDENT MARCOS VS VP SARAH DUTERTE",
-      Deadline: "2024-12-10",
-      Status: "Active",
-    },
-    {
-      "Case No.": 67890,
-      Title: "CITIZEN VS GOVERNMENT",
-      Deadline: "2024-12-15",
-      Status: "Closed",
-    },
-    {
-      "Case No.": 24680,
-      Title: "GOVERNMENT VS CITIZEN",
-      Deadline: "2024-12-20",
-      Status: "New",
-    },
-    {
-      "Case No.": 13579,
-      Title: "VP LENI ROBREDO VS SENATOR PACQUIAO",
-      Deadline: "2024-12-25",
-      Status: "Appealed",
-    },
-    {
-      "Case No.": 10101,
-      Title: "SENATOR PACQUIAO VS VP LENI ROBREDO",
-      Deadline: "2024-12-30",
-      Status: "Archived",
-    },
-  ];
 
-  const popoverContent = (
-    <Box style={{ padding: "1rem" }}>
-      <p>Additional options and actions can be placed here.</p>
-    </Box>
-  );
+  const [cases, setCases] = useState<Case[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  const fetchCases = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const response = await axios.get("http://localhost:3000/api/get-case-tracker");
+      console.log("Fetched cases:", response.data); // Log the response data
+      setCases(response.data || []);
+    } catch (error) {
+      console.error("Failed to fetch cases:", error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCases();
+  }, []);
 
   const handleAddCase = () => {
     console.log("Add New Case button clicked");
     // Add your logic here
   };
+
+  if (isLoading) {
+    return <Box>Loading...</Box>; // Display loading text while data is being fetched
+  }
+
+  if (isError) {
+    return <Box>Failed to load case data.</Box>; // Display error message if data fetch fails
+  }
+
+  // Transform cases to match the expected format for tableBodyData
+  const tableBodyData = cases.map((caseItem) => ({
+    caseNo: caseItem.case_no,
+    title: caseItem.title,
+    deadline: caseItem.deadline || "N/A", // Default value if deadline is not available
+    status: caseItem.status || "N/A",     // Default value if status is not available
+  }));
+
+  console.log("Transformed tableBodyData:", tableBodyData);
 
   return (
     <Box sx={{ marginX: 3, marginTop: 1 }}>
@@ -81,11 +91,25 @@ const CaseTracker: React.FC = () => {
       </Box>
 
       {/* Table */}
-      <TableComponent
-        tableHeadData={tableHeadData}
-        tableBodyData={tableBodyData}
-        popoverContent={popoverContent}
-      />
+      <Table>
+        <TableHead>
+          <TableRow>
+            {tableHeadData.map((head, index) => (
+              <TableCell key={index}>{head}</TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {tableBodyData.map((row, index) => (
+            <TableRow key={index}>
+              <TableCell>{row.caseNo}</TableCell>
+              <TableCell>{row.title}</TableCell>
+              <TableCell>{row.deadline}</TableCell>
+              <TableCell>{row.status}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </Box>
   );
 };

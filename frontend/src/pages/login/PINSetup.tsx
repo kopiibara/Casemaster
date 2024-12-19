@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import { Box } from "@mui/material";
 import { useAppContext } from "../../AppContext";
 import axios from "axios";
+import AlertSnackbar from "../../components/AlertComponent";
 
 const PINSetUp = () => {
   const navigate = useNavigate();
@@ -19,26 +20,44 @@ const PINSetUp = () => {
   const [showPin, setShowPin] = useState(true);
   const [pinValues, setPinValues] = useState(["", "", "", ""]);
   const [errorIndexes, setErrorIndexes] = useState<number[]>([]);
-  const [currentView, setCurrentView] = useState<"set-pin" | "confirm-pin">(
-    "set-pin"
-  );
+  const [currentView, setCurrentView] = useState<"set-pin" | "confirm-pin">("set-pin");
   const [setPin, setSetPin] = useState<string>("");
   const { profileData } = useAppContext();
-  const { fullName, email, phoneNo, image } = profileData;
-  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); // State to store the object URL for the image
+  const { fullName, email, phoneNo, image, role, isApproved } = profileData;
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined); 
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState<"success" | "error">("success");
+  const [isRemoved, setIsRemoved] = useState<string>("0");
+
+  // Function to show alert
+  const showAlert = (message: string, severity: "success" | "error") => {
+    setMessage(message);
+    setSeverity(severity);
+    setOpen(true);
+  };
+
+  const userEmail = localStorage.getItem("userEmail");
+  if (userEmail) {
+    console.log("Retrieved User Email:", userEmail);
+  } else {
+    console.error("No user email found in localStorage.");
+  }
 
   useEffect(() => {
     if (image) {
-      // If there's an image (Blob or File), create an object URL to display
       const objectURL = URL.createObjectURL(image);
       setImageUrl(objectURL);
 
-      // Cleanup the object URL when the component is unmounted or image changes
       return () => {
         URL.revokeObjectURL(objectURL);
       };
     }
   }, [image]);
+
+  useEffect(() => {
+    console.log(profileData);  // Check if fullName is properly populated
+  }, [profileData]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -80,9 +99,8 @@ const PINSetUp = () => {
     } else if (currentView === "confirm-pin") {
       const enteredPin = pinValues.join("");
       if (enteredPin === setPin) {
-        navigate("/Dashboard/dashboard");
-        //handleCreateProfile();
-        //setPinValues(["", "", "", ""]); // Reset here after successful profile creation
+        handleSubmitProfile();
+        setPinValues(["", "", "", ""]); // Reset here after successful profile creation
       } else {
         setErrorIndexes([0, 1, 2, 3]);
         setTimeout(() => {
@@ -93,27 +111,36 @@ const PINSetUp = () => {
     }
   };
 
-  const handleCreateProfile = async () => {
+  const handleSubmitProfile = async () => {
     const formData = new FormData();
     formData.append("name", fullName);
     formData.append("email", email);
     formData.append("phone", phoneNo);
-    formData.append("role", "Staff");
     if (image) {
-      formData.append("image", image);
+      formData.append("image", image); // Add image file to form data
     }
-    formData.append("pin", setPin); // Use setPin instead of pinValues.join("")
-    console.log(setPin);
+    formData.append("role", role);
+    formData.append("pin", pinValues.join(""));
+    formData.append("isApproved", String(isApproved));
+    formData.append("isRemoved", isRemoved);
+
     try {
-      const response = await axios.post(
-        "http://localhost:3304/api/save-profile",
-        formData
-      );
-      console.log(response.data);
-      navigate("/profile-selection");
-    } catch (error) {
-      console.error("Error:", error);
+      const response = await axios.post("http://localhost:3000/api/users", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      showAlert("Profile setup successful!", "success");
+      console.log("Profile setup successful", response.data);
+      navigate("/profiles");
+    } catch (err) {
+      console.error("Error uploading profile", err);
+      showAlert("Error during profile setup. Please try again.", "error");
     }
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
@@ -173,7 +200,6 @@ const PINSetUp = () => {
             : "Please re-enter your PIN to continue."}
         </p>
       </Box>
-
       {/* PIN Input Fields */}
       <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
         {inputRefs.map((ref, index) => (
@@ -201,8 +227,7 @@ const PINSetUp = () => {
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
                 height: "5.5rem",
-                backgroundColor:
-                  pinValues[index] !== "" ? "#517FD3" : "transparent",
+                backgroundColor: pinValues[index] !== "" ? "#517FD3" : "transparent",
                 "& fieldset": {
                   borderColor: errorIndexes.includes(index)
                     ? "#D32F2F" // Red border for errors
@@ -212,8 +237,7 @@ const PINSetUp = () => {
                   transition: "border-color 0.3s ease-in-out", // Smooth border color transition
                 },
                 "&:hover fieldset": {
-                  borderColor:
-                    pinValues[index] === "" ? "rgba(0,0,0,0.2)" : "#517FD3",
+                  borderColor: pinValues[index] === "" ? "rgba(0,0,0,0.2)" : "#517FD3",
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: errorIndexes.includes(index)
@@ -238,8 +262,6 @@ const PINSetUp = () => {
             }}
           />
         ))}
-        <p>{profileData.email}</p>
-        <img src={imageUrl} alt="Profile" width="100" height="100" />
       </Box>
 
       {/* Confirm Button */}
@@ -261,6 +283,13 @@ const PINSetUp = () => {
           Confirm
         </Button>
       </Box>
+
+      <AlertSnackbar
+        open={open}
+        message={message}
+        severity={severity}
+        onClose={handleClose}
+      />
     </Box>
   );
 };
