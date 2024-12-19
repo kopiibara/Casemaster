@@ -5,6 +5,8 @@ import { Box, Typography, TextField, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../../AppContext";
 import axios from "axios";
+import AlertSnackbar from "../../../components/AlertComponent";
+
 
 const ConfirmExistingProfile = () => {
   const [verificationMethod, setVerificationMethod] = useState("email");
@@ -12,6 +14,19 @@ const ConfirmExistingProfile = () => {
   const { profileData } = useAppContext();
   const [code, setCode] = useState("");
  const [id, setId] = useState<number>(0);
+ const [open, setOpen] = useState(false);
+ const [message, setMessage] = useState("");
+ const [severity, setSeverity] = useState<"success" | "error">("success");
+
+const showAlert = (message: string, severity: "success" | "error") => {
+ setMessage(message);
+ setSeverity(severity);
+ setOpen(true);
+};
+const handleClose = () => {
+  setOpen(false);
+  console.log("Closed");
+};
 
   const handleSwitchMethod = () => {
     setVerificationMethod((prev) => (prev === "email" ? "phone" : "email"));
@@ -20,6 +35,9 @@ const ConfirmExistingProfile = () => {
   useEffect(() => {
     setId(profileData.id || 0);
     console.log(profileData.id);
+
+    showAlert("Email Verification sent", "success");
+
   });
 
 
@@ -63,7 +81,7 @@ const ConfirmExistingProfile = () => {
           An email with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>(t*****@gmail.com).</strong>
+          was just sent to <strong>({profileData.email}).</strong>
         </Typography>
       </>
     ) : (
@@ -72,7 +90,7 @@ const ConfirmExistingProfile = () => {
           An SMS with a 6-digit verification code
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          was just sent to <strong>(+123 ** 5678).</strong>
+          was just sent to <strong>(+{profileData.phoneNo}).</strong>
         </Typography>
       </>
     );
@@ -222,6 +240,12 @@ const ConfirmExistingProfile = () => {
           </Box>
         </Box>
       </Stack>
+      <AlertSnackbar
+  open={open}
+  message={message}
+  severity={severity}
+  onClose={handleClose}
+/>
     </Box>
   );
 };

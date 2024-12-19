@@ -24,8 +24,12 @@ const EnterPin: React.FC<EnterPinProps> = ({
   inputRefs,
   handleInputChange,
   setCurrentView,
+
+
   
 }) => (
+
+  
   <>
     {/* Loading Screen for Unapproved Accounts */}
     <Backdrop

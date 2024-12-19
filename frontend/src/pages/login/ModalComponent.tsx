@@ -7,6 +7,7 @@ import Verification from "./modals/Verification";
 import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
+import AlertSnackbar from "../../components/AlertComponent";
 
 interface ModalViewProps {
   isModalOpen: boolean;
@@ -38,6 +39,18 @@ const ModalView: React.FC<ModalViewProps> = ({
   );
   const navigate = useNavigate();
   const [currentViewState, setCurrentViewState] = useState<string>(currentView);
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [severity, setSeverity] = useState<"success" | "error">("success");
+
+  const showAlert = (message: string, severity: "success" | "error") => {
+    setMessage(message);
+    setSeverity(severity);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -78,6 +91,7 @@ const ModalView: React.FC<ModalViewProps> = ({
         { to: selectedProfile.email }
       );
       console.log(response.data.message || "Email sent successfully!");
+      showAlert("Email sent successfully!", "success");
     } catch (err: any) {
       if (err.response) {
         console.log(err.response.data.error || "Failed to send email.");
@@ -186,8 +200,18 @@ const ModalView: React.FC<ModalViewProps> = ({
           </Box>
         </Box>
         {renderView()}
+        <AlertSnackbar
+  open={open}
+  message={message}
+  severity={severity}
+  onClose={handleClose}
+/>
+
+
       </Box>
+     
     </Modal>
+    
   );
 };
 

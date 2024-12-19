@@ -9,6 +9,7 @@ import emailRoutes from "./routes/emailRoutes";
 import smsRoutes from "./routes/smsRoutes";
 import caselogsRoutes from "./routes/caselogs";
 import { UploadedFile } from "express-fileupload";
+import caseTracker from "./routes/casetrackerRoutes";
 
 dotenv.config({ path: path.resolve(__dirname, "./config/.env") });
 
@@ -36,6 +37,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true })); // Replaces body
 app.use("/api", profileRoutes);
 app.use("/api", emailRoutes);
 app.use("/api", smsRoutes);
+app.use("/api", caseTracker);
 
 
 app.use(fileUpload());

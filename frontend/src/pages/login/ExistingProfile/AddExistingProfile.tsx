@@ -8,7 +8,7 @@ const AddExistingProfile = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/profile-selection");
   };
 
   const loginExistingProfile = () => {

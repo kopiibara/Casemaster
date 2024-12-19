@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import axios from "axios";
 import { useAppContext } from "../../../AppContext";
+import AlertSnackbar from "../../../components/AlertComponent";
 
 interface Profile {
   user_id: number;
@@ -24,6 +25,18 @@ const LoginExistingProfile = () => {
     const [inputEmail, setInputEmail] = useState<string>("");
     const [emailExists, setEmailExists] = useState<boolean | null>(null);
    const { setProfileData } = useAppContext();
+       const [open, setOpen] = useState(false);
+       const [message, setMessage] = useState("");
+       const [severity, setSeverity] = useState<"success" | "error">("success");
+   
+     const showAlert = (message: string, severity: "success" | "error") => {
+       setMessage(message);
+       setSeverity(severity);
+       setOpen(true);
+     };
+     const handleClose = () => {
+       setOpen(false);
+     };
 
     useEffect(() => {
       const fetchProfiles = async () => {
@@ -78,7 +91,7 @@ const LoginExistingProfile = () => {
         isApproved: matchedProfile.isApproved,
         pin: matchedProfile.pin,
       });
-
+      
       // Navigate to the next page (password page or similar)
       navigate("/existing-profile-pin");
     } else {
@@ -208,6 +221,12 @@ const LoginExistingProfile = () => {
           </Button>
         </Box>
       </Box>
+      <AlertSnackbar
+  open={open}
+  message={message}
+  severity={severity}
+  onClose={handleClose}
+/>
     </Box>
   );
 };

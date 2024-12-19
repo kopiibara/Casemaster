@@ -31,6 +31,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
+
   const handleChangePin = () => {
     const newPin = newPinRef.current?.value;
     const verifyPin = verifyPinRef.current?.value;
@@ -176,7 +177,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({
         <Box className="flex justify-between items-center w-full mt-3">
           <Box className="mt-4">
             <p className="flex justify-center items-start flex-col">
-              <span className="tracking-tight text-[#517FD3] cursor-pointer text-xs">
+              <span className="tracking-tight text-[#517FD3] cursor-pointer text-xs" onClick={handleSendEmail}>
                 Resend Code
               </span>
               <span
