@@ -19,11 +19,19 @@ const DeadlineCard = ({ title, dueDate }: DeadlineCardProps) => (
     }}
   >
     {/* Deadline Content */}
-    <Stack spacing={1} className="flex justify-start items-start">
-      <Typography variant="subtitle1" className="text-[#0F2043]">
+    <Stack spacing={1} className="flex ">
+      <Typography
+        variant="subtitle1"
+        className="text-[#0F2043] text-start "
+        sx={{ textTransform: "none" }}
+      >
         {title}
       </Typography>
-      <Typography variant="body2" className="text-[#878FA1]">
+      <Typography
+        variant="body2"
+        className="text-[#878FA1] text-start"
+        sx={{ textTransform: "none" }}
+      >
         {dueDate}
       </Typography>
     </Stack>
@@ -35,7 +43,7 @@ interface NotesProps {
 }
 
 const Deadline = ({ deadlines }: NotesProps) => {
-  const Dates = ["Today", "Yesterday", "This Week", "Last Week"];
+  const Dates = ["Today", "Yesterday"];
 
   return (
     <Box className="flex flex-col w-full">

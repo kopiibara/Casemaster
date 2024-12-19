@@ -5,10 +5,14 @@ import axios from "axios"; // Import axios
 import { format } from "date-fns"; // Import date-fns for date formatting
 
 interface SystemLogsProps {
-  showHeader?: boolean; // Optional prop to conditionally render the header
+  showHeader?: boolean;
+  userId?: number; // Make userId optional
 }
 
-export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
+export default function SystemLogs({
+  showHeader = true,
+  userId,
+}: SystemLogsProps) {
   // State to hold rows data
   const [rows, setRows] = React.useState<any[]>([]); // We use 'any' type to allow flexibility
   const [loading, setLoading] = React.useState<boolean>(true); // Loading state
@@ -17,32 +21,36 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
   React.useEffect(() => {
     const fetchSystemLogs = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/auditlogs'); 
+        const response = await axios.get("http://localhost:3000/api/auditlogs");
         // Format the action_date before setting the rows
         const formattedData = response.data.map((log: any) => ({
           ...log,
-          action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"), // Format the date
+          action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"),
         }));
-        setRows(formattedData); 
+        setRows(formattedData);
       } catch (err) {
         setError("Failed to fetch system logs");
         console.error(err);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
-    fetchSystemLogs(); 
-  }, []); 
+    fetchSystemLogs();
+  }, []);
 
   const columns = [
-    { id: "action_date", label: "Date", mWidth: 50 },  // Map to 'action_date' // Map to 'audit_id'
-    { id: "action", label: "Action", minWidth: 100 },   // Map to 'action'
+    { id: "action_date", label: "Date", mWidth: 50 }, // Map to 'action_date' // Map to 'audit_id'
+    { id: "action", label: "Action", minWidth: 100 }, // Map to 'action'
   ];
 
   if (loading) {
     return (
-      <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
+      <Stack
+        spacing={3}
+        className="px-6"
+        sx={{ maxWidth: "500px", maxHeight: "600px" }}
+      >
         <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
           Loading system logs...
         </Typography>
@@ -52,7 +60,11 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
 
   if (error) {
     return (
-      <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
+      <Stack
+        spacing={3}
+        className="px-6"
+        sx={{ maxWidth: "500px", maxHeight: "600px" }}
+      >
         <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
           {error}
         </Typography>
@@ -61,12 +73,20 @@ export default function SystemLogs({ showHeader = true }: SystemLogsProps) {
   }
 
   return (
-    <Stack spacing={3} className="px-6" sx={{ maxWidth: "500px", maxHeight: "600px" }}>
+    <Stack
+      spacing={3}
+      className="px-6"
+      sx={{ maxWidth: "500px", maxHeight: "600px" }}
+    >
       {showHeader && (
         <Box>
           {/* Header */}
           <Stack>
-            <Typography variant="h6" fontWeight={"bold"} sx={{ color: "#0F2043" }}>
+            <Typography
+              variant="h6"
+              fontWeight={"bold"}
+              sx={{ color: "#0F2043" }}
+            >
               System Logs
             </Typography>
             <Typography variant="subtitle2" sx={{ color: "#0F2043" }}>

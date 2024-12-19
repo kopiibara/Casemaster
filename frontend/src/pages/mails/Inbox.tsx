@@ -13,7 +13,7 @@ const Inbox = () => {
   };
 
   return (
-    <Box sx={{ marginX: 3, marginY: 2 }}>
+    <Box sx={{ marginX: 3, marginY: 2, width: "100%" }}>
       <Stack spacing={2}>
         {/* Filter Buttons */}
         <MailsFilterButtons

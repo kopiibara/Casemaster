@@ -18,6 +18,7 @@ import StaffManagementPage from "./modals/StaffManagement";
 import SystemLogsPage from "./modals/SystemLogs";
 
 // Icons
+import CloseIcon from "@mui/icons-material/Close";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
@@ -224,7 +225,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ open, onClose }) => {
             >
               <Box flexGrow={1} />
               <IconButton onClick={onClose}>
-                <CancelOutlinedIcon className="text-[#517FD3]" />
+                <CloseIcon className="text-[#808080]" />
               </IconButton>
             </Stack>
             {selectedItem === "Profile" && <ProfilePage />}

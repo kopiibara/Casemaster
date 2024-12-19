@@ -39,9 +39,16 @@ const Dashboard: React.FC = () => {
   ];
 
   const deadlineData = [
-    { title: "MALAPITAN VS TRILLANES", dueDate: "Due 3 days left" },
-    { title: "PROJECT A DEADLINE", dueDate: "Due 1 week left" },
-    { title: "REVIEW EXAM", dueDate: "Due 5 days left" },
+    {
+      id: "Today",
+      title: "Cancellation of Encumbrance",
+      dueDate: "Due 3 days left",
+    },
+    {
+      id: "Yesterday",
+      title: "Issuance of Owner's Duplicate Title",
+      dueDate: "Due 3 days left",
+    },
   ];
 
   return (

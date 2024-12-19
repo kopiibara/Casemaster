@@ -20,12 +20,21 @@ import StatusIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 // Props for the EditCase component
 interface EditCaseProps {
   onClose: () => void;
+  caseData: { [key: string]: string | null } | null;
 }
 
-const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
+const EditCase: React.FC<EditCaseProps> = ({ onClose, caseData }) => {
   // Local state to manage the editable fields
   const [editableData, setEditableData] = useState<any>({});
   const [attachment, setAttachment] = useState<File | null>(null);
+
+  // Populate state when caseData is passed
+  useEffect(() => {
+    if (caseData) {
+      console.log(caseData); // Check if caseData is passed correctly
+      setEditableData(caseData);
+    }
+  }, [caseData]);
 
   // Handle input changes and update the editableData state
   const handleInputChange = (key: string, value: string) => {
@@ -102,6 +111,10 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <CaseNoIcon className="w-20 text-[#8992A3]" />
                   <TextField
                     label="Case No."
+                    value={editableData.case_no || ""}
+                    onChange={(e) =>
+                      handleInputChange("case_no", e.target.value)
+                    }
                     fullWidth
                     size="small"
                     variant="outlined"
@@ -118,6 +131,8 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <TextField
                     size="small"
                     label="Title"
+                    value={editableData.title || ""}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
                     fullWidth
                     variant="outlined"
                   />
@@ -133,6 +148,10 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <TextField
                     label="Party Filer"
                     size="small"
+                    value={editableData.party_filer || ""}
+                    onChange={(e) =>
+                      handleInputChange("party_filer", e.target.value)
+                    }
                     fullWidth
                     variant="outlined"
                   />
@@ -148,6 +167,10 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <TextField
                     label="Document Type"
                     size="small"
+                    value={editableData.case_type || ""}
+                    onChange={(e) =>
+                      handleInputChange("case_type", e.target.value)
+                    }
                     fullWidth
                     variant="outlined"
                   />
@@ -196,6 +219,8 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <TextField
                     label="Tag"
                     size="small"
+                    value={editableData.tag || ""}
+                    onChange={(e) => handleInputChange("tag", e.target.value)}
                     fullWidth
                     variant="outlined"
                   />
@@ -211,6 +236,10 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
                   <TextField
                     label="Status"
                     size="small"
+                    value={editableData.status || ""}
+                    onChange={(e) =>
+                      handleInputChange("status", e.target.value)
+                    }
                     fullWidth
                     variant="outlined"
                   />
@@ -270,4 +299,4 @@ const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
   );
 };
 
-export default AddNewCase;
+export default EditCase;

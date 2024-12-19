@@ -4,6 +4,7 @@ import db from "../config/db";
 import { google } from "googleapis";
 import axios from "axios";
 import dotenv from "dotenv"; // Import dotenv module
+import { RowDataPacket, OkPacket } from "mysql2";
 
 dotenv.config(); // Load .env file
 
@@ -17,45 +18,113 @@ const auth = new google.auth.GoogleAuth({
 
 const drive = google.drive({ version: "v3", auth });
 
-// Endpoint to insert a new case log
-router.post("/caselogs", (req: Request, res: Response) => {
-  const { caseNo, caseTitle, partyFiler, caseType, tags, file_url, file_name } =
-    req.body;
+// Endpoint to get all case logs with source = 'Email'
 
-  if (
-    !caseNo ||
-    !caseTitle ||
-    !partyFiler ||
-    !caseType ||
-    !file_url ||
-    !file_name
-  ) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
-
+// Endpoint to get all case logs with source = 'Email'
+router.get("/caselogs", (req: Request, res: Response) => {
   const sql = `
-        INSERT INTO caselogs (case_no, title, party_filer, case_type, tag, status, file_url, file_name)
-        VALUES (?, ?, ?, ?, ?, 'New', ?, ?)
-      `;
-  const values = [
-    caseNo,
-    caseTitle,
-    partyFiler,
-    caseType,
-    tags.join(", "),
-    file_url,
-    file_name,
-  ];
+    SELECT id, case_no, title, date_added, status, source
+    FROM caselogs
+    WHERE source = 'Email'
+  `;
 
-  db.query(sql, values, (err, results) => {
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Database query error:", err);
+      res.status(500).json({ error: "Failed to fetch case logs" });
+      return;
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+// Endpoint to get all case logs with source = 'Email'
+router.get("/manual", (req: Request, res: Response) => {
+  const sql = `
+    SELECT id, case_no, title, date_added, status, source
+    FROM caselogs
+    WHERE source = 'Manual'
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Database query error:", err);
+      res.status(500).json({ error: "Failed to fetch case logs" });
+      return;
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+router.get("/caselogs/:id", (req: Request, res: Response) => {
+  const { id } = req.params; // Get the ID from the request params
+
+  // Query to fetch the case log by ID
+  const sql =
+    "SELECT id, case_no, title, date_added, status, source FROM caselogs WHERE id = ?";
+
+  db.query(sql, [id], (err, results: any) => {
+    if (err) {
+      console.error("Database error:", err);
+      res.status(500).json({ error: "Failed to fetch case log by ID" });
+      return;
+    }
+
+    if (results.length > 0) {
+      // Case log found, return it
+      res.status(200).json(results[0]); // Returning the first result (since we're fetching by ID, there should only be one result)
+    } else {
+      // Case log with the specified ID does not exist
+      res.status(404).json({ error: "Case log not found" });
+    }
+  });
+});
+
+router.get("/caselogs/:id", (req: Request, res: Response) => {
+  const { case_no, title, party_filer, case_type, file_url, tag, status, id } =
+    req.body;
+  // Query to fetch the case log by ID
+  const sql =
+    "SELECT id, case_no, title, date_added, status, source FROM caselogs WHERE id = ?";
+
+  db.query(sql, [id], (err, results: any) => {
+    if (err) {
+      console.error("Database error:", err);
+      res.status(500).json({ error: "Failed to fetch case log by ID" });
+      return;
+    }
+
+    if (results.length > 0) {
+      // Case log found, return it
+      res.status(200).json(results[0]); // Returning the first result (since we're fetching by ID, there should only be one result)
+    } else {
+      // Case log with the specified ID does not exist
+      res.status(404).json({ error: "Case log not found" });
+    }
+  });
+});
+
+router.get("/check-case-existence/:caseNo", (req: Request, res: Response) => {
+  const { caseNo } = req.params; // Get the caseNo from the request params
+
+  // Query to check if the case number exists in the database
+  const sql = "SELECT 1 FROM caselogs WHERE case_no = ?";
+  db.query(sql, [caseNo], (err, results: any) => {
     if (err) {
       console.error(err);
       res.status(500).json({ error: "Database error" });
       return;
     }
 
-    res.status(201).json({ message: "Case log added successfully" });
+    if (results.length > 0) {
+      // Case number exists
+      res.status(200).json({ exists: true });
+    } else {
+      // Case number does not exist
+      res.status(200).json({ exists: false });
+    }
   });
 });
 

@@ -11,7 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { Stack, Typography, Skeleton } from "@mui/material";  // Import Skeleton
+import { Stack, Typography, Skeleton } from "@mui/material"; // Import Skeleton
 import StaffPersonalDetails from "./StaffPersonalDetails"; // Assuming this is your component
 import axios from "axios";
 import { useEffect } from "react";
@@ -21,7 +21,7 @@ interface EmployeeProfile {
   user_id: number;
   name: string;
   role: string;
-  image: string; 
+  image: string;
   email: string;
   phone: string;
   pin: string;
@@ -29,7 +29,10 @@ interface EmployeeProfile {
 }
 
 // Status mapping for Chip colors
-const statusColors: Record<string, "default" | "success" | "warning" | "error"> = {
+const statusColors: Record<
+  string,
+  "default" | "success" | "warning" | "error"
+> = {
   Active: "success",
   Inactive: "default",
   Pending: "warning",
@@ -37,9 +40,10 @@ const statusColors: Record<string, "default" | "success" | "warning" | "error"> 
 
 const DirectoryTable: React.FC = () => {
   const [open, setOpen] = React.useState(false);
-  const [selectedStaff, setSelectedStaff] = React.useState<EmployeeProfile | null>(null);
+  const [selectedStaff, setSelectedStaff] =
+    React.useState<EmployeeProfile | null>(null);
   const [profilesData, setProfilesData] = React.useState<EmployeeProfile[]>([]);
-  const [loading, setLoading] = React.useState<boolean>(true);  // Add loading state
+  const [loading, setLoading] = React.useState<boolean>(true); // Add loading state
 
   // Open dialog with selected Employee details
   const handleOpenDialog = (profile: EmployeeProfile) => {
@@ -56,18 +60,22 @@ const DirectoryTable: React.FC = () => {
   // Fetch profiles data from the API
   const fetchProfiles = async () => {
     try {
-      setLoading(true);  // Set loading to true while fetching data
-      const response = await axios.get('http://localhost:3000/api/get-profiles');
-      const profilesWithValidImages = response.data.map((profile: EmployeeProfile) => ({
-        ...profile,
-        image: profile.image || 'path/to/default/image.jpg', // Replace with your default image path
-      }));
+      setLoading(true); // Set loading to true while fetching data
+      const response = await axios.get(
+        "http://localhost:3000/api/get-profiles"
+      );
+      const profilesWithValidImages = response.data.map(
+        (profile: EmployeeProfile) => ({
+          ...profile,
+          image: profile.image || "path/to/default/image.jpg", // Replace with your default image path
+        })
+      );
       setProfilesData(profilesWithValidImages);
-      setLoading(false);  // Set loading to false once data is fetched
+      setLoading(false); // Set loading to false once data is fetched
       console.log(profilesWithValidImages);
     } catch (error) {
       console.error("Failed to fetch profiles", error);
-      setLoading(false);  // Set loading to false if an error occurs
+      setLoading(false); // Set loading to false if an error occurs
     }
   };
 
@@ -77,13 +85,13 @@ const DirectoryTable: React.FC = () => {
   }, []);
 
   const handleStatusChange = () => {
-    fetchProfiles();  // Re-fetch profiles to update the status in the table
+    fetchProfiles(); // Re-fetch profiles to update the status in the table
   };
 
   return (
     <>
       <TableContainer component={Paper}>
-        {loading ? (  // If loading, show the skeleton
+        {loading ? ( // If loading, show the skeleton
           <Skeleton variant="rectangular" width="100%" height={400} />
         ) : (
           <Table sx={{ maxWidth: "full" }} aria-label="directory table">
@@ -93,7 +101,10 @@ const DirectoryTable: React.FC = () => {
                 <TableCell align="left" sx={{ fontWeight: "bold" }}>
                   Status
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}></TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ fontWeight: "bold" }}
+                ></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -106,7 +117,9 @@ const DirectoryTable: React.FC = () => {
                   <TableCell>
                     <Stack direction="row" alignItems="center" spacing={2}>
                       <Avatar alt={profile.name} src={profile.image} />
-                      <Typography variant="subtitle2">{profile.name}</Typography>
+                      <Typography variant="subtitle2">
+                        {profile.name}
+                      </Typography>
                     </Stack>
                   </TableCell>
                   <TableCell align="left">

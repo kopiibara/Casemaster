@@ -58,6 +58,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
     caseTitle: "",
     partyFiler: "",
     caseType: "",
+    tags: "", // Added tags to error state
   });
 
   useEffect(() => {
@@ -71,22 +72,57 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
       .catch((error) => console.error("Error fetching tags:", error));
   }, []);
 
-  const validateFields = () => {
-    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/;
+  // Function to check if the case number exists by making an API call
+  const checkCaseNoExists = async (caseNo: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/check-case-existence/${caseNo}`
+      );
+      return response.data.exists; // Assuming the response contains { exists: true } or { exists: false }
+    } catch (error) {
+      console.error("Error checking case existence:", error);
+      return false; // If the API fails, assume the case number doesn't exist
+    }
+  };
+
+  const validateFields = async () => {
+    const caseNoRegex = /^[0-9]+(-[0-9]+)?$/; // Case No. can have numbers and hyphens
+    const nonNumbersRegex = /^(?!\d+$).+/; // Allows numbers but not numbers only
+
+    // Define the newErrors object and include the 'tags' field
     const newErrors = {
       caseNo: caseNoRegex.test(caseNo) ? "" : "Invalid Case No. format.",
-      caseTitle: caseTitle.trim() ? "" : "Case Title is required.",
-      partyFiler: partyFiler.trim() ? "" : "Party Filer is required.",
+      caseTitle: nonNumbersRegex.test(caseTitle.trim())
+        ? ""
+        : "Case Title cannot be numbers only.",
+      partyFiler: nonNumbersRegex.test(partyFiler.trim())
+        ? ""
+        : "Party Filer cannot be numbers only.",
       caseType: caseType ? "" : "Case Type is required.",
+      tags: tags.length > 0 ? "" : "Tags are required.", // Ensure tags are validated
     };
 
+    // Check if the Case No. already exists
+    const caseExists = await checkCaseNoExists(caseNo);
+    if (caseExists) {
+      if (!tags.length) {
+        newErrors.tags = "Tags are required for an existing Case No."; // Handle case for missing tags
+      }
+    }
+
+    // Update the errors state
     setErrors(newErrors);
 
+    // Return whether all fields are valid
     return Object.values(newErrors).every((err) => err === "");
   };
 
   const handleSave = async () => {
-    if (!validateFields() || !currentAttachment) return;
+    // Perform validation first
+    if (!(await validateFields()) || !currentAttachment) {
+      setErrorMessage("Please correct the highlighted errors.");
+      return; // Exit early if validation fails
+    }
 
     try {
       // Step 1: Upload the file to Google Drive
@@ -112,7 +148,7 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
         caseTitle,
         partyFiler,
         caseType,
-        tags,
+        tags, // Now this is correctly typed
         file_url: webContentLink, // Add the Google Drive file URL
         file_name: currentAttachment.name, // Include file name
       };
@@ -156,222 +192,274 @@ const AttachmentModal: React.FC<AttachmentModalProps> = ({
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: "80%",
-          height: "80%",
-          margin: "auto",
-          marginTop: "5%",
-          backgroundColor: "white",
-          boxShadow: 24,
-          borderRadius: 2,
-          p: 4,
-          overflow: "hidden",
-        }}
-      >
-        {/* Left Side - Form */}
+    <>
+      <Modal open={open} onClose={onClose}>
         <Box
-          sx={{ width: "30%", borderRight: "1px solid #ddd", paddingRight: 2 }}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            width: "80%",
+            height: "80%",
+            maxHeight: "100vh",
+            margin: "auto",
+            marginTop: "5%",
+            backgroundColor: "white",
+            boxShadow: 24,
+            borderRadius: 2,
+            p: 4,
+          }}
         >
+          {/* Left Side - Form */}
           <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{
+              width: "30%",
+              borderRight: "1px solid #ddd",
+              paddingRight: 2,
+            }}
           >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Import to Case Logs
-            </Typography>
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ my: 2 }} />
-          <Box component="form" noValidate autoComplete="off" sx={{ my: 2 }}>
-            <TextField
-              label="Case No."
-              required
-              fullWidth
-              value={caseNo}
-              onChange={(e) => setCaseNo(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.caseNo}
-              helperText={errors.caseNo}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Case Title"
-              required
-              fullWidth
-              value={caseTitle}
-              onChange={(e) => setCaseTitle(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.caseTitle}
-              helperText={errors.caseTitle}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Party Filer"
-              required
-              fullWidth
-              value={partyFiler}
-              onChange={(e) => setPartyFiler(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.partyFiler}
-              helperText={errors.partyFiler}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Case Type"
-              placeholder="Select a case type"
-              required
-              select
-              fullWidth
-              value={caseType || ""}
-              onChange={(e) => setCaseType(e.target.value)}
-              sx={{ mb: 2 }}
-              error={!!errors.caseType}
-              InputLabelProps={{ shrink: true }}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
             >
-              <MenuItem disabled value="">
-                Choose case type
-              </MenuItem>
-              <MenuItem value="Civil Case">Civil Case</MenuItem>
-              <MenuItem value="Criminal Case">Criminal Case</MenuItem>
-              <MenuItem value="Special Case">Special Case</MenuItem>
-              <MenuItem value="Motions">Motions</MenuItem>
-              <MenuItem value="Incidents">Incidents</MenuItem>
-              <MenuItem value="Pleadings">Pleadings</MenuItem>
-            </TextField>
-            <Autocomplete
-              multiple
-              freeSolo
-              options={availableTags}
-              value={tags}
-              onChange={(event, newValue) => {
-                const uniqueTags = Array.from(
-                  new Set(newValue.map((tag) => tag.trim()))
-                ).filter((tag) => tag);
-                setTags(uniqueTags);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Tags"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  helperText="Add tags by typing and pressing Enter"
-                  InputLabelProps={{ shrink: true }} // Keeps the label on top
-                />
-              )}
-              filterOptions={(options, { inputValue }) => {
-                const filtered = options.filter((option) =>
-                  option.toLowerCase().includes(inputValue.toLowerCase())
-                );
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Import to Case Logs
+              </Typography>
+              <IconButton onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box component="form" noValidate autoComplete="off" sx={{ my: 2 }}>
+              <TextField
+                label="Case No."
+                required
+                fullWidth
+                value={caseNo}
+                onChange={(e) => setCaseNo(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseNo}
+                helperText={errors.caseNo}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Case Title"
+                required
+                fullWidth
+                value={caseTitle}
+                onChange={(e) => setCaseTitle(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseTitle}
+                helperText={errors.caseTitle}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Party Filer"
+                required
+                fullWidth
+                value={partyFiler}
+                onChange={(e) => setPartyFiler(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.partyFiler}
+                helperText={errors.partyFiler}
+                InputLabelProps={{ shrink: true }}
+              />
 
-                if (inputValue.trim() && !options.includes(inputValue.trim())) {
-                  filtered.push(inputValue.trim());
-                }
-
-                return filtered;
-              }}
-            />
-
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Button
-                variant="outlined"
-                onClick={handleDiscard}
-                sx={{
-                  color: "#0F2043",
-                  borderColor: "#0F2043",
-                  borderRadius: "0.3rem",
-                  textTransform: "none",
-                  "&:hover": {
-                    borderColor: "#0B1730",
-                    backgroundColor: "rgba(15, 32, 67, 0.1)",
-                  },
-                }}
+              <TextField
+                label="Case Type"
+                placeholder="Select a case type"
+                required
+                select
+                fullWidth
+                value={caseType || ""}
+                onChange={(e) => setCaseType(e.target.value)}
+                sx={{ mb: 2 }}
+                error={!!errors.caseType}
+                InputLabelProps={{ shrink: true }}
               >
-                Discard
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSave}
-                sx={{
-                  backgroundColor: "#0F2043",
-                  color: "#FFFFFF",
-                  borderRadius: "0.3rem",
-                  textTransform: "none",
-                  "&:hover": {
-                    backgroundColor: "#0B1730",
-                  },
+                <MenuItem disabled value="">
+                  Choose case type
+                </MenuItem>
+                <MenuItem value="Civil Case">Civil Case</MenuItem>
+                <MenuItem value="Criminal Case">Criminal Case</MenuItem>
+                <MenuItem value="Special Case">Special Case</MenuItem>
+                <MenuItem value="Motions">Motions</MenuItem>
+                <MenuItem value="Incidents">Incidents</MenuItem>
+                <MenuItem value="Pleadings">Pleadings</MenuItem>
+              </TextField>
+
+              <Autocomplete
+                multiple
+                freeSolo
+                options={availableTags}
+                value={tags}
+                onChange={(event, newValue) => {
+                  const uniqueTags = Array.from(
+                    new Set(newValue.map((tag) => tag.trim()))
+                  ).filter((tag) => tag);
+                  setTags(uniqueTags);
                 }}
-              >
-                Save
-              </Button>
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Tags"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                    helperText={
+                      errors.tags || "Add tags by typing and pressing Enter"
+                    }
+                    error={!!errors.tags}
+                    InputLabelProps={{ shrink: true }} // Keeps the label on top
+                  />
+                )}
+                filterOptions={(options, { inputValue }) => {
+                  const filtered = options.filter((option) =>
+                    option.toLowerCase().includes(inputValue.toLowerCase())
+                  );
+
+                  if (
+                    inputValue.trim() &&
+                    !options.includes(inputValue.trim())
+                  ) {
+                    filtered.push(inputValue.trim());
+                  }
+
+                  return filtered;
+                }}
+              />
+
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <Button
+                  variant="outlined"
+                  onClick={handleDiscard}
+                  sx={{
+                    color: "#0F2043",
+                    borderColor: "#0F2043",
+                    borderRadius: "0.3rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      borderColor: "#0B1730",
+                      backgroundColor: "rgba(15, 32, 67, 0.1)",
+                    },
+                  }}
+                >
+                  Discard
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSave}
+                  sx={{
+                    backgroundColor: "#0F2043",
+                    color: "#FFFFFF",
+                    borderRadius: "0.3rem",
+                    textTransform: "none",
+                    "&:hover": {
+                      backgroundColor: "#0B1730",
+                    },
+                  }}
+                >
+                  Save
+                </Button>
+              </Box>
             </Box>
           </Box>
-        </Box>
-        {/* Right Side - Viewer */}
-        <Box sx={{ width: "70%", paddingLeft: 2, overflowY: "auto" }}>
-          {currentAttachment ? (
-            <>
-              <Box sx={{ paddingLeft: 3, marginTop: 4, marginBottom: 4 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                  {currentAttachment.name}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.disabled"
-                  sx={{ mb: 2 }}
-                >
-                  Type: {currentAttachment.type}, Size: {currentAttachment.size}
-                </Typography>
-              </Box>
-              {currentAttachment.type === "application/pdf" ? (
-                <div style={{ height: "600px" }}>
-                  <Worker
-                    workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
+          {/* Right Side - Viewer */}
+          <Box
+            sx={{
+              width: "70%",
+              paddingLeft: 2,
+              height: "100%",
+            }}
+          >
+            {currentAttachment ? (
+              <>
+                <Box sx={{ paddingLeft: 3, marginTop: 4, marginBottom: 4 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    {currentAttachment.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.disabled"
+                    sx={{ mb: 2 }}
                   >
-                    <Viewer fileUrl={currentAttachment.url} />
-                  </Worker>
-                </div>
-              ) : (
-                <img
-                  src={currentAttachment.url}
-                  alt={currentAttachment.name}
-                  style={{ width: "100%" }}
-                />
-              )}
-            </>
-          ) : (
-            <Typography variant="body1" color="text.secondary">
-              Select an attachment to view its content.
-            </Typography>
-          )}
+                    Type: {currentAttachment.type}, Size:{" "}
+                    {currentAttachment.size}
+                  </Typography>
+                </Box>
+                {currentAttachment.type === "application/pdf" ? (
+                  <Box
+                    sx={{
+                      height: "500px",
+                      "&::-webkit-scrollbar": {
+                        width: 4,
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        backgroundColor: "#f0f0f0",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        backgroundColor: "#D9D9D9",
+                        "&:hover": {
+                          backgroundColor: "#909090",
+                        },
+                      },
+                    }}
+                  >
+                    <Worker
+                      workerUrl={`https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`}
+                    >
+                      <Viewer fileUrl={currentAttachment.url} />
+                    </Worker>
+                  </Box>
+                ) : (
+                  <img
+                    src={currentAttachment.url}
+                    alt={currentAttachment.name}
+                    style={{ width: "100%" }}
+                  />
+                )}
+              </>
+            ) : (
+              <Typography variant="body1" color="text.secondary">
+                Select an attachment to view its content.
+              </Typography>
+            )}
+          </Box>
         </Box>
-        {/* Snackbar for Notifications */}
-        <Snackbar
-          open={!!successMessage}
-          autoHideDuration={6000}
-          onClose={() => setSuccessMessage(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert severity="success">{successMessage}</Alert>
-        </Snackbar>
+      </Modal>
+
+      {/* Error and Success Alerts */}
+      {errorMessage && (
         <Snackbar
           open={!!errorMessage}
           autoHideDuration={6000}
           onClose={() => setErrorMessage(null)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert severity="error">{errorMessage}</Alert>
+          <Alert
+            severity="error"
+            onClose={() => setErrorMessage(null)}
+            sx={{ width: "100%" }}
+          >
+            {errorMessage}
+          </Alert>
         </Snackbar>
-      </Box>
-    </Modal>
+      )}
+      {successMessage && (
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={6000}
+          onClose={() => setSuccessMessage(null)}
+        >
+          <Alert
+            severity="success"
+            onClose={() => setSuccessMessage(null)}
+            sx={{ width: "100%" }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+      )}
+    </>
   );
 };
 
