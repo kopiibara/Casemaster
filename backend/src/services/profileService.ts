@@ -224,4 +224,5 @@ export const setNewPin = (userId: number, pin: string) => {
       }
     });
   });
+
 };
