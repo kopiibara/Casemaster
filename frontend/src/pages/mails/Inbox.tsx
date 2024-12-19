@@ -17,7 +17,7 @@ const Inbox = () => {
   };
 
   return (
-    <Box sx={{ marginX: 3, marginY: 2 }}>
+    <Box sx={{ marginX: 3, marginY: 2, maxWidth: "100%", overflow: "hidden" }}>
       <Stack spacing={2}>
         {/* Filter Buttons */}
         <MailsFilterButtons
@@ -36,7 +36,14 @@ const Inbox = () => {
         </Button>
         {/* Main Content Area */}
         <Box
-          sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 2,
+            width: "100%",
+            maxHeight: "80vh",
+            overflow: "hidden",
+          }}
         >
           {/* Mail Container */}
           <Box

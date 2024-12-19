@@ -31,24 +31,29 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({
         cursor: "pointer",
         "&:hover": { backgroundColor: "#b2ebf2" },
         transition: "background-color 0.2s ease-in-out",
+        display: "grid",
+        gridTemplateColumns: "1fr auto",
+        gap: 1,
       }}
     >
-      <Typography variant="subtitle1" fontWeight={500} noWrap>
-        {sender}
-      </Typography>
-      <Typography variant="caption" color="text.secondary" noWrap>
-        {time}
-      </Typography>
-      <Typography variant="body1" fontWeight={600} noWrap>
-        {subject || "No Subject"}
-      </Typography>
-      <Typography
-        variant="body2"
-        color="text.secondary"
-        sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-      >
-        {preview}
-      </Typography>
+      <Box>
+        <Typography variant="subtitle1" fontWeight={500} noWrap>
+          {sender}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" noWrap>
+          {time}
+        </Typography>
+        <Typography variant="body1" fontWeight={600} noWrap>
+          {subject || "No Subject"}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+        >
+          {preview}
+        </Typography>
+      </Box>
       {hasAttachment && (
         <Box display="flex" alignItems="center" mt={1}>
           <AttachFileIcon fontSize="small" sx={{ mr: 0.5, color: "#757575" }} />

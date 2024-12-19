@@ -158,11 +158,12 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter, refreshKe
 
   // Render the email list and details
   return (
-    <Box display="flex" height="77vh" overflow="hidden">
+    <Box display="flex" height="100%" overflow="hidden">
       {/* Email List */}
       <Box
         sx={{
-          width: "35%",
+          width: { xs: "100%", md: "35%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           borderRight: "1px solid #ddd",
           bgcolor: "#f7f7f7",
@@ -195,7 +196,8 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter, refreshKe
       {/* Email Details */}
       <Box
         sx={{
-          width: "65%",
+          width: { xs: "100%", md: "65%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           padding: 3,
           bgcolor: "#fff",
