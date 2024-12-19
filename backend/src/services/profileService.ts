@@ -207,3 +207,21 @@ export const checkUsernameExists = (email: string): Promise<boolean> => {
     });
   });
 };
+
+export const setNewPin = (userId: number, pin: string) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE users SET pin = ? WHERE user_id = ?`;
+
+    db.query(query, [pin, userId], (err, result: any) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (result.affectedRows > 0) {
+          resolve(true); // PIN updated successfully
+        } else {
+          resolve(false); // No user found with the provided ID
+        }
+      }
+    });
+  });
+};
