@@ -21,19 +21,12 @@ export default function SystemLogs({
   React.useEffect(() => {
     const fetchSystemLogs = async () => {
       try {
-        // Check if userId is provided to fetch either global or user-specific logs
-        const url = userId
-          ? `http://localhost:3000/api/auditlogs/${userId}` // For user-specific logs
-          : `http://localhost:3000/api/auditlogs`; // For global logs
-
-        const response = await axios.get(url);
-
+        const response = await axios.get("http://localhost:3000/api/auditlogs");
         // Format the action_date before setting the rows
         const formattedData = response.data.map((log: any) => ({
           ...log,
           action_date: format(new Date(log.action_date), "yyyy-MM-dd HH:mm:ss"),
         }));
-
         setRows(formattedData);
       } catch (err) {
         setError("Failed to fetch system logs");
@@ -44,10 +37,10 @@ export default function SystemLogs({
     };
 
     fetchSystemLogs();
-  }, [userId]); // Make the effect dependent on userId
+  }, []);
 
   const columns = [
-    { id: "action_date", label: "Date", mWidth: 50 }, // Map to 'action_date'
+    { id: "action_date", label: "Date", mWidth: 50 }, // Map to 'action_date' // Map to 'audit_id'
     { id: "action", label: "Action", minWidth: 100 }, // Map to 'action'
   ];
 

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Stack,
   Typography,
   IconButton,
   Divider,
+  TextField,
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
@@ -16,14 +17,69 @@ import AttachmentIcon from "@mui/icons-material/AttachFileOutlined";
 import TagIcon from "@mui/icons-material/LabelOutlined";
 import StatusIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
-const AddNewCase = ({ onClose }: { onClose: () => void }) => {
+// Props for the EditCase component
+interface EditCaseProps {
+  onClose: () => void;
+}
+
+const AddNewCase: React.FC<EditCaseProps> = ({ onClose }) => {
+  // Local state to manage the editable fields
+  const [editableData, setEditableData] = useState<any>({});
+  const [attachment, setAttachment] = useState<File | null>(null);
+
+  // Handle input changes and update the editableData state
+  const handleInputChange = (key: string, value: string) => {
+    setEditableData((prev: any) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setAttachment(file);
+      // Optionally, you can update the editableData with the file name or URL
+      setEditableData((prev: any) => ({
+        ...prev,
+        file_url: file.name, // Save file name or path
+      }));
+    }
+  };
+
+  // Function to save the edited case data to the database via an API request
+  const saveCaseData = async () => {
+    try {
+      // Assuming you have an API endpoint to handle case updates
+      const response = await fetch("/api/update-case", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editableData), // Sending the edited data
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Case updated successfully:", result);
+        onClose(); // Close the dialog after successful update
+      } else {
+        console.error("Failed to update case:", result);
+        alert("Failed to save changes.");
+      }
+    } catch (error) {
+      console.error("Error updating case:", error);
+      alert("Error saving data. Please try again.");
+    }
+  };
+
   return (
     <Box sx={{ rounded: "0.5rem" }}>
       <Stack className="gap-4 p-6">
         {/* Header */}
         <Stack direction={"row"} className="flex items-center">
           <Typography variant="h5" className="text-[#0F2043]">
-            Add New Case
+            Edit Case
           </Typography>
           <Box flexGrow={1}></Box>
           <IconButton onClick={onClose}>
@@ -32,86 +88,182 @@ const AddNewCase = ({ onClose }: { onClose: () => void }) => {
         </Stack>
         <Divider className="mb-2 w-[calc(100%-0.8rem)]" />
 
-        {/*Content*/}
+        {/* Content */}
         <Box>
-          <Box>
-            <Stack className="mt-2 gap-7">
-              <Box className="gap-3 text-[#8992A3] flex items-center">
-                <CaseNoIcon />
-                <Typography className="w-20">Case No.</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
+          <Stack className="mt-2 gap-7">
+            {editableData ? (
+              <>
+                {/* Case No */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <CaseNoIcon className="w-20 text-[#8992A3]" />
+                  <TextField
+                    label="Case No."
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                  />
+                </Stack>
 
-              <Box className=" gap-3 text-[#8992A3] flex items-center">
-                <TitleIcon />
-                <Typography className="w-20">Title</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
+                {/* Title */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <TitleIcon className="w-20 text-[#8992A3]" />
+                  <TextField
+                    size="small"
+                    label="Title"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Stack>
 
-              <Box className=" gap-3 text-[#8992A3] flex items-center">
-                <PartyFilerIcon />
-                <Typography className="w-20">Party Filer</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
-              <Box className=" gap-3 text-[#8992A3] flex items-center w-full">
-                <DocumentTypeIcon />
-                <Typography className="w-20">Document Type</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
-              <Box className=" gap-3 text-[#8992A3] flex items-center w-full">
-                <AttachmentIcon />
-                <Typography className="w-20">Attachment</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
-              <Box className=" gap-3 text-[#8992A3] flex items-center w-full">
-                <TagIcon />
-                <Typography className="w-20">Tag</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
-              <Box className=" gap-3 text-[#8992A3] flex items-center w-full">
-                <StatusIcon />
-                <Typography className="w-20">Status</Typography>
-                <input
-                  type="text"
-                  className="p-1 ml-auto w-full max-w-[16rem] rounded-[4px] focus:outline-none focus:ring-2 focus:ring-blue-[#B1B8C7] focus:border-[#B1B8C7]"
-                  placeholder="Empty"
-                />
-              </Box>
-              <Stack direction={"row"} spacing={2}>
-                <Box className="flex-grow"></Box>
-                <button className="border border-[#0F2043] text-[#0F2043] px-4 py-2 rounded hover:border-blue-700 hover:bg-blue-100">
-                  Discard
-                </button>
-                <button className="bg-[#0F2043] text-white px-4 py-2 rounded hover:bg-[#0B1730]">
-                  Save
-                </button>
-              </Stack>
+                {/* Party Filer */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <PartyFilerIcon className="w-20" />
+                  <TextField
+                    label="Party Filer"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Stack>
+
+                {/* Document Type */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <DocumentTypeIcon className="w-20" />
+                  <TextField
+                    label="Document Type"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Stack>
+
+                {/* Attachment */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <AttachmentIcon className="w-20" />
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    sx={{
+                      color: "#808080",
+                      borderColor: "#808080",
+                      borderRadius: "0.5rem",
+                      height: "2rem",
+                      width: "8rem",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.8rem",
+                      textTransform: "none",
+                    }}
+                  >
+                    Choose File
+                    <input
+                      type="file"
+                      hidden
+                      onChange={handleAttachmentChange}
+                    />
+                  </Button>
+                  {editableData.file_url && (
+                    <Typography>{editableData.file_url}</Typography>
+                  )}
+                </Stack>
+
+                {/* Tag */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <TagIcon className="w-20" />
+                  <TextField
+                    label="Tag"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Stack>
+
+                {/* Status */}
+                <Stack
+                  direction={"row"}
+                  spacing={2}
+                  className="gap-3 text-[#8992A3] items-center"
+                >
+                  <StatusIcon className="w-20" />
+                  <TextField
+                    label="Status"
+                    size="small"
+                    fullWidth
+                    variant="outlined"
+                  />
+                </Stack>
+              </>
+            ) : (
+              <Typography>No data available</Typography>
+            )}
+            <Stack
+              direction={"row"}
+              spacing={2}
+              className="flex items-center justify-end"
+            >
+              <Button
+                variant="outlined"
+                disableElevation
+                sx={{
+                  color: "#2E49D5",
+                  borderColor: "#2E49D5",
+                  borderRadius: "0.5rem",
+                  height: "2rem",
+                  width: "6rem",
+                  marginBottom: "0.5rem",
+                  fontSize: "0.8rem",
+                  textTransform: "none",
+
+                  "&:hover": {
+                    backgroundColor: "rgba(46,73,213,0.1)",
+                  },
+                }}
+                onClick={onClose} // Close without saving
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  color: "white",
+                  borderColor: "#2E49D5",
+                  borderRadius: "0.5rem",
+                  height: "2rem",
+                  width: "6rem",
+                  marginBottom: "0.5rem",
+                  fontSize: "0.8rem",
+                  textTransform: "none",
+                }}
+                onClick={saveCaseData} // Save changes
+              >
+                Save
+              </Button>
             </Stack>
-          </Box>
+          </Stack>
         </Box>
       </Stack>
     </Box>

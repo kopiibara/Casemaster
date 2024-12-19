@@ -1,5 +1,4 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import {
   Stack,
   Box,
@@ -26,62 +25,68 @@ import LabelOutlinedIcon from "@mui/icons-material/LabelOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import EditFilledIcon from "@mui/icons-material/Edit";
-import EditCase from "./EditCase";
+import ChipComponent from "./ChipComponent"; // Assuming you have this component
+import EditCase from "./EditCase"; // Assuming you have this component
+import { Document, Page } from "react-pdf"; // React-PDF library
+import axios from "axios";
 
-export default function DetailsComponent() {
-  type IconState = {
-    import: "outlined" | "filled";
-    email: "outlined" | "filled";
-    edit: "outlined" | "filled";
-    [key: string]: "outlined" | "filled";
-  };
+// Props interface
+interface DetailsComponentProps {
+  values: { [key: string]: string | null } | null; // Allow values to be null
+  onEdit: (data: any) => void; // Function to fetch and handle edit
+}
 
-  const [icons, setIcons] = useState<IconState>({
+export default function DetailsComponent({
+  values,
+  onEdit,
+}: DetailsComponentProps) {
+  const [icons, setIcons] = useState<{ [key: string]: string }>({
     import: "outlined",
     email: "outlined",
     edit: "outlined",
   });
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const detailsData = [
     {
       icon: <DescriptionOutlinedIcon className="text-lg" />,
       label: "Case No.",
-      value: "RCT-001",
+      valueKey: "case_no",
     },
     {
       icon: <TitleOutlinedIcon className="text-lg" />,
       label: "Title",
-      value: "BPI SAVINGS v. LABINDO",
+      valueKey: "title",
     },
     {
       icon: <PersonOutlineIcon className="text-lg" />,
       label: "Party Filer",
-      value: "Yvez Lawrence",
+      valueKey: "party_filer",
     },
     {
       icon: <CalendarTodayOutlinedIcon className="text-lg" />,
       label: "Date Added",
-      value: "October 12, 2024 5:30 PM",
+      valueKey: "date_added",
     },
     {
       icon: <LabelOutlinedIcon className="text-lg" />,
       label: "Document Type",
-      value: "Motion",
+      valueKey: "case_type",
     },
-    {
-      icon: <AttachFileOutlinedIcon className="text-lg" />,
-      label: "Attachment",
-      value: "101424_motion_recon.pdf",
-    },
+
     {
       icon: <LabelOutlinedIcon className="text-lg" />,
       label: "Tag",
-      value: "None",
+      valueKey: "tag",
     },
     {
       icon: <CheckCircleOutlineOutlinedIcon className="text-lg" />,
       label: "Status",
-      value: "New",
+      valueKey: "status",
     },
   ];
 
@@ -99,16 +104,65 @@ export default function DetailsComponent() {
     }));
   };
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const handleDialogOpen = () => setIsDialogOpen(true);
+  const handleDialogClose = () => setIsDialogOpen(false);
 
-  // Functions to handle dialog open/close
-  const handleDialogOpen = () => {
-    setIsDialogOpen(true);
+  const handleEditClick = () => {
+    if (values) {
+      onEdit(values); // Pass the current data to the parent component
+      handleDialogOpen();
+    }
   };
 
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
+  const getValueOrEmpty = (value: string | null) => {
+    return value && value.trim() !== "" ? value : "Empty";
   };
+
+  const renderAttachment = (url: string | null) => {
+    if (url) {
+      return (
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault(); // Prevent default link behavior
+            fetchFileDetails(url); // Fetch file details and show PDF
+          }}
+          style={{ color: "#0F2043", textDecoration: "underline" }}
+        >
+          Open Attachment
+        </a>
+      );
+    }
+    return "No attachment available";
+  };
+
+  // Function to fetch file details for PDF display
+  const fetchFileDetails = async (fileId: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/file-details/${fileId}`);
+      setPdfUrl(response.data.webViewLink); // Use the webViewLink for the PDF viewer
+      setIsPdfViewerOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch file details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderPdfViewer = () => {
+    if (loading) {
+      return <Typography>Loading...</Typography>;
+    }
+
+    return (
+      <Document file={pdfUrl || ""}>
+        <Page pageNumber={1} />
+      </Document>
+    );
+  };
+
+  const hasData = values && Object.keys(values).length > 0;
 
   return (
     <>
@@ -124,32 +178,15 @@ export default function DetailsComponent() {
                   Details
                 </Typography>
                 <Box className="flex-grow" />
-
                 <Stack direction={"row"} alignItems="center">
                   <Tooltip
                     title="Import to Case Tracker"
                     slots={{ transition: Zoom }}
-                    placement="top"
                     arrow
-                    slotProps={{
-                      popper: {
-                        modifiers: [
-                          {
-                            name: "offset",
-                            options: {
-                              offset: [0, -5],
-                            },
-                          },
-                        ],
-                      },
-                    }}
                   >
                     <IconButton
                       aria-label="import"
                       onClick={() => handleIconChange("click", "import")}
-                      onMouseEnter={() => handleIconChange("enter", "import")}
-                      onMouseLeave={() => handleIconChange("leave", "import")}
-                      className="rounded-full min-w-auto min-h-auto"
                     >
                       {icons.import === "outlined" ? (
                         <ImportOutlinedIcon className="text-[#0F2043]" />
@@ -162,27 +199,11 @@ export default function DetailsComponent() {
                   <Tooltip
                     title="Check Email"
                     slots={{ transition: Zoom }}
-                    placement="top"
                     arrow
-                    slotProps={{
-                      popper: {
-                        modifiers: [
-                          {
-                            name: "offset",
-                            options: {
-                              offset: [0, -5],
-                            },
-                          },
-                        ],
-                      },
-                    }}
                   >
                     <IconButton
                       aria-label="Email"
                       onClick={() => handleIconChange("click", "email")}
-                      onMouseEnter={() => handleIconChange("enter", "email")}
-                      onMouseLeave={() => handleIconChange("leave", "email")}
-                      className="rounded-full min-w-auto min-h-auto"
                     >
                       {icons.email === "outlined" ? (
                         <EmailOutlinedIcon className="text-[#0F2043]" />
@@ -195,28 +216,9 @@ export default function DetailsComponent() {
                   <Tooltip
                     title="Edit Details"
                     slots={{ transition: Zoom }}
-                    placement="top"
                     arrow
-                    slotProps={{
-                      popper: {
-                        modifiers: [
-                          {
-                            name: "offset",
-                            options: {
-                              offset: [0, -5],
-                            },
-                          },
-                        ],
-                      },
-                    }}
                   >
-                    <IconButton
-                      aria-label="Edit"
-                      onClick={handleDialogOpen}
-                      onMouseEnter={() => handleIconChange("enter", "edit")}
-                      onMouseLeave={() => handleIconChange("leave", "edit")}
-                      className="rounded-full min-w-auto min-h-auto"
-                    >
+                    <IconButton aria-label="Edit" onClick={handleEditClick}>
                       {icons.edit === "outlined" ? (
                         <EditOutlinedIcon className="text-[#0F2043]" />
                       ) : (
@@ -226,53 +228,84 @@ export default function DetailsComponent() {
                   </Tooltip>
                 </Stack>
               </Stack>
-              <Divider className="w-[calc(100%-0.75rem)]" />
+              <Divider />
 
-              <Box className="max-h-[480px] overflow-auto scrollbar-thin scrollbar-thumb-[#D9D9D9] scrollbar-track-[#f0f0f0] scrollbar-thumb-rounded hover:scrollbar-thumb-[#909090]">
-                <Stack spacing={2} mt={2}>
-                  {detailsData.map((detail, index) => (
-                    <Stack
-                      key={index}
-                      direction="row"
-                      spacing={2}
-                      alignItems="center"
-                      className="min-h-[40px] text-[#8992A3]"
-                    >
-                      <Box className="flex items-center w-[40%] gap-3   ">
-                        {detail.icon}
-                        <Typography variant="body2" className=" text-[#8992A3]">
-                          {detail.label}
-                        </Typography>
-                      </Box>
-                      <Typography
-                        variant="body2"
-                        className="w-[60%] break-words text-[#0F2043]"
+              {/* Dynamic Content */}
+              <Box>
+                {hasData ? (
+                  <Stack spacing={2} mt={2}>
+                    {detailsData.map((detail, index) => (
+                      <Stack
+                        key={index}
+                        direction="row"
+                        spacing={4}
+                        alignItems="center"
                       >
-                        {detail.value}
-                      </Typography>
-                    </Stack>
-                  ))}
-                </Stack>
+                        <Stack
+                          direction={"row"}
+                          spacing={2}
+                          className="w-[40%]"
+                        >
+                          <Box className="text-[#57637B]">{detail.icon}</Box>
+                          <Typography
+                            variant="subtitle2"
+                            className="text-[#57637B]"
+                          >
+                            {detail.label}
+                          </Typography>
+                        </Stack>
+                        <Typography
+                          variant="subtitle2"
+                          fontWeight={"bold"}
+                          className="w-[60%]"
+                        >
+                          {detail.valueKey === "file_url" ? (
+                            renderAttachment(values[detail.valueKey] as string)
+                          ) : detail.valueKey === "status" ? (
+                            <ChipComponent
+                              label={getValueOrEmpty(
+                                values[detail.valueKey] as string
+                              )}
+                              variant="filled"
+                            />
+                          ) : (
+                            getValueOrEmpty(values[detail.valueKey])
+                          )}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Select row to show data
+                  </Typography>
+                )}
               </Box>
             </Stack>
           </Box>
         </CardContent>
       </Card>
+
+      {/* Dialog for Edit */}
       <Dialog
         open={isDialogOpen}
         onClose={handleDialogClose}
         fullWidth
         maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: 3, // Set your desired border radius
-          },
-        }}
       >
         <DialogContent>
-          {/* Pass handleDialogClose to AddNewCase */}
-          <EditCase onClose={handleDialogClose} />
+          <EditCase onClose={handleDialogClose} caseData={values} />
         </DialogContent>
+      </Dialog>
+
+      {/* PDF Viewer Dialog */}
+      <Dialog
+        open={isPdfViewerOpen}
+        onClose={() => setIsPdfViewerOpen(false)}
+        fullWidth
+        maxWidth="lg"
+      >
+        <DialogContent>{renderPdfViewer()}</DialogContent>
       </Dialog>
     </>
   );

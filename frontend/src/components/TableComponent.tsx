@@ -1,28 +1,32 @@
-import * as React from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import ChipComponent from "./ChipComponent"; // Make sure this component exists
-import MoreIcon from "@mui/icons-material/MoreVert";
-import IconButton from "@mui/material/IconButton";
-import { Popover, TableSortLabel, Button, Paper } from "@mui/material";
+import React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Popover,
+  TableSortLabel,
+  Paper,
+} from "@mui/material";
 import RestartAltOutlinedIcon from "@mui/icons-material/RestartAltOutlined";
+import MoreIcon from "@mui/icons-material/MoreVert";
+import ChipComponent from "./ChipComponent"; // Ensure this component exists
 
-// Helper function to sort data
 const descendingComparator = (a: any, b: any, orderBy: string) => {
+  if (!orderBy || !a[orderBy] || !b[orderBy]) return 0;
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
   return 0;
 };
 
-const getComparator = (order: "asc" | "desc", orderBy: string) => {
-  return order === "desc"
+const getComparator = (order: "asc" | "desc", orderBy: string) =>
+  order === "desc"
     ? (a: any, b: any) => descendingComparator(a, b, orderBy)
     : (a: any, b: any) => -descendingComparator(a, b, orderBy);
-};
 
 const stableSort = (array: any[], comparator: any) => {
   const stabilizedThis = array.map((el, index) => [el, index]);
@@ -38,141 +42,97 @@ interface TableComponentProps {
   tableHeadData: string[];
   tableBodyData: Array<{ [key: string]: string | number }>;
   popoverContent: React.ReactNode;
+  onRowClick?: (row: any) => void; // Added onRowClick
 }
 
 const TableComponent: React.FC<TableComponentProps> = ({
   tableHeadData,
   tableBodyData,
   popoverContent,
+  onRowClick,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
   const [order, setOrder] = React.useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = React.useState<string>(""); // Store column to sort by
-  const [maxRows, setMaxRows] = React.useState<number>(7); // Rows that fit the screen
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget); // Show popover
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null); // Close popover
-  };
+  const [orderBy, setOrderBy] = React.useState<string>(tableHeadData[0] || "");
 
   const handleRequestSort = (property: string) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property); // Set column to sort by
+    setOrderBy(property);
   };
 
   const handleResetSort = () => {
     setOrder("asc");
-    setOrderBy(""); // Reset sorting
+    setOrderBy("");
   };
 
-  const calculateMaxRows = () => {
-    const rowHeight = 48; // Height of each row in pixels
-    const containerPadding = 150; // Padding for header, footer, etc.
-    const availableHeight = window.innerHeight - containerPadding;
-    setMaxRows(Math.floor(availableHeight / rowHeight)); // Calculate rows that fit
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  React.useEffect(() => {
-    calculateMaxRows(); // Initial calculation
-    window.addEventListener("resize", calculateMaxRows);
-    return () => {
-      window.removeEventListener("resize", calculateMaxRows); // Clean up on unmount
-    };
-  }, []);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
-  const sortedData = stableSort(tableBodyData, getComparator(order, orderBy));
-  const displayedData = sortedData.slice(0, maxRows); // Display rows within the limit
+  const sortedData = orderBy
+    ? stableSort(tableBodyData, getComparator(order, orderBy))
+    : tableBodyData;
 
-  const handleRowClick = (row: { [key: string]: string | number }) => {
-    console.log("Row clicked:", row); // Handle row click logic
+  const handleRowClick = (rowId: any) => {
+    // Pass the row ID to the parent component to fetch case details
+    onRowClick && onRowClick(rowId);
   };
 
   return (
     <TableContainer
-      sx={{
-        "&::-webkit-scrollbar": {
-          width: 4,
-        },
-        "&::-webkit-scrollbar-track": {
-          backgroundColor: "#f0f0f0",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#D9D9D9",
-          "&:hover": {
-            backgroundColor: "#909090",
-          },
-        },
-      }}
-      className="bg-white rounded-lg max-h-[78vh]"
+      component={Paper}
+      sx={{ maxHeight: "vh", overflowY: "auto" }}
     >
-      <Table stickyHeader aria-label="dynamic table">
-        <TableHead className="bg-[#DCE5F6]">
+      <Table stickyHeader>
+        <TableHead>
           <TableRow>
             {tableHeadData.map((header, index) => (
               <TableCell
                 key={index}
                 align="center"
-                sx={{
-                  fontWeight: "bold",
-                  color: "#0F2043",
-                  fontSize: "0.875rem",
-                  backgroundColor: "#DCE5F6",
-                }}
                 sortDirection={orderBy === header ? order : false}
               >
                 <TableSortLabel
                   active={orderBy === header}
                   direction={orderBy === header ? order : "asc"}
                   onClick={() => handleRequestSort(header)}
+                  aria-label={`Sort by ${header}`}
                 >
                   {header}
                 </TableSortLabel>
               </TableCell>
             ))}
-            <TableCell
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                color: "#0F2043",
-                fontSize: "0.875rem",
-                backgroundColor: "#DCE5F6",
-              }}
-            >
+            <TableCell align="center">
               {orderBy && (
-                <IconButton onClick={handleResetSort} size="small">
-                  <RestartAltOutlinedIcon />
-                </IconButton>
+                <Tooltip title="Reset Sorting">
+                  <IconButton onClick={handleResetSort} size="small">
+                    <RestartAltOutlinedIcon />
+                  </IconButton>
+                </Tooltip>
               )}
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {displayedData.map((row, rowIndex) => (
+          {sortedData.map((row, rowIndex) => (
             <TableRow
               key={rowIndex}
               hover
-              onClick={() => handleRowClick(row)}
+              onClick={() => handleRowClick(row.id)}
               style={{ cursor: "pointer" }}
             >
               {tableHeadData.map((header, cellIndex) => (
-                <TableCell
-                  key={cellIndex}
-                  align="center"
-                  sx={{
-                    maxWidth: 150,
-                    wordWrap: "break-word",
-                    whiteSpace: "normal",
-                  }}
-                >
+                <TableCell key={cellIndex} align="center">
                   {header === "Status" && typeof row[header] === "string" ? (
                     <ChipComponent label={row[header] as string} />
                   ) : (
@@ -180,8 +140,7 @@ const TableComponent: React.FC<TableComponentProps> = ({
                   )}
                 </TableCell>
               ))}
-
-              <TableCell align="right" width={5}>
+              <TableCell align="right">
                 <IconButton aria-label="more-options" onClick={handleClick}>
                   <MoreIcon />
                 </IconButton>
