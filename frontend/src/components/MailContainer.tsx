@@ -31,15 +31,17 @@ interface Reply {
 
 interface MailContainerProps {
   selectedFilter: string;
+  refreshKey: number; // Add refreshKey prop
 }
 
-const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
+const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter, refreshKey }) => {
   const { accessToken } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>("");
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -47,6 +49,8 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
 
       setLoading(true);
       setError(null);
+      setSnackbarMessage("Refreshing emails...");
+      setShowSnackbar(true);
 
       try {
         const client = Client.init({
@@ -65,12 +69,10 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
         const emailsWithAttachments = response.value.map((email: any) => ({
           ...email,
           attachments: email.attachments?.map((attachment: any) => {
-            // Check if attachment has contentUrl or use mediaContentUrl for larger files
             let url =
               attachment.contentUrl || attachment["@odata.mediaContentUrl"];
 
             if (!url && attachment.contentBytes) {
-              // Handle the case where contentBytes is present for small files
               url = `data:${attachment.contentType};base64,${attachment.contentBytes}`;
             }
 
@@ -78,22 +80,25 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
               name: attachment.name,
               size: attachment.size,
               type: attachment.contentType,
-              url, // Use the correct URL (either contentUrl, mediaContentUrl, or contentBytes)
+              url,
             };
           }),
         }));
 
-        setEmails(emailsWithAttachments); // Set emails with attachments data
+        setEmails(emailsWithAttachments);
+        setSnackbarMessage("Emails successfully refreshed");
       } catch (err) {
         console.error("Error fetching emails:", err);
         setError("Failed to load emails.");
+        setSnackbarMessage("Refresh failed - try again");
       } finally {
         setLoading(false);
+        setShowSnackbar(true);
       }
     };
 
     fetchEmails();
-  }, [accessToken]);
+  }, [accessToken, refreshKey]);
 
   // Filter emails based on selected filter
   const filteredEmails = emails.filter((email) => {
@@ -119,6 +124,7 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
       ];
       setSelectedEmail({ ...selectedEmail, replies: updatedReplies });
       setShowSnackbar(true);
+      setSnackbarMessage("Reply sent successfully!");
     }
   };
 
@@ -152,11 +158,12 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
 
   // Render the email list and details
   return (
-    <Box display="flex" height="77vh" overflow="hidden">
+    <Box display="flex" height="100%" overflow="hidden">
       {/* Email List */}
       <Box
         sx={{
-          width: "35%",
+          width: { xs: "100%", md: "35%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           borderRight: "1px solid #ddd",
           bgcolor: "#f7f7f7",
@@ -189,7 +196,8 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
       {/* Email Details */}
       <Box
         sx={{
-          width: "65%",
+          width: { xs: "100%", md: "65%" },
+          maxHeight: "80vh",
           overflowY: "auto",
           padding: 3,
           bgcolor: "#fff",
@@ -233,11 +241,11 @@ const MailContainer: React.FC<MailContainerProps> = ({ selectedFilter }) => {
         )}
       </Box>
 
-      {/* Snackbar for Reply Notification */}
+      {/* Snackbar for Notifications */}
       <Snackbar
         open={showSnackbar}
         autoHideDuration={3000}
-        message="Reply sent successfully!"
+        message={snackbarMessage}
         onClose={() => setShowSnackbar(false)}
       />
     </Box>

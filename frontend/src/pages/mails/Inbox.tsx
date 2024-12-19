@@ -1,19 +1,23 @@
-import { Box } from "@mui/system";
-import Stack from "@mui/material/Stack";
-import MailsFilterButtons from "../../components/MailsFilter"; // Assuming these are your filters
+import { Box, Button, Stack } from "@mui/material";
+import MailsFilterButtons from "../../components/MailsFilter";
 import MailContainer from "../../components/MailContainer";
 import { useState } from "react";
 
 const Inbox = () => {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [refreshKey, setRefreshKey] = useState<number>(0); // Key to trigger refresh
   const filters = ["All", "Unread", "Important"]; // Example filters
 
   const handleFilterSelect = (filter: string) => {
     setSelectedFilter(filter);
   };
 
+  const handleRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1); // Increment key to trigger refresh
+  };
+
   return (
-    <Box sx={{ marginX: 3, marginY: 2 }}>
+    <Box sx={{ marginX: 3, marginY: 2, maxWidth: "100%", overflow: "hidden" }}>
       <Stack spacing={2}>
         {/* Filter Buttons */}
         <MailsFilterButtons
@@ -21,9 +25,25 @@ const Inbox = () => {
           onFilterSelect={handleFilterSelect}
           selectedFilter={selectedFilter}
         />
+        {/* Refresh Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleRefresh}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          Refresh Emails
+        </Button>
         {/* Main Content Area */}
         <Box
-          sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 2,
+            width: "100%",
+            maxHeight: "80vh",
+            overflow: "hidden",
+          }}
         >
           {/* Mail Container */}
           <Box
@@ -34,7 +54,7 @@ const Inbox = () => {
               overflow: "hidden",
             }}
           >
-            <MailContainer selectedFilter={selectedFilter} />
+            <MailContainer selectedFilter={selectedFilter} refreshKey={refreshKey} />
           </Box>
         </Box>
       </Stack>
