@@ -28,9 +28,12 @@ const ProfileSelection = () => {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [hoveredProfileId, setHoveredProfileId] = useState<number | null>(null);
 
+
   const handleBack = () => {
     navigate("/");
   };
+
+
 
 
   useEffect(() => {

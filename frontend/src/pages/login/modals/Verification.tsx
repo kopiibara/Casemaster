@@ -52,6 +52,26 @@ const Verification: React.FC<VerificationProps> = ({
   useEffect(() => {
     setMessage(`${name} logged in successfully`);
   }, [name]);
+
+  const handleSendEmail = async () => {
+   
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/send-verification-email",
+        { to: email }
+      );
+      console.log(response.data.message || "Email sent successfully!");
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err.response.data.error || "Failed to send email.");
+      } else if (err.request) {
+        console.log("No response from the server. Please try again.");
+      } else {
+        console.log("Error: " + err.message);
+      }
+    } finally { 
+    }
+  };
   
   const handleVerifyEmail = async () => {
     try {
@@ -210,6 +230,7 @@ const saveActionLog = async (userId: number, actionDateTime: string) => {
                 cursor: "pointer",
                 mb: 1,
               }}
+              onClick={handleSendEmail}
             >
               Resend Code
             </Typography>

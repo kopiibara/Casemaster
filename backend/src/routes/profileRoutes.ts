@@ -1,9 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';  // Import fs to read the file
-import { getProfiles, approveAccount, transferRole, saveActionLog, getAuditLogs, checkUsernameExists, removeProfileCard, addProfileCard , getProfilesUser} from '../services/profileService';
+import { getProfiles, approveAccount, transferRole, saveActionLog, getAuditLogs, checkUsernameExists, removeProfileCard, addProfileCard , getProfilesUser, setNewPin} from '../services/profileService';
 import multer from 'multer';
 import db from '../config/db'; // Import the DB connection
+import { set } from 'mongoose';
 
 // Set up Multer for file upload
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -216,6 +217,26 @@ router.get('/check-user', async (req, res) => {
   }
 });
 
+
+router.put('/change-pin', async (req: Request, res: Response) => {
+  const { userId, pin } = req.body;
+
+  if (!userId || !pin) {
+    res.status(400).json({ message: 'User ID and PIN are required' });
+  }
+
+  try {
+    const result = await setNewPin(userId, pin); // Pass userId first, then pin
+    if (result) {
+      res.status(200).json({ message: 'PIN updated successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating PIN:', error);
+    res.status(500).json({ message: 'Error updating PIN' });
+  }
+});
 
 
 export default router;

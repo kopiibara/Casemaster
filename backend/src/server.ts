@@ -10,8 +10,12 @@ import smsRoutes from "./routes/smsRoutes";
 import caselogsRoutes from "./routes/caselogs";
 import attachmentsRouter from './routes/attachments';
 import { UploadedFile } from "express-fileupload";
+
 import { google } from "googleapis";
 import fs from "fs";
+
+import caseTracker from "./routes/casetrackerRoutes";
+
 
 dotenv.config({ path: path.resolve(__dirname, "./config/.env") });
 
@@ -38,6 +42,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true })); // Replaces body
 app.use("/api", profileRoutes);
 app.use("/api", emailRoutes);
 app.use("/api", smsRoutes);
+
+app.use("/api", caseTracker);
+
 app.use(fileUpload());
 app.use("/api", caselogsRoutes);
 app.use('/api', attachmentsRouter);

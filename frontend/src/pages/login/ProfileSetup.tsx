@@ -97,7 +97,6 @@ const ProfileSetup = () => {
       handleCloseModal();
 
       if (fullName && email && phoneNo) {
-
         setProfileData({
           fullName,
           email,
